@@ -1,0 +1,82 @@
+# ============================================
+#  PROYECTO REDES NEURONALES - .gitignore
+# ============================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Entornos virtuales ---
+venv/
+env/
+ENV/
+.venv/
+.env
+*.env
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+profile_default/
+
+# --- Datos (no subir datasets pesados) ---
+data/raw/*.xlsx
+data/raw/*.csv
+data/raw/*.zip
+data/processed/
+!data/raw/.gitkeep
+!data/.gitkeep
+!data/processed/.gitkeep
+
+# --- Resultados generados automáticamente ---
+resultados/figures/*.png
+resultados/figures/*.pdf
+resultados/figures/*.svg
+resultados/tables/*.csv
+resultados/tables/*.xlsx
+!resultados/figures/.gitkeep
+!resultados/tables/.gitkeep
+
+# --- Quarto / R ---
+.quarto/
+_cache/
+_site/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.html
+
+# --- Modelos entrenados ---
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.onnx
+models/
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- VS Code ---
+.vscode/
+*.code-workspace
+
+# --- PyCharm / IntelliJ ---
+.idea/
+*.iml
+
+# --- Logs ---
+*.log
+logs/
