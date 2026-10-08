@@ -80,3 +80,6 @@ desktop.ini
 # --- Logs ---
 *.log
 logs/
+
+/.quarto/
+**/*.quarto_ipynb
