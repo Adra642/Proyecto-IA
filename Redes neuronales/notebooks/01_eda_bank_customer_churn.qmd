@@ -1,0 +1,331 @@
+---
+title: "Exploración de abandono de clientes"
+jupyter: proyecto-ia
+format: html
+---
+
+```{python}
+#| label: setup
+#| message: false
+#| warning: false
+import copy
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+import pytorch_lightning as pl
+
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, RobustScaler
+
+RANDOM_STATE = 42
+sns.set_theme(style="whitegrid", context="notebook")
+pd.set_option("display.max_columns", 50)
+```
+
+```{python}
+#| label: load-data
+#| warning: false
+data_path = Path("../data/Customer-Churn-Records.csv")
+if not data_path.exists():
+    raise FileNotFoundError(
+        f"No se encontró el dataset en {data_path.resolve()}. "
+        "Añade Customer-Churn-Records.csv en la carpeta data."
+    )
+
+df_raw = pd.read_csv(data_path)
+columnas_sin_prediccion = ["RowNumber", "CustomerId", "Surname"]
+df = df_raw.drop(columns=columnas_sin_prediccion).copy()
+df.head()
+```
+
+Los identificadores y el apellido se excluyen porque pueden memorizar observaciones, pero no describen una relación generalizable de churn. Las transformaciones que aprenden parámetros se reservarán para el conjunto de entrenamiento.
+
+```{python}
+#| label: data-overview
+#| warning: false
+overview = pd.DataFrame({
+    "dtype": df.dtypes.astype(str),
+    "missing": df.isna().sum(),
+    "missing_pct": (100 * df.isna().mean()).round(2),
+    "cardinality": df.nunique(dropna=False),
+})
+overview.sort_values(["missing", "cardinality"], ascending=[False, True])
+```
+
+La cardinalidad distingue categorías de posibles identificadores: una cardinalidad cercana al número de filas es una señal de fuga o de una variable que no conviene codificar como categoría. Los faltantes se cuantifican antes de imputar.
+
+```{python}
+#| label: eda-target-balance
+#| warning: false
+target_summary = df["Exited"].value_counts(dropna=False).rename_axis("Exited").to_frame("count")
+target_summary["percentage"] = (100 * target_summary["count"] / len(df)).round(2)
+display(target_summary)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.countplot(data=df, x="Exited", ax=ax, color="#176b87")
+ax.set(title="Distribución de abandono", xlabel="Abandono (0 = no, 1 = sí)", ylabel="Clientes")
+plt.show()
+```
+
+La proporción de la clase positiva debe conservarse en cada partición. La estratificación reduce la variación del gradiente entre train, validation y test, evitando que una métrica dependa de una composición accidental de clases.
+
+```{python}
+#| label: data-quality-rules
+#| warning: false
+binary_columns = ["Exited", "HasCrCard", "IsActiveMember", "Complain"]
+range_rules = {
+    "CreditScore": (0, 1000),
+    "Age": (0, 120),
+    "Tenure": (0, 20),
+    "NumOfProducts": (1, 10),
+    "Satisfaction Score": (1, 5),
+    "Point Earned": (0, 1000),
+}
+
+quality_rows = []
+for column in binary_columns:
+    invalid = ~df[column].isin([0, 1])
+    quality_rows.append({"rule": f"{column} is binary", "violations": int(invalid.sum())})
+for column, (lower, upper) in range_rules.items():
+    invalid = ~df[column].between(lower, upper, inclusive="both")
+    quality_rows.append({"rule": f"{column} in [{lower}, {upper}]", "violations": int(invalid.sum())})
+
+pd.DataFrame(quality_rows)
+```
+
+Este reporte separa faltantes de inconsistencias lógicas. No se eliminan filas automáticamente: una inconsistencia debe investigarse, porque eliminarla puede sesgar la distribución de churn y reducir la señal disponible.
+
+```{python}
+#| label: eda-categorical-cardinality
+#| warning: false
+categorical_columns = df.select_dtypes(include=["object", "category"]).columns.tolist()
+cardinality_report = pd.DataFrame({
+    "cardinality": df[categorical_columns].nunique(dropna=False),
+    "levels": [df[column].value_counts(dropna=False).to_dict() for column in categorical_columns],
+})
+cardinality_report
+```
+
+```{python}
+#| label: eda-financial-outliers
+#| warning: false
+financial_columns = ["Balance", "EstimatedSalary"]
+outlier_rows = []
+for column in financial_columns:
+    q1, q3 = df[column].quantile([0.25, 0.75])
+    iqr = q3 - q1
+    lower, upper = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    mask = ~df[column].between(lower, upper, inclusive="both")
+    outlier_rows.append({
+        "variable": column,
+        "q1": q1,
+        "q3": q3,
+        "lower_iqr_limit": lower,
+        "upper_iqr_limit": upper,
+        "outliers": int(mask.sum()),
+        "outlier_pct": round(100 * mask.mean(), 2),
+    })
+display(pd.DataFrame(outlier_rows))
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+for ax, column in zip(axes, financial_columns):
+    sns.boxplot(data=df, x=column, ax=ax, color="#f4a261")
+    ax.set_title(f"{column}: valores extremos")
+plt.tight_layout()
+plt.show()
+```
+
+Los valores extremos financieros pueden ser clientes reales y contener señal de negocio; eliminarlos reduce el tamaño muestral y puede introducir sesgo. Se aplicará `log1p` a variables no negativas para comprimir colas ($x' = \log(1+x)$) y winsorización IQR para limitar la influencia de pocos puntos. Después se usará `RobustScaler`, basado en mediana e IQR:
+
+$$x' = \frac{x - \operatorname{median}(x)}{Q_{0.75}(x)-Q_{0.25}(x)}.$$
+
+```{python}
+#| label: eda-bivariate
+#| warning: false
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+sns.violinplot(data=df, x="Exited", y="Age", inner="quartile", color="#2a9d8f", ax=axes[0])
+axes[0].set_title("Edad y abandono")
+sns.boxplot(data=df, x="Exited", y="Balance", color="#e9c46a", ax=axes[1])
+axes[1].set_title("Balance y abandono")
+sns.boxplot(data=df, x="Exited", y="EstimatedSalary", color="#f4a261", ax=axes[2])
+axes[2].set_title("Salario estimado y abandono")
+plt.tight_layout()
+plt.show()
+```
+
+Las distribuciones bivariantes muestran si una variable cambia de localización o dispersión entre clases. Medianas y cuartiles son más informativos que medias cuando hay asimetría; las figuras sugieren señal discriminativa, pero no prueban causalidad.
+
+```{python}
+#| label: eda-correlation-heatmap
+#| warning: false
+numeric_features = df.select_dtypes(include=np.number).drop(columns="Exited")
+spearman_corr = numeric_features.corr(method="spearman")
+
+plt.figure(figsize=(11, 8))
+sns.heatmap(spearman_corr, cmap="vlag", center=0, annot=True, fmt=".2f", square=True)
+plt.title("Correlación de Spearman entre predictores numéricos")
+plt.tight_layout()
+plt.show()
+```
+
+La correlación de Spearman detecta relaciones monótonas y es menos sensible a colas que Pearson. Correlaciones altas sugieren redundancia y gradientes correlacionados; el escalado robusto estabiliza magnitudes, aunque no elimina la correlación.
+
+```{python}
+#| label: preprocessing-pipeline
+#| warning: false
+class IQRClipper(BaseEstimator, TransformerMixin):
+    """Clips each feature using IQR limits learned from training data."""
+
+    def __init__(self, factor=1.5):
+        self.factor = factor
+
+    def fit(self, X, y=None):
+        values = np.asarray(X, dtype=np.float64)
+        self.lower_ = np.nanquantile(values, 0.25, axis=0)
+        self.upper_ = np.nanquantile(values, 0.75, axis=0)
+        iqr = self.upper_ - self.lower_
+        self.lower_ = self.lower_ - self.factor * iqr
+        self.upper_ = self.upper_ + self.factor * iqr
+        return self
+
+    def transform(self, X):
+        values = np.asarray(X, dtype=np.float64)
+        return np.clip(values, self.lower_, self.upper_)
+
+
+target_column = "Exited"
+feature_frame = df.drop(columns=target_column).copy()
+categorical_columns = feature_frame.select_dtypes(include=["object", "category"]).columns.tolist()
+numeric_columns = feature_frame.select_dtypes(include=np.number).columns.tolist()
+financial_columns = [column for column in ["Balance", "EstimatedSalary"] if column in numeric_columns]
+other_numeric_columns = [column for column in numeric_columns if column not in financial_columns]
+
+def log1p_nonnegative(values):
+    return np.log1p(np.clip(values, a_min=0, a_max=None))
+
+financial_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("log1p", FunctionTransformer(log1p_nonnegative, feature_names_out="one-to-one")),
+    ("winsorize", IQRClipper()),
+    ("scale", RobustScaler()),
+])
+numeric_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("winsorize", IQRClipper()),
+    ("scale", RobustScaler()),
+])
+categorical_pipeline = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False, dtype=np.float32)),
+])
+
+preprocessor = ColumnTransformer([
+    ("financial", financial_pipeline, financial_columns),
+    ("numeric", numeric_pipeline, other_numeric_columns),
+    ("categorical", categorical_pipeline, categorical_columns),
+], remainder="drop", verbose_feature_names_out=False)
+```
+
+El `ColumnTransformer` mantiene tipos de transformación separados. `handle_unknown="ignore"` evita que una categoría nueva en validación o test rompa la inferencia. Todas las medianas, límites IQR, parámetros de escala y categorías se aprenderán dentro de `fit` sobre train.
+
+```{python}
+#| label: data-module
+#| warning: false
+class ChurnDataModule(pl.LightningDataModule):
+    def __init__(self, frame, target_column="Exited", batch_size=64, num_workers=0):
+        super().__init__()
+        self.frame = frame.reset_index(drop=True).copy()
+        self.target_column = target_column
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.pin_memory = torch.cuda.is_available()
+        self.preprocessor = copy.deepcopy(preprocessor)
+        self._is_setup = False
+
+    def setup(self, stage=None):
+        if self._is_setup:
+            return
+
+        indices = np.arange(len(self.frame))
+        labels = self.frame[self.target_column].to_numpy()
+        train_indices, temporary_indices = train_test_split(
+            indices, test_size=0.20, random_state=RANDOM_STATE, stratify=labels
+        )
+        validation_indices, test_indices = train_test_split(
+            temporary_indices,
+            test_size=0.50,
+            random_state=RANDOM_STATE,
+            stratify=labels[temporary_indices],
+        )
+
+        train_frame = self.frame.iloc[train_indices]
+        validation_frame = self.frame.iloc[validation_indices]
+        test_frame = self.frame.iloc[test_indices]
+
+        self.preprocessor.fit(train_frame.drop(columns=self.target_column))
+        self.train_dataset = self._make_dataset(train_frame)
+        self.validation_dataset = self._make_dataset(validation_frame)
+        self.test_dataset = self._make_dataset(test_frame)
+        self.input_dim = self.train_dataset.tensors[0].shape[1]
+        self.split_indices = {"train": train_indices, "validation": validation_indices, "test": test_indices}
+        self.class_counts = np.bincount(labels[train_indices].astype(int), minlength=2)
+        self._is_setup = True
+
+    def _make_dataset(self, frame):
+        features = self.preprocessor.transform(frame.drop(columns=self.target_column))
+        labels = frame[self.target_column].to_numpy(dtype=np.float32).reshape(-1, 1)
+        return TensorDataset(torch.tensor(features, dtype=torch.float32), torch.tensor(labels))
+
+    def _loader(self, dataset, shuffle=False):
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=shuffle,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+            persistent_workers=self.num_workers > 0,
+        )
+
+    def train_dataloader(self):
+        return self._loader(self.train_dataset, shuffle=True)
+
+    def val_dataloader(self):
+        return self._loader(self.validation_dataset)
+
+    def test_dataloader(self):
+        return self._loader(self.test_dataset)
+
+
+data_module = ChurnDataModule(df, batch_size=64)
+data_module.setup()
+print(f"Input dimension after preprocessing: {data_module.input_dim}")
+print(f"Train class counts [0, 1]: {data_module.class_counts.tolist()}")
+```
+
+La separación 80/10/10 es estratificada en ambas etapas, y `_is_setup` evita que Lightning vuelva a ajustar el preprocesador accidentalmente. Train ejecuta `fit`; validation y test solo ejecutan `transform`. El tensor final es `float32`, más eficiente en VRAM que `float64`, y `pin_memory` se activa automáticamente cuando hay GPU.
+
+```{python}
+#| label: split-validation
+#| warning: false
+split_report = pd.DataFrame({
+    "split": ["train", "validation", "test"],
+    "rows": [len(data_module.train_dataset), len(data_module.validation_dataset), len(data_module.test_dataset)],
+    "churn_rate": [
+        data_module.train_dataset.tensors[1].mean().item(),
+        data_module.validation_dataset.tensors[1].mean().item(),
+        data_module.test_dataset.tensors[1].mean().item(),
+    ],
+})
+split_report
+```
+
+Las tasas de churn deben ser prácticamente iguales entre particiones; esta tabla comprueba que la estratificación se aplicó. La transformación se aprende solo en train para que la evaluación represente datos no vistos.
