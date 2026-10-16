@@ -38,13 +38,11 @@ data/processed/
 !data/processed/.gitkeep
 
 # --- Resultados generados automáticamente ---
-resultados/figures/*.png
-resultados/figures/*.pdf
-resultados/figures/*.svg
-resultados/tables/*.csv
-resultados/tables/*.xlsx
+# Los PNG y CSV SÍ se suben porque P4 los necesita para el informe.
+# Los modelos (.pth, .ckpt) NO se suben porque ocupan mucho y se pueden regenerar.
 !resultados/figures/.gitkeep
 !resultados/tables/.gitkeep
+!resultados/models/.gitkeep
 
 # --- Quarto / R ---
 .quarto/
