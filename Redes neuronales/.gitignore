@@ -38,13 +38,12 @@ data/processed/
 !data/processed/.gitkeep
 
 # --- Resultados generados automáticamente ---
-resultados/figures/*.png
-resultados/figures/*.pdf
-resultados/figures/*.svg
-resultados/tables/*.csv
-resultados/tables/*.xlsx
+resultados/models/*.pth
+resultados/models/*.ckpt
 !resultados/figures/.gitkeep
 !resultados/tables/.gitkeep
+!resultados/models/.gitkeep
+
 
 # --- Quarto / R ---
 .quarto/
