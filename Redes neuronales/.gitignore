@@ -32,10 +32,10 @@ profile_default/
 data/raw/*.xlsx
 data/raw/*.csv
 data/raw/*.zip
-data/processed/
-!data/raw/.gitkeep
+#    data/processed/
+!data/raw/ .gitkeep
 !data/.gitkeep
-!data/processed/.gitkeep
+#!data/processed/.gitkeep
 
 # --- Resultados generados automáticamente ---
 resultados/figures/*.png
