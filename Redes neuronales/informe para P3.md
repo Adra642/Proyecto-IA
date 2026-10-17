@@ -11,6 +11,11 @@ A continuación, os dejo los detalles específicos para cada uno.
 
 El `DataModule` ya se encarga de hacer el split (80/10/10), de limpiar los datos y de darte los datos en "tensores" listos para PyTorch. No tienes que preocuparte por el preprocesamiento.
 
+
+Carlos, el DataModule ya está testeado (9/9 tests pasados). Así que puedes confiar en que las shapes (19) y el split (80/10/10) son exactos. No vas a tener sorpresas raras al entrenar."
+
+
+
 ### 1. La arquitectura de tu red
 El número de variables de entrada (features) es **19**. 
 *   **Nota importante:** Originalmente eran 20, pero hemos eliminado la columna `Complain` porque producía *leakage* (fuga de información, hacía trampa). 

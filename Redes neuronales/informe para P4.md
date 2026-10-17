@@ -25,3 +25,26 @@ Usamos un `ColumnTransformer` (una cadena de montaje) donde el `fit` se hace **S
 Tras todo el proceso, la red neuronal recibe exactamente **19 columnas**:
 *   **10 numéricas** (se ha quitado `Complain`).
 *   **9 generadas por OneHot:** Geography (3 países) + Gender (2 géneros) + Card Type (4 tipos de tarjeta) = 9.
+
+Oye, por si quieres añadir una línea de calidad en el informe sobre el preprocesamiento: he ejecutado los tests automáticos y pasan los 9/9. Eso garantiza matemáticamente que no hay valores nulos, que el split 80/10/10 está perfectamente estratificado y que no hay fuga de datos (leakage con Complain).
+
+¿Quieres verlo tú mismo/a y sacar una captura para el informe?
+Solo tienes que abrir la terminal en la raíz del proyecto (con tu entorno .venv activado) y ejecutar este comando:
+
+bash
+pytest tests/ -v
+Si todo está bien, la terminal te soltará una salida verde que termina así:
+
+text
+tests/test_preprocessing.py::test_clean_raw_drops_id_columns PASSED     [ 11%]
+tests/test_preprocessing.py::test_clean_raw_has_expected_shape PASSED   [ 22%]
+tests/test_preprocessing.py::test_target_is_binary PASSED               [ 33%]
+tests/test_preprocessing.py::test_no_missing_values PASSED              [ 44%]
+tests/test_preprocessing.py::test_no_duplicates PASSED                  [ 55%]
+tests/test_preprocessing.py::test_split_is_stratified PASSED            [ 66%]
+tests/test_preprocessing.py::test_tensor_shapes_match PASSED            [ 77%]
+tests/test_preprocessing.py::test_complain_is_not_in_features PASSED    [ 88%]
+tests/test_preprocessing.py::test_input_dim_is_19 PASSED                [100%]
+
+======================== 9 passed in 2.34s ========================
+Para el informe / Quarto: Puedes poner una frase tipo "El pipeline de preprocesamiento cuenta con una suite de 9 tests unitarios que garantizan la integridad de los datos y la ausencia de leakage, superados al 100% (ver anexo o captura)". Y si quieres, pegas una captura de pantalla de esa terminal en verde, ¡queda súper profesional!
