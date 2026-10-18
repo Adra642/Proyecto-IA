@@ -7,3 +7,4 @@ torch>=2.0
 pytorch-lightning>=2.0
 jupyter>=1.0
 quarto-cli>=1.6
+pytest>=7.0
