@@ -1,4 +1,6 @@
-# Análisis completo de resultados — Persona 3 (Fase C corregida)
+# Análisis de Resultados — Persona 3 (Fase C corregida)
+
+---
 
 ## 1. Resumen ejecutivo
 
@@ -6,32 +8,34 @@ Se han entrenado **10 configuraciones distintas** de red neuronal con **3 semill
 
 ### Hallazgos principales
 
-1. **El mejor modelo técnico es C** (3 capas, 128-64-32) con **Accuracy = 0.792 ± 0.012** y **F1 = 0.603 ± 0.019**. Sin embargo, las diferencias con B, F2, E, G y H2 están dentro del margen de 1 desviación estándar, por lo que en la práctica **todas las arquitecturas con 2 o más capas rinden de forma equivalente**.
+1. **C y F2 comparten el mejor F1 puntual (0.603)**, aunque C tiene mejor accuracy puntual (0.792) y F2 es más eficiente (25% menos parámetros). Las diferencias con B, E, G y H2 están dentro del margen de ±1 desviación estándar. **En la práctica, todas las configuraciones con 2+ capas sin dropout (B, C, F1, F2, G, H1, H2) y E son equivalentes según el criterio ±1 std. F3 es claramente peor que C según este criterio, pero confunde anchura y dropout, así que no se puede atribuir solo a la arquitectura.**
 
 2. **El overfitting anterior de C no era por profundidad**. Con 50 épocas fijas y sin regularización, C memorizaba el train. Con early stopping, C paró en **época 13** y generaliza correctamente. **La conclusión anterior "3 capas → overfitting severo" era falsa**.
 
-3. **El pos_weight ha cambiado el comportamiento del modelo sin cambiar su capacidad de discriminación**. El AUC se mantiene en ~0.865 en todos los modelos, pero el recall sube de ~0.53 a ~0.79 a costa de bajar la precision de ~0.77 a ~0.47. **Esto no es un empeoramiento, es un cambio de objetivo**: priorizar detectar churns sobre no molestar a los que se quedan.
+3. **El pos_weight ha cambiado el comportamiento del modelo sin cambiar su capacidad de discriminación**. El AUC se mantiene en ~0.865 en todos los modelos, pero el recall sube de ~0.53 a ~0.79 a costa de bajar la precision de ~0.77 a ~0.47. **No es un empeoramiento, es un cambio de objetivo**: priorizar detectar churns sobre no molestar a los que se quedan.
 
-4. **La arquitectura no es la palanca principal en este problema**. Las diferencias de accuracy entre todas las configuraciones con 2+ capas son de ~0.02 puntos, dentro del ruido estadístico. **Lo que sí importa** es el early stopping (corrige overfitting) y el pos_weight (ajusta el trade-off precision/recall).
+4. **La arquitectura no es la palanca principal en este problema**. **Las diferencias de accuracy entre las configuraciones con 2+ capas son pequeñas (~0.02 puntos en el rango observado), aunque F3 queda por debajo de C fuera del margen ±1 std.** **Lo que sí importa** es el early stopping (corrige overfitting) y el pos_weight (ajusta el trade-off precision/recall).
 
-5. **El dropout no aportó mejora** en este dataset. Con early stopping + weight decay + pos_weight ya hay suficiente regularización. Añadir dropout solo introduce ruido sin mejorar el rendimiento medio.
+5. **Los modelos con dropout (E, F3) rinden peor que C**, pero **no hay una comparación limpia que aísle el dropout** (E cambia profundidad y dropout; F3 cambia anchura y dropout). La conclusión sobre el dropout es **tentativa**, no concluyente.
+
+> **Nota metodológica**: a lo largo del documento se usa el criterio de **solapamiento de media ±1 desviación estándar** como criterio exploratorio para comparar modelos. No se realizaron tests estadísticos formales (t-test, Mann-Whitney) por el bajo número de semillas (3). Las afirmaciones de "diferencia clara" o "diferencia no concluyente" se basan en este criterio heurístico, no en significancia estadística formal.
 
 ---
 
 ## 2. Contexto y motivación: qué se corrigió respecto a la versión anterior
 
-La versión anterior del trabajo (entrenada con el código inicial) presentaba **6 debilidades metodológicas** que el profesor señaló:
+La versión anterior del trabajo (código inicial) presentaba **6 debilidades metodológicas** señaladas por el profesor:
 
 | Debilidad anterior | Corrección aplicada |
 |---|---|
-| 4 experimentos, pero solo 3 arquitecturas (D era variante de C) | **9 arquitecturas distintas** (A, B, C, E, F1, F2, F3, G, H1, H2) |
+| 4 experimentos, pero solo 3 arquitecturas (D era variante de C) | **7 arquitecturas distintas** (A, B, C, E, F1, F2, F3) + **3 variantes de B** (G, H1, H2) = 10 experimentos |
 | D cambiaba batch y LR a la vez → no se podía aislar el efecto | **Cada experimento cambia una sola variable** (ablación real) |
 | Una sola semilla (RANDOM_STATE=42) | **3 semillas** ([0, 1, 2]) con media ± std |
 | Sin early stopping (50 épocas fijas) | **Early stopping con patience=8**, max 300 épocas |
 | Dropout no se usaba aunque ChurnNet lo soporta | **Dropout 0.3** en E y F3, pasado correctamente desde train.py |
 | Desbalanceo detectado pero no mitigado | **pos_weight = 3.9** en BCEWithLogitsLoss |
 
-Además, se añadieron dos mejoras que el profesor mencionó en la reunión:
+Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 - **Tabla numérica de pérdidas finales** (Train_Loss_final, Val_Loss_final, Test_Loss).
 - **AUC-ROC** como métrica adicional (más robusta que accuracy para comparar modelos).
@@ -50,7 +54,7 @@ Además, se añadieron dos mejoras que el profesor mencionó en la reunión:
 | **E** | [128, 64, 32, 16] | 4 | 240 | 32 | 1e-3 | 0.3 | +1 capa vs C (con dropout) |
 | **F1** | [32, 32, 32] | 3 | 96 | 32 | 1e-3 | 0.0 | Anchura estrecha vs C |
 | **F2** | [64, 64, 64] | 3 | 192 | 32 | 1e-3 | 0.0 | Anchura media vs C |
-| **F3** | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 | Anchura grande vs C |
+| **F3** | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 | Anchura grande vs C (con dropout) |
 | **G** | [64, 32] | 2 | 96 | **64** | 1e-3 | 0.0 | Solo batch vs B |
 | **H1** | [64, 32] | 2 | 96 | 32 | **5e-4** | 0.0 | Solo LR vs B |
 | **H2** | [64, 32] | 2 | 96 | 32 | **1e-4** | 0.0 | Solo LR más bajo vs B |
@@ -60,34 +64,36 @@ Además, se añadieron dos mejoras que el profesor mencionó en la reunión:
 | Requisito | Cómo se cumple |
 |---|---|
 | **Número de capas ocultas** | 4 profundidades: A (1), B (2), C/F1/F2/F3 (3), E (4) |
-| **Número de neuronas por capa** | 4 anchuras con misma profundidad: F1 (96), F2 (192), C (224), F3 (384) |
+| **Número de neuronas por capa** | 3 anchuras con misma profundidad y sin dropout: F1 (96), F2 (192), C (224) |
 | **Batch size** | B (32) vs G (64), solo cambia el batch |
 | **Learning rate** | B (1e-3) vs H1 (5e-4) vs H2 (1e-4), solo cambia el LR |
 | **Ablación** | Cada experimento cambia una variable respecto a su referencia |
 
-### 3.3 Justificación técnica de la rejilla
+### 3.3 Limitaciones del diseño experimental
 
-- **A → B → C → E**: mide el efecto de la **profundidad** manteniendo constante todo lo demás. E lleva dropout porque, sin él, una red de 4 capas con 13.441 parámetros overfitearía inevitablemente, y la comparación no sería justa.
-- **F1 → F2 → C → F3**: mide el efecto de la **anchura** manteniendo la profundidad fija en 3 capas. Esto permite responder a la pregunta: *¿el problema de C (si lo hubiera) era la profundidad o la anchura?*
-- **B vs G**: aísla el efecto del **batch size**. B y G tienen la misma arquitectura y el mismo LR, solo cambia el batch.
-- **B vs H1 vs H2**: aísla el efecto del **learning rate**. Misma arquitectura, mismo batch, solo cambia el LR.
+**Importante**: no todas las comparaciones son perfectamente limpias.
+
+- **Anchura**: F1, F2 y C son comparables directamente (misma profundidad 3, sin dropout). **F3 no es directamente comparable** porque además lleva `dropout=0.3`. Su peor rendimiento puede deberse a la anchura excesiva, al dropout, o a ambos. Para aislar la anchura en el rango alto haría falta un F3 sin dropout (no incluido en la rejilla).
+- **Dropout**: no hay una comparación limpia. E cambia profundidad y dropout (C→E). F3 cambia anchura y dropout (C→F3). Para aislar el dropout haría falta `C+dropout` vs `C`, que no existe en la rejilla. La conclusión sobre el dropout es **tentativa**.
 
 ---
 
 ## 4. Resultados completos (media ± std, 3 semillas)
 
-| Modelo | Arquitectura | Params | Épocas | Accuracy | Precision | Recall | F1 | AUC |
-|---|---|---|---|---|---|---|---|---|
-| A | [32] | 673 | 31 | 0.766 ± 0.010 | 0.459 ± 0.013 | **0.797 ± 0.012** | 0.582 ± 0.008 | 0.867 ± 0.002 |
-| B | [64, 32] | 3.393 | 21 | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
-| **C** | [128, 64, 32] | 12.929 | 13 | **0.792 ± 0.012** | **0.495 ± 0.019** | 0.773 ± 0.016 | **0.603 ± 0.019** | 0.864 ± 0.004 |
-| E | [128, 64, 32, 16] | 13.441 | 26 | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
-| F1 | [32, 32, 32] | 2.785 | 18 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
-| **F2** | [64, 64, 64] | 9.665 | 14 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | **0.603 ± 0.007** | 0.867 ± 0.006 |
-| F3 | [128, 128, 128] | 35.713 | 24 | 0.773 ± 0.002 | 0.467 ± 0.002 | **0.802 ± 0.006** | 0.590 ± 0.001 | **0.869 ± 0.003** |
-| G | [64, 32] b=64 | 3.393 | 31 | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
-| H1 | [64, 32] lr=5e-4 | 3.393 | 38 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
-| H2 | [64, 32] lr=1e-4 | 3.393 | 108 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
+| Modelo | Arquitectura | Params | Épocas | Train Loss | Val Loss | Test Loss | Accuracy | Precision | Recall | F1 | AUC |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| A | [32] | 673 | 31 | 0.719 ± 0.001 | 0.746 ± 0.002 | 0.732 ± 0.004 | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
+| B | [64, 32] | 3.393 | 21 | 0.696 ± 0.001 | 0.741 ± 0.006 | 0.733 ± 0.006 | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
+| **C** | [128, 64, 32] | 12.929 | 13 | 0.733 ± 0.006 | 0.743 ± 0.005 | 0.735 ± 0.011 | **0.792 ± 0.012** | **0.495 ± 0.019** | 0.773 ± 0.016 | **0.603 ± 0.019** | 0.864 ± 0.004 |
+| E | [128, 64, 32, 16] | 13.441 | 26 | 0.740 ± 0.016 | 0.742 ± 0.004 | 0.727 ± 0.008 | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
+| F1 | [32, 32, 32] | 2.785 | 18 | 0.719 ± 0.001 | 0.745 ± 0.010 | 0.727 ± 0.011 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
+| **F2** | [64, 64, 64] | 9.665 | 14 | 0.690 ± 0.024 | 0.749 ± 0.006 | 0.732 ± 0.017 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | **0.603 ± 0.007** | 0.867 ± 0.006 |
+| F3 | [128, 128, 128] | 35.713 | 24 | 0.728 ± 0.014 | 0.747 ± 0.004 | 0.724 ± 0.008 | 0.773 ± 0.002 | 0.467 ± 0.002 | **0.802 ± 0.006** | 0.590 ± 0.001 | **0.869 ± 0.003** |
+| G | [64, 32] b=64 | 3.393 | 31 | 0.697 ± 0.013 | 0.742 ± 0.002 | 0.726 ± 0.003 | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
+| H1 | [64, 32] lr=5e-4 | 3.393 | 38 | 0.696 ± 0.016 | 0.743 ± 0.009 | 0.734 ± 0.004 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
+| H2 | [64, 32] lr=1e-4 | 3.393 | 108 | 0.700 ± 0.011 | 0.746 ± 0.012 | 0.732 ± 0.002 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
+
+> **Nota**: los valores de std en esta tabla están redondeados a 3 decimales. Los valores sin redondear (usados en la sección 8) son, por ejemplo, F3: std(accuracy) = 0.0015, std(F1) = 0.0006. Los rankings de estabilidad son idénticos con ambos redondeos.
 
 ---
 
@@ -97,122 +103,111 @@ Además, se añadieron dos mejoras que el profesor mencionó en la reunión:
 
 **Pregunta**: ¿Aumentar el número de capas ocultas mejora el rendimiento?
 
-**Respuesta**: **Sí, pero con un óptimo en 3 capas. La 4ª capa no aporta.**
+**Respuesta**: **La profundidad mejora de forma clara al comparar A (1 capa) con C (3 capas). Las transiciones individuales A→B, B→C y C→E no son concluyentes según el criterio ±1 std. No hay evidencia de que una 4ª capa aporte mejora; E no supera a C.**
 
 | Transición | Cambio en Accuracy | Cambio en F1 | Interpretación |
 |---|---|---|---|
-| A → B (+1 capa) | +0.015 | +0.013 | **Mejora significativa**. La 2ª capa permite aprender interacciones no lineales que una sola capa no captura. |
-| B → C (+1 capa) | +0.011 | +0.008 | **Mejora marginal**. C es ligeramente mejor que B, pero la diferencia está dentro de 1 std. |
-| C → E (+1 capa) | -0.011 | -0.008 | **Empeora**. La 4ª capa no aporta; el dropout mitiga parcialmente pero no compensa. |
+| A → B (+1 capa) | +0.015 | +0.013 | **Mejora puntual**, pero los intervalos ±1 std se solapan → **no concluyente** |
+| B → C (+1 capa) | +0.011 | +0.008 | **No concluyente** (los intervalos ±1 std se solapan) |
+| C → E (+1 capa) | -0.011 | -0.008 | **Empeora ligeramente**, pero no concluyente |
 
-**Interpretación técnica**:
+**Comparación según criterio ±1 std**:
 
-- **A (1 capa)** solo puede aprender una transformación lineal seguida de una no linealidad. No puede capturar interacciones entre features. Su accuracy es el peor (0.766).
-- **B (2 capas)** puede aprender una composición de dos transformaciones no lineales. Esto es suficiente para capturar la mayoría de patrones en este dataset. Accuracy sube a 0.782.
-- **C (3 capas)** añade una tercera transformación. La mejora es marginal (0.792). El modelo ya tiene capacidad suficiente.
-- **E (4 capas + dropout)** añade una 4ª capa, pero el dropout en el medio de la red reduce la información que fluye. La accuracy baja a 0.781. **La 4ª capa no aporta porque el dataset no tiene suficiente complejidad para necesitarla.**
+- **A vs B**: A = [0.756, 0.776], B = [0.768, 0.796]. **Se solapan** en [0.768, 0.776] → **diferencia no concluyente**.
+- **A vs C**: A = [0.756, 0.776], C = [0.780, 0.804]. **No se solapan** → **diferencia clara** según el criterio ±1 std. C es mejor que A.
+- **B vs C**: B = [0.768, 0.796], C = [0.780, 0.804]. **Se solapan** en [0.780, 0.796] → **diferencia no concluyente**.
+- **C vs E**: C = [0.780, 0.804], E = [0.764, 0.798]. **Se solapan** en [0.780, 0.798] → **diferencia no concluyente**.
 
-**Significancia estadística**:
-- A vs C: rangos no se solapan (A: [0.756, 0.776], C: [0.780, 0.805]). **Diferencia significativa**.
-- B vs C: rangos se solapan (B: [0.768, 0.795], C: [0.780, 0.805]). **Diferencia no significativa**.
-- C vs E: rangos se solapan. **Diferencia no significativa**.
+**Conclusión**: **A es claramente peor que C** según el criterio ±1 std. **Las transiciones individuales A→B, B→C y C→E no son concluyentes**. **No hay evidencia de que una 4ª capa aporte mejora**; E no supera a C. **El overfitting anterior de C no era por profundidad, era por 50 épocas fijas sin regularización**.
 
-**Conclusión**: la profundidad tiene un óptimo en **3 capas**. A es claramente peor. B y C son equivalentes. E no aporta. **El overfitting anterior de C no era por profundidad, era por 50 épocas fijas sin regularización**.
+---
 
-### 5.2 Efecto de la anchura (F1 → F2 → C → F3)
+### 5.2 Efecto de la anchura (F1 → F2 → C)
 
 **Pregunta**: Con la misma profundidad (3 capas), ¿cómo afecta el número de neuronas por capa?
 
-**Respuesta**: **Hay un óptimo en 192-224 neuronas. Menos es demasiado estrecho; más es demasiado ancho.**
+**Respuesta**: **F2 y C empatan en F1 y son equivalentes. F1 muestra peor accuracy puntual, pero la diferencia con C es marginal y no concluyente con 3 semillas. Los datos sugieren que 192-224 neuronas son suficientes; no se puede afirmar con rigor que 96 sea insuficiente.**
 
-| Modelo | Neuronas | Accuracy | F1 | Params | Interpretación |
-|---|---|---|---|---|---|
-| F1 | 96 | 0.776 | 0.588 | 2.785 | **Demasiado estrecho**. No tiene capacidad para aprender patrones complejos. |
-| F2 | 192 | 0.787 | **0.603** | 9.665 | **Óptimo de eficiencia**. Mismo F1 que C con 25% menos parámetros. |
-| C | 224 | **0.792** | **0.603** | 12.929 | **Óptimo de accuracy**. Ligeramente mejor que F2 en accuracy. |
-| F3 | 384 | 0.773 | 0.590 | 35.713 | **Demasiado ancho**. Overfitea incluso con dropout. |
+| Modelo | Neuronas | Dropout | Accuracy | F1 | Params | Comparación limpia |
+|---|---|---|---|---|---|---|
+| F1 | 96 | 0.0 | 0.776 ± 0.006 | 0.588 ± 0.004 | 2.785 | ✅ Sí (sin dropout) |
+| F2 | 192 | 0.0 | 0.787 ± 0.009 | **0.603 ± 0.007** | 9.665 | ✅ Sí (sin dropout) |
+| C | 224 | 0.0 | **0.792 ± 0.012** | **0.603 ± 0.019** | 12.929 | ✅ Sí (sin dropout) |
+| F3 | 384 | **0.3** | 0.773 ± 0.002 | 0.590 ± 0.001 | 35.713 | ❌ **No** (también cambia dropout) |
 
-**Interpretación técnica**:
+**Comparación según criterio ±1 std**:
 
-- **F1 (96 neuronas)** tiene solo 2.785 parámetros. Con 8.000 ejemplos de train, la relación parámetros/ejemplos es baja (0.35). El modelo no tiene capacidad suficiente para aprender los patrones. Accuracy baja a 0.776.
-- **F2 (192 neuronas)** tiene 9.665 parámetros. Relación parámetros/ejemplos: 1.2. Es suficiente para aprender sin overfitear. F1 = 0.603, igual que C.
-- **C (224 neuronas)** tiene 12.929 parámetros. Relación: 1.6. Ligeramente más capacidad que F2. Accuracy sube a 0.792 (mejor del estudio).
-- **F3 (384 neuronas)** tiene 35.713 parámetros. Relación: **4.5**. Demasiada capacidad para 8.000 ejemplos. Aunque tiene dropout (0.3), overfitea. Accuracy baja a 0.773.
+- **F1 vs C**: F1 = [0.770, 0.782], C = [0.780, 0.804]. **Se solapan ligeramente** en [0.780, 0.782]. La diferencia de 0.016 en accuracy es **marginal y no concluyente** con 3 semillas.
+- **F2 vs C**: F2 = [0.778, 0.796], C = [0.780, 0.804]. **Se solapan ampliamente** → **diferencia no concluyente**. F2 y C son equivalentes.
+- **C vs F3**: C = [0.780, 0.804], F3 = [0.771, 0.774]. **NO se solapan**. F3 es **claramente peor** que C según el criterio ±1 std. Pero como F3 también lleva dropout, no se puede atribuir exclusivamente a la anchura.
 
-**Significancia estadística**:
-- F1 vs C: rangos no se solapan (F1: [0.770, 0.782], C: [0.780, 0.805]). **Diferencia significativa**.
-- F2 vs C: rangos se solapan (F2: [0.778, 0.796], C: [0.780, 0.805]). **Diferencia no significativa**.
-- C vs F3: rangos se solapan parcialmente. F3 tiene std muy baja (0.0015), lo que indica que es muy estable pero consistentemente peor.
+**Conclusión**: **F2 y C empatan en F1 puntual (0.603) y son equivalentes**. **F1 muestra peor accuracy puntual (0.776 vs 0.792), pero la diferencia es marginal y no concluyente** con 3 semillas. Los datos **sugieren** que 192-224 neuronas son suficientes para el mejor F1 observado; **no se puede afirmar con rigor que 96 sea insuficiente** según el criterio ±1 std. F3 no es comparable directamente con C.
 
-**Conclusión**: el óptimo de anchura está en **192-224 neuronas**. F2 es la mejor relación rendimiento/eficiencia (mismo F1 que C con 25% menos parámetros). F3, a pesar de tener 2.7x más parámetros que C, rinde peor.
+---
 
 ### 5.3 Efecto del batch size (B vs G)
 
 **Pregunta**: ¿Un batch más grande mejora el rendimiento?
 
-**Respuesta**: **No. El batch no es una palanca relevante en este problema.**
+**Respuesta**: **No se observa un efecto relevante del batch en el rendimiento final.**
 
-| Modelo | Batch | Accuracy | F1 | Épocas | Interpretación |
-|---|---|---|---|---|---|
-| B | 32 | 0.782 | 0.595 | 21 | Batch pequeño: más actualizaciones por época, convergencia más rápida. |
-| G | 64 | 0.788 | 0.599 | 31 | Batch grande: menos actualizaciones por época, necesita más épocas. |
+| Modelo | Batch | Accuracy | F1 | Épocas |
+|---|---|---|---|---|
+| B | 32 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 |
+| G | 64 | 0.788 ± 0.011 | 0.599 ± 0.015 | 31 |
 
 **Interpretación técnica**:
 
 - Con batch=32, hay 8000/32 = **250 actualizaciones por época**.
 - Con batch=64, hay 8000/64 = **125 actualizaciones por época**.
 - G necesita más épocas (31 vs 21) porque cada época tiene menos pasos de actualización.
-- La diferencia en accuracy (0.788 vs 0.782) es de 0.006, **dentro del ruido estadístico** (std ~0.01).
+- La diferencia en accuracy (0.006) está **dentro del ruido** (std ~0.01).
 
-**Teoría**: un batch más grande regulariza implícitamente (gradiente más suave, menos ruido). Pero en este caso, con early stopping + weight decay, ese efecto es redundante. **El batch no aporta nada aquí**.
+**Comparación según criterio ±1 std**: B = [0.768, 0.796], G = [0.777, 0.799]. **Se solapan ampliamente** → **diferencia no concluyente**.
 
-**Significancia**: rangos se solapan. **No significativo**.
+**Conclusión**: **no se observa un efecto relevante del batch** en el rendimiento final. Con early stopping + weight decay, el efecto regularizador implícito del batch grande es redundante.
+
+---
 
 ### 5.4 Efecto del learning rate (B vs H1 vs H2)
 
 **Pregunta**: ¿Un learning rate más bajo mejora el rendimiento?
 
-**Respuesta**: **No. El LR no afecta al resultado final, pero sí al tiempo de entrenamiento.**
+**Respuesta**: **No se observa un efecto relevante del LR en el rendimiento final, pero sí en el tiempo de entrenamiento.**
 
 | Modelo | LR | Accuracy | F1 | Épocas | Tiempo relativo |
 |---|---|---|---|---|---|
-| B | 1e-3 | 0.782 | 0.595 | 21 | 1x |
-| H1 | 5e-4 | 0.781 | 0.590 | 38 | 1.8x |
-| H2 | 1e-4 | 0.785 | 0.595 | **108** | **5.1x** |
+| B | 1e-3 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 | 1x |
+| H1 | 5e-4 | 0.781 ± 0.005 | 0.590 ± 0.008 | 38 | 1.8x |
+| H2 | 1e-4 | 0.785 ± 0.005 | 0.595 ± 0.008 | **108** | **5.1x** |
 
-**Interpretación técnica**:
+**Comparación según criterio ±1 std**: todos los rangos se solapan. **Diferencia no concluyente**.
 
-- **B (LR=1e-3)**: converge en 21 épocas. Es el más rápido.
-- **H1 (LR=5e-4)**: converge en 38 épocas. 1.8x más lento, mismo resultado.
-- **H2 (LR=1e-4)**: converge en 108 épocas. 5.1x más lento, mismo resultado.
+**Conclusión**: **no se observa un efecto relevante del LR** en el rendimiento final. LR=1e-3 es el mejor compromiso de eficiencia: mismo resultado que LR más bajos, pero 5x menos tiempo.
 
-**¿Por qué H2 necesita tantas épocas?** Porque con LR=1e-4, cada actualización mueve los pesos muy poco. El modelo tarda mucho en llegar al mínimo. Pero **al final llega al mismo sitio**: accuracy 0.785 (vs 0.782 de B).
+---
 
-**Significancia**: rangos se solapan. **No significativo**.
-
-**Conclusión**: LR=1e-3 es el mejor compromiso. Mismo resultado que LR más bajos, pero 5x menos tiempo. **No tiene sentido usar LR=1e-4 en este problema**.
-
-### 5.5 Efecto del dropout (C vs E vs F3)
+### 5.5 Sobre el dropout (conclusión tentativa)
 
 **Pregunta**: ¿El dropout mejora el rendimiento?
 
-**Respuesta**: **No. El dropout no aporta en este dataset.**
+**Respuesta**: **Los modelos con dropout rinden peor, pero no hay una comparación limpia que aísle el dropout.**
 
-| Modelo | Dropout | Arquitectura | F1 | Accuracy | Interpretación |
+| Modelo | Dropout | Arquitectura | F1 | Accuracy | Comparación con C |
 |---|---|---|---|---|---|
-| C | 0.0 | [128, 64, 32] | **0.603** | **0.792** | Sin dropout: mejor F1 y accuracy. |
-| E | 0.3 | [128, 64, 32, 16] | 0.595 | 0.781 | Con dropout: peor en ambas métricas. |
-| F3 | 0.3 | [128, 128, 128] | 0.590 | 0.773 | Con dropout: peor aún. |
+| C | 0.0 | [128, 64, 32] | **0.603** | **0.792** | Referencia |
+| E | 0.3 | [128, 64, 32, 16] | 0.595 | 0.781 | Cambia profundidad Y dropout |
+| F3 | 0.3 | [128, 128, 128] | 0.590 | 0.773 | Cambia anchura Y dropout |
 
-**Interpretación técnica**:
+**Análisis**:
 
-- **C (sin dropout)** es el mejor en F1 y accuracy. El early stopping + weight decay ya son suficientes para regularizar.
-- **E (con dropout, 4 capas)** es peor. El dropout añade ruido durante el entrenamiento, lo que **reduce la capacidad efectiva** de la red. En un dataset pequeño como este, eso es contraproducente.
-- **F3 (con dropout, 384 neuronas)** es el peor. Aunque el dropout ayuda a controlar el overfitting de las 384 neuronas, no es suficiente para compensar el exceso de capacidad.
+- **Entre C, E y F3**, C tiene el mejor F1 y accuracy. **Globalmente, F2 empata con C en F1 (0.603)**.
+- **E (con dropout, 4 capas)** es peor. Pero E cambia **dos variables** respecto a C: profundidad (3→4) y dropout (0→0.3).
+- **F3 (con dropout, 384 neuronas)** es el peor. Pero F3 cambia **dos variables** respecto a C: anchura (224→384) y dropout (0→0.3).
 
-**¿Por qué el dropout no ayuda aquí?** Porque el dataset no es lo suficientemente grande como para que el dropout aporte. El dropout es útil cuando hay **millones de ejemplos** y la red tiende a memorizar. Con 10.000 ejemplos y early stopping, el dropout es redundante.
+**Conclusión tentativa**: los modelos con dropout rinden peor, pero **no se puede atribuir exclusivamente al dropout**. Podría ser la profundidad (en E), la anchura (en F3), o el dropout. Para aislar el dropout haría falta un experimento `C con dropout=0.3` vs `C sin dropout`, que no existe en esta rejilla.
 
-**Conclusión**: el dropout **no es universalmente útil**. Depende del contexto de regularización. Aquí, con early stopping + weight decay + pos_weight, no aporta.
+**Hipótesis (no confirmada)**: con early stopping + weight decay + pos_weight ya hay suficiente regularización. El dropout añade ruido sin aportar mejora. Pero esto es una hipótesis, no una conclusión. **Trabajo futuro**: añadir `C con dropout` para aislar el efecto.
 
 ---
 
@@ -220,37 +215,33 @@ Además, se añadieron dos mejoras que el profesor mencionó en la reunión:
 
 Cada modelo tiene su `loss_modelo_X.png`. Estas curvas cuentan la historia del entrenamiento.
 
-### 6.1 Modelo A (1 capa, 673 params)
+### 6.1 Modelo A (1 capa, 673 params, 31 épocas)
 
-- **Train loss**: baja de 0.99 a 0.72 en 31 épocas.
-- **Val loss**: baja de 0.94 a 0.75 en 31 épocas.
+- **Train loss**: baja de ~0.99 a ~0.72 en 31 épocas.
+- **Val loss**: baja de ~0.94 a ~0.75 en 31 épocas.
 - **Forma**: train y val bajan juntos y se estabilizan.
-- **Early stopping**: en época 31, cuando val dejó de mejorar durante 8 épocas.
 - **Diagnóstico**: **sin overfitting**. El modelo es demasiado simple para memorizar.
 
-### 6.2 Modelo C (3 capas, 12.929 params)
+### 6.2 Modelo C (3 capas, 12.929 params, 13 épocas)
 
-- **Train loss**: baja de 0.94 a 0.68 en 13 épocas.
-- **Val loss**: baja de 0.90 a 0.74 en 13 épocas.
-- **Forma**: train y val bajan juntos muy rápido. El modelo converge en solo 13 épocas.
-- **Early stopping**: en época 13.
+- **Train loss**: baja de ~0.94 a **~0.73** en 13 épocas (valor final real: 0.733 ± 0.006).
+- **Val loss**: baja de ~0.90 a **~0.74** en 13 épocas.
+- **Forma**: train y val bajan juntos muy rápido.
 - **Diagnóstico**: **sin overfitting**. El early stopping paró antes de que el modelo empezara a memorizar. **Esto es clave**: en la versión anterior, C overfiteaba porque se entrenaba 50 épocas fijas. Ahora para en 13 y generaliza bien.
 
 ### 6.3 Modelo H2 (LR=1e-4, 108 épocas)
 
-- **Train loss**: baja de 1.09 a 0.70 en 108 épocas.
-- **Val loss**: baja de 1.07 a 0.75 en 108 épocas.
+- **Train loss**: baja de ~1.09 a ~0.70 en 108 épocas (valor final real: 0.700 ± 0.011).
+- **Val loss**: baja de ~1.07 a ~0.75 en 108 épocas (valor final real: 0.746 ± 0.012).
 - **Forma**: descenso muy lento y gradual.
-- **Early stopping**: en época 108.
-- **Diagnóstico**: **convergencia lenta por LR bajo**. El modelo necesita muchas más épocas para llegar al mismo sitio. Al final, mismo resultado que B (accuracy 0.785 vs 0.782).
+- **Diagnóstico**: **convergencia lenta por LR bajo**. Necesita 5x más épocas que B para llegar al mismo sitio.
 
-### 6.4 Modelo F3 (384 neuronas, dropout, 24 épocas)
+### 6.4 Modelo F3 (384 neuronas + dropout, 24 épocas)
 
-- **Train loss**: baja de 0.96 a 0.72 en 24 épocas.
-- **Val loss**: baja de 0.91 a 0.74 en 24 épocas.
+- **Train loss**: baja de ~0.96 a ~0.73 en 24 épocas (valor final real: 0.728 ± 0.014).
+- **Val loss**: baja de ~0.91 a ~0.75 en 24 épocas (valor final real: 0.747 ± 0.004).
 - **Forma**: descenso más ruidoso por el dropout.
-- **Early stopping**: en época 24.
-- **Diagnóstico**: **el dropout añade ruido**. La val loss tiene más varianza entre épocas. Aun así, el early stopping lo controla.
+- **Diagnóstico**: **el dropout añade ruido**. La val loss tiene más varianza entre épocas.
 
 ---
 
@@ -268,101 +259,105 @@ Cada modelo tiene su `loss_modelo_X.png`. Estas curvas cuentan la historia del e
 
 ### 7.2 ¿Qué significa esto?
 
-Con `pos_weight=3.9`, la loss de los falsos negativos se multiplica por 3.9. Eso hace que el modelo **prefiera predecir churn aunque se equivoque**, porque equivocarse diciendo "se va" (falso positivo) cuesta menos que equivocarse diciendo "se queda" (falso negativo).
+Con `pos_weight=3.9`, la loss de los falsos negativos se multiplica por 3.9. Eso hace que el modelo **prefiera predecir churn aunque se equivoque**.
+
+**Efecto técnico preciso**: `pos_weight` **desplaza las probabilidades predichas de los positivos hacia arriba**. El efecto neto es **equivalente** a bajar el umbral de decisión de 0.5 a ~0.35, pero **no es exactamente lo mismo**: el umbral sigue siendo 0.5, lo que cambia es la distribución de probabilidades que produce el modelo.
 
 **Efecto práctico**:
-- **Recall sube**: detecta el 79% de los churns reales (antes 53%).
-- **Precision baja**: de los que predice churn, solo el 47% lo son (antes 77%).
+- **Recall sube**: detecta el ~79% de los churns reales (antes ~53%).
+- **Precision baja**: de los que predice churn, solo el ~47% lo son (antes ~77%).
 - **Accuracy baja**: acierta menos globalmente porque hay más falsas alarmas.
 - **AUC se mantiene**: la capacidad de discriminación no cambia.
 
 ### 7.3 ¿Por qué el AUC es igual?
 
-El AUC mide la probabilidad de que un churn real tenga más probabilidad predicha que un no-churn real. **Es independiente del umbral**. El pos_weight cambia el umbral efectivo de decisión, pero **no cambia la capacidad del modelo para ordenar las probabilidades**.
+El AUC mide la probabilidad de que un churn real tenga más probabilidad predicha que un no-churn real. **Es independiente del umbral**. El pos_weight desplaza las probabilidades, pero **no cambia la capacidad del modelo para ordenar** las muestras.
 
-**Analogía**: es como una balanza muy precisa pero mal calibrada. El pos_weight recalibra el punto de equilibrio. La balanza sigue siendo igual de precisa (AUC), pero ahora se inclina hacia el churn.
+**Analogía**: el pos_weight **desplaza el punto de corte efectivo** de la decisión, no la capacidad de ordenación del modelo. La "balanza" sigue ordenando igual de bien (AUC), pero el "punto de equilibrio" se inclina hacia el churn.
 
 ### 7.4 ¿Es mejor o peor?
 
 **Depende del negocio**:
 
-- **Si el coste de perder un cliente es alto** (típico en churn): **mejor ahora**. Recall 0.79 significa que detectas 4 de cada 5 clientes que se van.
-- **Si el coste de molestar a un cliente con una promo innecesaria es alto**: peor ahora. Precision 0.47 significa que de cada 2 clientes que marcas como churn, 1 no lo es.
+- **Si el coste de perder un cliente es alto** (típico en churn bancario): **mejor ahora**. Recall ~0.79 significa que detectas 4 de cada 5 clientes que se van.
+- **Si el coste de molestar a un cliente con una promo innecesaria es alto**: peor ahora. Precision ~0.47 significa que de cada 2 clientes que marcas como churn, 1 no lo es.
 
 **En churn bancario, el coste de perder un cliente es mucho mayor que el coste de ofrecerle una promo**. Por eso **priorizar recall es la decisión correcta**.
+
+> **Nota**: el dataset `Customer-Churn-Records.csv` contiene columnas como `CreditScore`, `Geography`, `Balance`, `NumOfProducts`, `HasCrCard`, `IsActiveMember` y `EstimatedSalary`, que son específicas del dominio bancario. Por eso se usa "churn bancario" y no genéricamente "churn".
 
 ---
 
 ## 8. Estabilidad entre semillas: análisis de la desviación estándar
 
-La desviación estándar (std) mide cuánto varía el resultado entre semillas. **Menos std = más estable**.
-
 | Modelo | Accuracy std | F1 std | Estabilidad |
 |---|---|---|---|
-| F3 | **0.0015** | **0.0006** | **El más estable** |
+| F3 | **0.0015** | **0.0006** | **El más estable en ambas métricas** |
 | H2 | 0.0050 | 0.0076 | Muy estable |
 | H1 | 0.0051 | 0.0081 | Muy estable |
 | F1 | 0.0059 | 0.0038 | Estable |
 | F2 | 0.0093 | 0.0071 | Moderadamente estable |
 | A | 0.0102 | 0.0078 | Moderadamente estable |
 | G | 0.0105 | 0.0145 | Moderadamente estable |
-| C | 0.0124 | 0.0190 | **El menos estable** |
+| C | 0.0124 | **0.0190** | **El menos estable en F1** |
 | B | 0.0137 | 0.0122 | Poco estable |
-| E | 0.0171 | 0.0150 | Poco estable |
+| E | **0.0171** | 0.0150 | **El menos estable en accuracy** |
+
+> **Nota**: los valores de esta tabla son los **sin redondear**. En la tabla de la sección 4 aparecen redondeados a 3 decimales (por ejemplo, F3: 0.002 y 0.001). Los rankings de estabilidad son idénticos con ambos redondeos.
 
 **Interpretación**:
 
-- **F3 (384 neuronas + dropout)** es el más estable (std 0.0015 en accuracy). El dropout reduce la varianza entre semillas.
-- **C (3 capas sin dropout)** es el menos estable (std 0.0124). Sin dropout, la inicialización aleatoria afecta más.
-- **H1 y H2 (LR bajos)** son muy estables. Un LR bajo hace que el entrenamiento sea más determinista.
+- **E es el menos estable en accuracy** (std 0.0171). La combinación de 4 capas + dropout introduce más varianza en accuracy.
+- **C es el menos estable en F1** (std 0.0190). Su F1 varía más entre semillas por la sensibilidad del F1 al equilibrio precision/recall.
+- **F3 (384 neuronas + dropout)** es el más estable en ambas métricas (std 0.0015 en accuracy, 0.0006 en F1). **Pero no se puede atribuir solo al dropout**: F3 también cambia la anchura (384 vs 224), y E, que también lleva dropout, es el **menos estable en accuracy**. La relación dropout-varianza queda como **hipótesis**, no como conclusión. Para aislarla haría falta `C+dropout` vs `C`.
 
-**Lección**: el dropout, aunque no mejora la media, **sí reduce la varianza**. Es un trade-off: menos rendimiento medio, pero más consistencia entre semillas.
+**Lección (tentativa)**: el dropout podría reducir la varianza entre semillas, pero los datos no permiten aislarlo de otras variables (anchura en F3, profundidad en E). La relación queda como hipótesis a confirmar en trabajo futuro.
 
 ---
 
 ## 9. El caso de F3: AUC alto pero accuracy baja
 
-F3 tiene el **mejor AUC (0.869)** pero el **peor accuracy (0.773)**. Esto parece contradictorio, pero no lo es.
+F3 tiene el **mejor AUC (0.869)** pero el **peor accuracy (0.773)**. Esto no es contradictorio.
 
 ### 9.1 ¿Por qué ocurre?
 
-- **AUC alto**: F3 asigna probabilidades muy bien calibradas. Si tomas un churn real y un no-churn real, F3 asigna más probabilidad al churn el 86.9% de las veces. **La capacidad de discriminación es excelente**.
-- **Accuracy bajo**: el umbral de decisión 0.5 no es el óptimo para F3. Con dropout, las probabilidades están más "comprimidas" hacia el centro. Muchos churns reales tienen probabilidad 0.45 (por debajo del umbral 0.5) y se clasifican como no-churn.
+- **AUC alto**: F3 **ordena muy bien las muestras**. Si tomas un churn real y un no-churn real, F3 asigna más probabilidad al churn el 86.9% de las veces. **Buena discriminación**, pero **no necesariamente buena calibración**. El AUC no mide calibración: un modelo puede tener AUC alto y probabilidades mal calibradas.
+- **Accuracy bajo**: el umbral de decisión 0.5 no es el óptimo para F3. Con dropout, las probabilidades están más "comprimidas" hacia el centro. **Posiblemente** muchos churns reales tienen probabilidad ~0.45 (por debajo del umbral 0.5) y se clasifican como no-churn. **Esto es una hipótesis plausible, no una medición directa**.
 
 ### 9.2 ¿Qué pasaría si bajáramos el umbral?
 
-Si usáramos umbral 0.35 en lugar de 0.5:
+Si bajáramos el umbral a 0.35:
 - **Recall subiría** (más churns detectados).
 - **Precision bajaría** (más falsas alarmas).
-- **Accuracy subiría** (porque el umbral estaría mejor calibrado para la distribución de F3).
+- **El efecto sobre accuracy es incierto** y probablemente negativo si el umbral añade muchos falsos positivos (con precision ya baja, añadir más FP puede empeorar el accuracy global). Habría que medirlo con threshold tuning explícito.
 
 ### 9.3 Lección
 
-**El accuracy depende del umbral; el AUC no**. Para comparar modelos, el AUC es más robusto. F3 es un modelo excelente en términos de discriminación, pero su umbral óptimo no es 0.5.
+**El accuracy depende del umbral; el AUC no**. Para comparar modelos, el AUC es más robusto que el accuracy. F3 tiene una excelente capacidad de discriminación (AUC alto), pero su umbral óptimo no es 0.5. **AUC y calibración son cosas distintas**: el AUC mide ordenación, no calibración.
 
 ---
 
 ## 10. Hallazgos inesperados
 
-### 10.1 El dropout no ayudó
+### 10.1 El batch no muestra efecto relevante
 
-A pesar de que el profesor lo pidió y de que el código lo soporta, el dropout **no mejoró el rendimiento**. C (sin dropout) fue mejor que E y F3 (con dropout). **Lección**: el dropout no es universalmente útil; depende del contexto de regularización.
+B (batch 32) y G (batch 64) obtuvieron resultados equivalentes. **Lección**: en este dataset, no se observa un efecto relevante del batch en el rendimiento final.
 
-### 10.2 El batch no importa
-
-B (batch 32) y G (batch 64) obtuvieron resultados equivalentes. **Lección**: en este dataset, el batch no es una palanca relevante.
-
-### 10.3 El LR no afecta al resultado, solo al tiempo
+### 10.2 El LR no muestra efecto relevante en el resultado, solo en el tiempo
 
 B (LR 1e-3), H1 (LR 5e-4) y H2 (LR 1e-4) obtuvieron resultados equivalentes. Pero H2 necesitó **5x más épocas**. **Lección**: el LR afecta a la eficiencia, no al resultado final.
 
-### 10.4 La anchura óptima es 192-224 neuronas
+### 10.3 La anchura: 192-224 neuronas parecen suficientes
 
-F2 (192) y C (224) empatan en F1. F1 (96) es demasiado estrecho. F3 (384) es demasiado ancho. **Lección**: hay un óptimo de capacidad que depende del tamaño del dataset.
+F2 (192) y C (224) empatan en F1 puntual (0.603). **F1 (96) queda algo por debajo (0.776 vs 0.792 en accuracy), pero la diferencia no es concluyente** según el criterio ±1 std. Los datos **sugieren** que 192-224 neuronas son suficientes; no se puede afirmar con rigor que 96 sea insuficiente. **Lección**: en este dataset, 192-224 neuronas parecen suficientes para el mejor F1 observado.
 
-### 10.5 El overfitting de C era por épocas, no por profundidad
+### 10.4 El overfitting de C era por épocas, no por profundidad
 
 La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overfitting era por **50 épocas fijas sin regularización**. Con early stopping, C converge en 13 épocas y generaliza bien. **Lección**: no atribuir el overfitting a la arquitectura sin aislar las variables.
+
+### 10.5 El dropout no muestra mejora, pero la comparación no es limpia
+
+Los modelos con dropout (E, F3) rinden peor, pero también cambian otras variables. **Lección**: no concluir sobre el dropout sin una comparación que lo aísle.
 
 ---
 
@@ -370,7 +365,7 @@ La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overf
 
 | Aspecto | Antes | Ahora |
 |---|---|---|
-| Arquitecturas | 3 (D era variante de C) | 9 arquitecturas distintas |
+| Experimentos | 4 (3 arquitecturas + 1 variante) | 10 (7 arquitecturas + 3 variantes) |
 | Semillas | 1 | 3 |
 | Early stopping | No | Sí (patience=8) |
 | Dropout | No usado | Activo en E y F3 |
@@ -378,7 +373,7 @@ La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overf
 | AUC | No medido | 0.86-0.87 |
 | Tabla de pérdidas finales | No | Sí (train/val/test) |
 | Conclusión sobre C | "Overfitting por profundidad" | "Overfitting por 50 épocas fijas" |
-| Significancia estadística | No | Media ± std con 3 semillas |
+| Significancia estadística | No | Media ± std con 3 semillas (criterio exploratorio) |
 | Gráfico con barras de error | No | Sí |
 
 **Esto demuestra que se han corregido los errores metodológicos señalados por el profesor.**
@@ -390,11 +385,10 @@ La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overf
 1. **El early stopping es más importante que la arquitectura**. Sin él, cualquier red grande overfitea. Con él, incluso C (12.929 parámetros) generaliza bien.
 2. **El pos_weight cambia el trade-off precision/recall sin cambiar la capacidad de discriminación (AUC constante)**. Es una decisión de negocio, no de estadística.
 3. **La ablación es obligatoria**. Sin ella, no puedes atribuir causalidad. La versión anterior mezclaba batch y LR en el modelo D; ahora cada experimento cambia una variable.
-4. **3 semillas son el mínimo para distinguir señal de ruido**. Con 1 semilla, diferencias de 0.01 son indistinguibles de la aleatorización.
-5. **El dropout no es universalmente útil**. Depende del contexto de regularización. Aquí, con early stopping + weight decay + pos_weight, es redundante.
-6. **En datasets pequeños (10.000 ejemplos), las redes grandes no aportan**. F3 (384 neuronas) rinde peor que C (224) a pesar de tener 2.7x más parámetros.
-7. **El LR afecta al tiempo, no al resultado**. LR=1e-3 converge en 21 épocas; LR=1e-4 necesita 108. Mismo resultado, 5x más tiempo.
-8. **El AUC es más robusto que el accuracy para comparar modelos**. F3 tiene el mejor AUC pero el peor accuracy por el umbral.
+4. **3 semillas permiten reportar media ± std y evitar conclusiones basadas en una única inicialización**, aunque no permiten tests formales con potencia suficiente. Para eso harían falta más semillas (≥10) o validación cruzada.
+5. **En este dataset, 192-224 neuronas parecen suficientes para el mejor F1 observado**. No hay evidencia de que anchuras mayores aporten, pero **F3 confunde anchura y dropout**, así que la conclusión sobre el rango alto es tentativa.
+6. **El LR afecta al tiempo, no al resultado**. LR=1e-3 converge en 21 épocas; LR=1e-4 necesita 108. Mismo resultado, 5x más tiempo.
+7. **El AUC es más robusto que el accuracy para comparar modelos**. F3 tiene el mejor AUC pero el peor accuracy por el umbral.
 
 ---
 
@@ -402,39 +396,61 @@ La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overf
 
 - **Una sola partición train/val/test**. No se hizo validación cruzada k-fold. Con 3 semillas se mitiga parcialmente, pero una CV daría estimaciones más robustas.
 - **Dataset de 10.000 ejemplos**. Es pequeño para redes grandes. Los resultados podrían cambiar con más datos.
-- **Desbalanceo mitigado con pos_weight pero no se exploró threshold tuning**. Bajar el umbral a 0.35 o 0.4 podría mejorar el F1.
+- **Desbalanceo mitigado con pos_weight pero no se exploró threshold tuning explícito**. Bajar el umbral a 0.35 o 0.4 podría mejorar el recall en todos los modelos, pero el efecto sobre accuracy y F1 requiere medición explícita.
+- **No hay comparación limpia de dropout**. E y F3 cambian dropout + otra variable.
+- **F3 no es comparable directamente con C** por el dropout.
 - **No se probó BatchNorm**. Podría estabilizar el entrenamiento de las redes más profundas.
-- **No se probaron otras funciones de activación** (tanh, LeakyReLU, GELU). ReLU es el estándar, pero otras podrían funcionar mejor en este dataset.
+- **No se probaron otras funciones de activación** (tanh, LeakyReLU, GELU).
+- **Criterio de comparación exploratorio**. Se usa solapamiento ±1 std, no tests estadísticos formales. Con 3 semillas no hay potencia suficiente para tests formales.
 
 ---
 
 ## 14. Trabajo futuro
 
 1. **Validación cruzada 5-fold** para estimaciones más robustas.
-2. **Threshold tuning explícito**: probar umbrales 0.3, 0.35, 0.4, 0.45, 0.5 y ver el trade-off precision/recall.
-3. **Probar BatchNorm** en las redes profundas (C, E, F3).
-4. **Probar otras activaciones** (LeakyReLU, GELU).
-5. **Probar oversampling** de la clase minoritaria en lugar de pos_weight.
-6. **Probar arquitecturas más grandes** si se consiguen más datos.
+2. **Threshold tuning explícito**: probar umbrales 0.3, 0.35, 0.4, 0.45, 0.5 y medir el trade-off precision/recall/accuracy/F1.
+3. **Añadir `C+dropout`** para aislar el efecto del dropout de la profundidad y la anchura.
+4. **Añadir `F3 sin dropout`** para aislar la anchura en el rango alto.
+5. **Probar BatchNorm** en las redes profundas (C, E, F3).
+6. **Probar otras activaciones** (LeakyReLU, GELU).
+7. **Probar oversampling** de la clase minoritaria en lugar de pos_weight.
 
 ---
 
-## 15. Conclusiones finales
+## 15. Conclusiones finales y recomendación
 
-1. **El mejor modelo técnico es C** (3 capas, 128-64-32) con Accuracy = 0.792 ± 0.012 y F1 = 0.603 ± 0.019.
+### 15.1 Conclusiones técnicas
 
-2. **El mejor modelo en eficiencia es F2** (3 capas, 64-64-64) con el mismo F1 que C pero **25% menos parámetros**.
+1. **C y F2 comparten el mejor F1 puntual (0.603)**, aunque C tiene mejor accuracy puntual (0.792) y F2 es más eficiente (25% menos parámetros: 9.665 vs 12.929). Las diferencias con B, E, G y H2 están dentro del margen ±1 std. **En la práctica, todas las configuraciones con 2+ capas sin dropout (B, C, F1, F2, G, H1, H2) y E son equivalentes según el criterio ±1 std. F3 es claramente peor que C según este criterio, pero confunde anchura y dropout, así que no se puede atribuir solo a la arquitectura.**
 
-3. **El mejor modelo para negocio es F3** (3 capas, 128-128-128) con el mejor recall (0.802) y AUC (0.869). Detecta más churns reales.
+2. **Si el criterio es eficiencia con rendimiento equivalente, F2 es preferible a C**: mismo F1 puntual con un 25% menos de parámetros.
 
-4. **La arquitectura no es la palanca principal**. Las diferencias entre todas las configuraciones con 2+ capas están dentro del margen de 1 desviación estándar. **Lo que sí importa** es:
+3. **F3 tiene el mejor recall (0.802) y AUC (0.869)**, pero el peor accuracy (0.773) por el umbral. En un contexto de negocio donde el coste de perder un cliente es alto, es el candidato más alineado, **pero requiere threshold tuning antes de producción**.
+
+4. **La arquitectura no es la palanca principal**. Las diferencias entre las configuraciones con 2+ capas son pequeñas (~0.02 puntos en el rango observado), aunque F3 queda por debajo de C fuera del margen ±1 std. **Lo que sí importa** es:
    - **Early stopping** (corrige overfitting).
    - **pos_weight** (ajusta el trade-off precision/recall hacia el negocio).
    - **Weight decay** (regulariza).
 
 5. **El overfitting anterior de C no era por profundidad**: era por 50 épocas fijas sin regularización. Con early stopping, C converge en 13 épocas y generaliza correctamente.
 
-6. **El dropout no aportó** en este dataset. Con early stopping + weight decay + pos_weight ya hay suficiente regularización.
+### 15.2 Recomendación final explícita
+
+**Dado que en churn bancario el coste de un falso negativo (cliente que se va y no detectas) supera al de un falso positivo (cliente que se queda y le ofreces una promo), la recomendación de negocio es F3.** Detecta el 80.2% de los churns reales, con un AUC de 0.869, aceptando el coste de una precision más baja (0.467).
+
+**Importante**: F3 **no debería desplegarse con umbral 0.5 sin threshold tuning**. Su AUC alto con accuracy bajo sugiere que su umbral óptimo es más bajo (~0.35). Antes de producción habría que:
+1. Hacer threshold tuning explícito (0.3, 0.35, 0.4, 0.45, 0.5).
+2. Compararlo con C y F2 ajustando también sus umbrales.
+3. Medir el coste de negocio de cada configuración (coste de falso positivo vs falso negativo).
+
+**Si el criterio fuera únicamente F1 puntual (equilibrio precision/recall), la recomendación sería F2**: mismo F1 que C con 25% menos parámetros, más eficiente en producción.
+
+**Si el criterio fuera accuracy puntual (no aplicable en churn desbalanceado), la recomendación sería C**: mejor accuracy (0.792).
+
+**Recomendación operativa**:
+- **F3 para producción, previo threshold tuning** (prioriza recall, alineado con el coste asimétrico del churn).
+- **F2 como alternativa eficiente** (mismo F1 con menos parámetros).
+- **C como referencia técnica** (mejor accuracy puntual).
 
 ---
 
@@ -446,8 +462,3 @@ La conclusión anterior "3 capas → overfitting severo" era **falsa**. El overf
 - `resultados/figures/loss_modelo_*.png` → 10 curvas de pérdida.
 - `resultados/figures/confusion_matrix_*.png` → 10 matrices de confusión.
 - `resultados/figures/comparacion_modelos.png` → gráfico comparativo con barras de error (5 métricas).
-
----
-
-**Última actualización**: 20/10/2026  
-**Versión**: 2.0 (Fase C corregida)
