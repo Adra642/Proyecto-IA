@@ -14,7 +14,7 @@ Se han entrenado **10 configuraciones distintas** de red neuronal con **3 semill
 
 3. **El pos_weight ha cambiado el comportamiento del modelo sin cambiar su capacidad de discriminación**. El AUC se mantiene en ~0.865 en todos los modelos, pero el recall sube de ~0.53 a ~0.79 a costa de bajar la precision de ~0.77 a ~0.47. **No es un empeoramiento, es un cambio de objetivo**: priorizar detectar churns sobre no molestar a los que se quedan.
 
-4. **La arquitectura no es la palanca principal en este problema**. **Las diferencias de accuracy entre las configuraciones con 2+ capas son pequeñas (~0.02 puntos en el rango observado), aunque F3 queda por debajo de C fuera del margen ±1 std.** **Lo que sí importa** es el early stopping (corrige overfitting) y el pos_weight (ajusta el trade-off precision/recall).
+4. **La arquitectura no es la palanca principal en este problema**. Las diferencias de accuracy entre las configuraciones con 2+ capas son pequeñas (~0.02 puntos en el rango observado), aunque F3 queda por debajo de C fuera del margen ±1 std. **Lo que sí importa** es el early stopping (corrige overfitting) y el pos_weight (ajusta el trade-off precision/recall).
 
 5. **Los modelos con dropout (E, F3) rinden peor que C**, pero **no hay una comparación limpia que aísle el dropout** (E cambia profundidad y dropout; F3 cambia anchura y dropout). La conclusión sobre el dropout es **tentativa**, no concluyente.
 
@@ -44,22 +44,36 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 ## 3. Diseño experimental: justificación de cada decisión
 
-### 3.1 Rejilla de 10 experimentos
+### 3.1 Rejilla de 10 experimentos (todos los hiperparámetros)
 
-| Exp | Topología | Prof. | Neuronas | Batch | LR | Dropout | Qué aísla |
-|---|---|---|---|---|---|---|---|
-| **A** | [32] | 1 | 32 | 32 | 1e-3 | 0.0 | Baseline mínimo |
-| **B** | [64, 32] | 2 | 96 | 32 | 1e-3 | 0.0 | +1 capa vs A |
-| **C** | [128, 64, 32] | 3 | 224 | 32 | 1e-3 | 0.0 | +1 capa vs B |
-| **E** | [128, 64, 32, 16] | 4 | 240 | 32 | 1e-3 | 0.3 | +1 capa vs C (con dropout) |
-| **F1** | [32, 32, 32] | 3 | 96 | 32 | 1e-3 | 0.0 | Anchura estrecha vs C |
-| **F2** | [64, 64, 64] | 3 | 192 | 32 | 1e-3 | 0.0 | Anchura media vs C |
-| **F3** | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 | Anchura grande vs C (con dropout) |
-| **G** | [64, 32] | 2 | 96 | **64** | 1e-3 | 0.0 | Solo batch vs B |
-| **H1** | [64, 32] | 2 | 96 | 32 | **5e-4** | 0.0 | Solo LR vs B |
-| **H2** | [64, 32] | 2 | 96 | 32 | **1e-4** | 0.0 | Solo LR más bajo vs B |
+| Exp | Topología | Capas ocultas | Neuronas totales | Batch | LR | Dropout | Weight decay | Early stopping | Qué aísla |
+|---|---|---|---|---|---|---|---|---|---|
+| **A** | [32] | 1 | 32 | 32 | 1e-3 | 0.0 | 1e-4 | patience=8 | Baseline mínimo |
+| **B** | [64, 32] | 2 | 96 | 32 | 1e-3 | 0.0 | 1e-4 | patience=8 | +1 capa vs A |
+| **C** | [128, 64, 32] | 3 | 224 | 32 | 1e-3 | 0.0 | 1e-4 | patience=8 | +1 capa vs B |
+| **E** | [128, 64, 32, 16] | 4 | 240 | 32 | 1e-3 | 0.3 | 1e-4 | patience=8 | +1 capa vs C (con dropout) |
+| **F1** | [32, 32, 32] | 3 | 96 | 32 | 1e-3 | 0.0 | 1e-4 | patience=8 | Anchura estrecha vs C |
+| **F2** | [64, 64, 64] | 3 | 192 | 32 | 1e-3 | 0.0 | 1e-4 | patience=8 | Anchura media vs C |
+| **F3** | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 | 1e-4 | patience=8 | Anchura grande vs C (con dropout) |
+| **G** | [64, 32] | 2 | 96 | **64** | 1e-3 | 0.0 | 1e-4 | patience=8 | Solo batch vs B |
+| **H1** | [64, 32] | 2 | 96 | 32 | **5e-4** | 0.0 | 1e-4 | patience=8 | Solo LR vs B |
+| **H2** | [64, 32] | 2 | 96 | 32 | **1e-4** | 0.0 | 1e-4 | patience=8 | Solo LR más bajo vs B |
 
-### 3.2 Cobertura de los requisitos del enunciado
+### 3.2 Configuración común a todos los experimentos
+
+| Parámetro | Valor | Justificación |
+|---|---|---|
+| **Optimizador** | Adam | Estándar para redes pequeñas/medianas; converge rápido sin tuning manual. |
+| **Loss** | BCEWithLogitsLoss | Clasificación binaria; combina sigmoide + binary cross-entropy de forma estable. |
+| **pos_weight** | 3.9 | Calculado como n_neg/n_pos = 6370/1630 ≈ 3.9. Penaliza más los falsos negativos. |
+| **Weight decay** | 1e-4 | Regularización L2 en Adam. Evita pesos gigantes. |
+| **Early stopping** | patience=8 | Para cuando `val_loss` deja de mejorar 8 épocas. Restaura el mejor estado. |
+| **MAX_EPOCHS** | 300 | Tope duro; early stopping decide antes. |
+| **Semillas** | [0, 1, 2] | 3 semillas para media ± std. |
+| **Umbral de decisión** | 0.5 | Estándar. En análisis se discute bajar a 0.35 (no implementado). |
+| **Input dim** | 19 | Tras eliminar `Complain` por leakage (P2). |
+
+### 3.3 Cobertura de los requisitos del enunciado
 
 | Requisito | Cómo se cumple |
 |---|---|
@@ -69,7 +83,7 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 | **Learning rate** | B (1e-3) vs H1 (5e-4) vs H2 (1e-4), solo cambia el LR |
 | **Ablación** | Cada experimento cambia una variable respecto a su referencia |
 
-### 3.3 Limitaciones del diseño experimental
+### 3.4 Limitaciones del diseño experimental
 
 **Importante**: no todas las comparaciones son perfectamente limpias.
 
@@ -78,22 +92,24 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 ---
 
-## 4. Resultados completos (media ± std, 3 semillas)
+## 4. Resultados completos (media ± std, 3 semillas) — con todos los hiperparámetros
 
-| Modelo | Arquitectura | Params | Épocas | Train Loss | Val Loss | Test Loss | Accuracy | Precision | Recall | F1 | AUC |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| A | [32] | 673 | 31 | 0.719 ± 0.001 | 0.746 ± 0.002 | 0.732 ± 0.004 | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
-| B | [64, 32] | 3.393 | 21 | 0.696 ± 0.001 | 0.741 ± 0.006 | 0.733 ± 0.006 | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
-| **C** | [128, 64, 32] | 12.929 | 13 | 0.733 ± 0.006 | 0.743 ± 0.005 | 0.735 ± 0.011 | **0.792 ± 0.012** | **0.495 ± 0.019** | 0.773 ± 0.016 | **0.603 ± 0.019** | 0.864 ± 0.004 |
-| E | [128, 64, 32, 16] | 13.441 | 26 | 0.740 ± 0.016 | 0.742 ± 0.004 | 0.727 ± 0.008 | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
-| F1 | [32, 32, 32] | 2.785 | 18 | 0.719 ± 0.001 | 0.745 ± 0.010 | 0.727 ± 0.011 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
-| **F2** | [64, 64, 64] | 9.665 | 14 | 0.690 ± 0.024 | 0.749 ± 0.006 | 0.732 ± 0.017 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | **0.603 ± 0.007** | 0.867 ± 0.006 |
-| F3 | [128, 128, 128] | 35.713 | 24 | 0.728 ± 0.014 | 0.747 ± 0.004 | 0.724 ± 0.008 | 0.773 ± 0.002 | 0.467 ± 0.002 | **0.802 ± 0.006** | 0.590 ± 0.001 | **0.869 ± 0.003** |
-| G | [64, 32] b=64 | 3.393 | 31 | 0.697 ± 0.013 | 0.742 ± 0.002 | 0.726 ± 0.003 | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
-| H1 | [64, 32] lr=5e-4 | 3.393 | 38 | 0.696 ± 0.016 | 0.743 ± 0.009 | 0.734 ± 0.004 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
-| H2 | [64, 32] lr=1e-4 | 3.393 | 108 | 0.700 ± 0.011 | 0.746 ± 0.012 | 0.732 ± 0.002 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
+| Modelo | Arquitectura | Capas | Neuronas | Params | Batch | LR | Dropout | Épocas | Train Loss | Val Loss | Test Loss | Accuracy | Precision | Recall | F1 | AUC |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A | [32] | 1 | 32 | 673 | 32 | 1e-3 | 0.0 | 31 | 0.719 ± 0.001 | 0.746 ± 0.002 | 0.732 ± 0.004 | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
+| B | [64, 32] | 2 | 96 | 3.393 | 32 | 1e-3 | 0.0 | 21 | 0.696 ± 0.001 | 0.741 ± 0.006 | 0.733 ± 0.006 | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
+| **C** | [128, 64, 32] | 3 | 224 | 12.929 | 32 | 1e-3 | 0.0 | 13 | 0.733 ± 0.006 | 0.743 ± 0.005 | 0.735 ± 0.011 | **0.792 ± 0.012** | **0.495 ± 0.019** | 0.773 ± 0.016 | **0.603 ± 0.019** | 0.864 ± 0.004 |
+| E | [128, 64, 32, 16] | 4 | 240 | 13.441 | 32 | 1e-3 | 0.3 | 26 | 0.740 ± 0.016 | 0.742 ± 0.004 | 0.727 ± 0.008 | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
+| F1 | [32, 32, 32] | 3 | 96 | 2.785 | 32 | 1e-3 | 0.0 | 18 | 0.719 ± 0.001 | 0.745 ± 0.010 | 0.727 ± 0.011 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
+| **F2** | [64, 64, 64] | 3 | 192 | 9.665 | 32 | 1e-3 | 0.0 | 14 | 0.690 ± 0.024 | 0.749 ± 0.006 | 0.732 ± 0.017 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | **0.603 ± 0.007** | 0.867 ± 0.006 |
+| F3 | [128, 128, 128] | 3 | 384 | 35.713 | 32 | 1e-3 | 0.3 | 24 | 0.728 ± 0.014 | 0.747 ± 0.004 | 0.724 ± 0.008 | 0.773 ± 0.002 | 0.467 ± 0.002 | **0.802 ± 0.006** | 0.590 ± 0.001 | **0.869 ± 0.003** |
+| G | [64, 32] | 2 | 96 | 3.393 | 64 | 1e-3 | 0.0 | 31 | 0.697 ± 0.013 | 0.742 ± 0.002 | 0.726 ± 0.003 | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
+| H1 | [64, 32] | 2 | 96 | 3.393 | 32 | 5e-4 | 0.0 | 38 | 0.696 ± 0.016 | 0.743 ± 0.009 | 0.734 ± 0.004 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
+| H2 | [64, 32] | 2 | 96 | 3.393 | 32 | 1e-4 | 0.0 | 108 | 0.700 ± 0.011 | 0.746 ± 0.012 | 0.732 ± 0.002 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
 
-> **Nota**: los valores de std en esta tabla están redondeados a 3 decimales. Los valores sin redondear (usados en la sección 8) son, por ejemplo, F3: std(accuracy) = 0.0015, std(F1) = 0.0006. Los rankings de estabilidad son idénticos con ambos redondeos.
+> **Nota sobre redondeo**: los valores de std en esta tabla están redondeados a 3 decimales. Los valores sin redondear (usados en la sección 8) son, por ejemplo, F3: std(accuracy) = 0.0015, std(F1) = 0.0006. Los rankings de estabilidad son idénticos con ambos redondeos.
+
+> **Nota sobre hiperparámetros**: las columnas Batch, LR y Dropout son explícitas en esta tabla. Weight decay (1e-4) y early stopping (patience=8) son comunes a todos los experimentos (ver tabla 3.2). El umbral de decisión es 0.5 en todos los casos.
 
 ---
 
@@ -128,12 +144,12 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 **Respuesta**: **F2 y C empatan en F1 y son equivalentes. F1 muestra peor accuracy puntual, pero la diferencia con C es marginal y no concluyente con 3 semillas. Los datos sugieren que 192-224 neuronas son suficientes; no se puede afirmar con rigor que 96 sea insuficiente.**
 
-| Modelo | Neuronas | Dropout | Accuracy | F1 | Params | Comparación limpia |
-|---|---|---|---|---|---|---|
-| F1 | 96 | 0.0 | 0.776 ± 0.006 | 0.588 ± 0.004 | 2.785 | ✅ Sí (sin dropout) |
-| F2 | 192 | 0.0 | 0.787 ± 0.009 | **0.603 ± 0.007** | 9.665 | ✅ Sí (sin dropout) |
-| C | 224 | 0.0 | **0.792 ± 0.012** | **0.603 ± 0.019** | 12.929 | ✅ Sí (sin dropout) |
-| F3 | 384 | **0.3** | 0.773 ± 0.002 | 0.590 ± 0.001 | 35.713 | ❌ **No** (también cambia dropout) |
+| Modelo | Neuronas | Dropout | Batch | LR | Accuracy | F1 | Params | Comparación limpia |
+|---|---|---|---|---|---|---|---|---|
+| F1 | 96 | 0.0 | 32 | 1e-3 | 0.776 ± 0.006 | 0.588 ± 0.004 | 2.785 | ✅ Sí (sin dropout) |
+| F2 | 192 | 0.0 | 32 | 1e-3 | 0.787 ± 0.009 | **0.603 ± 0.007** | 9.665 | ✅ Sí (sin dropout) |
+| C | 224 | 0.0 | 32 | 1e-3 | **0.792 ± 0.012** | **0.603 ± 0.019** | 12.929 | ✅ Sí (sin dropout) |
+| F3 | 384 | **0.3** | 32 | 1e-3 | 0.773 ± 0.002 | 0.590 ± 0.001 | 35.713 | ❌ **No** (también cambia dropout) |
 
 **Comparación según criterio ±1 std**:
 
@@ -151,10 +167,10 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 **Respuesta**: **No se observa un efecto relevante del batch en el rendimiento final.**
 
-| Modelo | Batch | Accuracy | F1 | Épocas |
-|---|---|---|---|---|
-| B | 32 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 |
-| G | 64 | 0.788 ± 0.011 | 0.599 ± 0.015 | 31 |
+| Modelo | Batch | Arquitectura | LR | Dropout | Accuracy | F1 | Épocas |
+|---|---|---|---|---|---|---|---|
+| B | 32 | [64, 32] | 1e-3 | 0.0 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 |
+| G | 64 | [64, 32] | 1e-3 | 0.0 | 0.788 ± 0.011 | 0.599 ± 0.015 | 31 |
 
 **Interpretación técnica**:
 
@@ -175,11 +191,17 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 **Respuesta**: **No se observa un efecto relevante del LR en el rendimiento final, pero sí en el tiempo de entrenamiento.**
 
-| Modelo | LR | Accuracy | F1 | Épocas | Tiempo relativo |
-|---|---|---|---|---|---|
-| B | 1e-3 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 | 1x |
-| H1 | 5e-4 | 0.781 ± 0.005 | 0.590 ± 0.008 | 38 | 1.8x |
-| H2 | 1e-4 | 0.785 ± 0.005 | 0.595 ± 0.008 | **108** | **5.1x** |
+| Modelo | LR | Arquitectura | Batch | Dropout | Accuracy | F1 | Épocas | Tiempo relativo |
+|---|---|---|---|---|---|---|---|---|
+| B | 1e-3 | [64, 32] | 32 | 0.0 | 0.782 ± 0.014 | 0.595 ± 0.012 | 21 | 1x |
+| H1 | 5e-4 | [64, 32] | 32 | 0.0 | 0.781 ± 0.005 | 0.590 ± 0.008 | 38 | 1.8x |
+| H2 | 1e-4 | [64, 32] | 32 | 0.0 | 0.785 ± 0.005 | 0.595 ± 0.008 | **108** | **5.1x** |
+
+**Interpretación técnica**:
+
+- **B (LR=1e-3)**: converge en 21 épocas. Es el más rápido.
+- **H1 (LR=5e-4)**: converge en 38 épocas. 1.8x más lento, mismo resultado.
+- **H2 (LR=1e-4)**: converge en 108 épocas. 5.1x más lento, mismo resultado.
 
 **Comparación según criterio ±1 std**: todos los rangos se solapan. **Diferencia no concluyente**.
 
@@ -193,11 +215,11 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 **Respuesta**: **Los modelos con dropout rinden peor, pero no hay una comparación limpia que aísle el dropout.**
 
-| Modelo | Dropout | Arquitectura | F1 | Accuracy | Comparación con C |
-|---|---|---|---|---|---|
-| C | 0.0 | [128, 64, 32] | **0.603** | **0.792** | Referencia |
-| E | 0.3 | [128, 64, 32, 16] | 0.595 | 0.781 | Cambia profundidad Y dropout |
-| F3 | 0.3 | [128, 128, 128] | 0.590 | 0.773 | Cambia anchura Y dropout |
+| Modelo | Dropout | Arquitectura | Batch | LR | F1 | Accuracy | Comparación con C |
+|---|---|---|---|---|---|---|---|
+| C | 0.0 | [128, 64, 32] | 32 | 1e-3 | **0.603** | **0.792** | Referencia |
+| E | 0.3 | [128, 64, 32, 16] | 32 | 1e-3 | 0.595 | 0.781 | Cambia profundidad Y dropout |
+| F3 | 0.3 | [128, 128, 128] | 32 | 1e-3 | 0.590 | 0.773 | Cambia anchura Y dropout |
 
 **Análisis**:
 
@@ -215,28 +237,28 @@ Además, se añadieron dos mejoras mencionadas por el profesor en la reunión:
 
 Cada modelo tiene su `loss_modelo_X.png`. Estas curvas cuentan la historia del entrenamiento.
 
-### 6.1 Modelo A (1 capa, 673 params, 31 épocas)
+### 6.1 Modelo A (1 capa, 673 params, batch 32, lr 1e-3, dropout 0.0, 31 épocas)
 
 - **Train loss**: baja de ~0.99 a ~0.72 en 31 épocas.
 - **Val loss**: baja de ~0.94 a ~0.75 en 31 épocas.
 - **Forma**: train y val bajan juntos y se estabilizan.
 - **Diagnóstico**: **sin overfitting**. El modelo es demasiado simple para memorizar.
 
-### 6.2 Modelo C (3 capas, 12.929 params, 13 épocas)
+### 6.2 Modelo C (3 capas, 12.929 params, batch 32, lr 1e-3, dropout 0.0, 13 épocas)
 
 - **Train loss**: baja de ~0.94 a **~0.73** en 13 épocas (valor final real: 0.733 ± 0.006).
 - **Val loss**: baja de ~0.90 a **~0.74** en 13 épocas.
 - **Forma**: train y val bajan juntos muy rápido.
 - **Diagnóstico**: **sin overfitting**. El early stopping paró antes de que el modelo empezara a memorizar. **Esto es clave**: en la versión anterior, C overfiteaba porque se entrenaba 50 épocas fijas. Ahora para en 13 y generaliza bien.
 
-### 6.3 Modelo H2 (LR=1e-4, 108 épocas)
+### 6.3 Modelo H2 (2 capas, 3.393 params, batch 32, lr 1e-4, dropout 0.0, 108 épocas)
 
 - **Train loss**: baja de ~1.09 a ~0.70 en 108 épocas (valor final real: 0.700 ± 0.011).
 - **Val loss**: baja de ~1.07 a ~0.75 en 108 épocas (valor final real: 0.746 ± 0.012).
 - **Forma**: descenso muy lento y gradual.
 - **Diagnóstico**: **convergencia lenta por LR bajo**. Necesita 5x más épocas que B para llegar al mismo sitio.
 
-### 6.4 Modelo F3 (384 neuronas + dropout, 24 épocas)
+### 6.4 Modelo F3 (3 capas, 35.713 params, batch 32, lr 1e-3, dropout 0.3, 24 épocas)
 
 - **Train loss**: baja de ~0.96 a ~0.73 en 24 épocas (valor final real: 0.728 ± 0.014).
 - **Val loss**: baja de ~0.91 a ~0.75 en 24 épocas (valor final real: 0.747 ± 0.004).
@@ -290,18 +312,18 @@ El AUC mide la probabilidad de que un churn real tenga más probabilidad predich
 
 ## 8. Estabilidad entre semillas: análisis de la desviación estándar
 
-| Modelo | Accuracy std | F1 std | Estabilidad |
-|---|---|---|---|
-| F3 | **0.0015** | **0.0006** | **El más estable en ambas métricas** |
-| H2 | 0.0050 | 0.0076 | Muy estable |
-| H1 | 0.0051 | 0.0081 | Muy estable |
-| F1 | 0.0059 | 0.0038 | Estable |
-| F2 | 0.0093 | 0.0071 | Moderadamente estable |
-| A | 0.0102 | 0.0078 | Moderadamente estable |
-| G | 0.0105 | 0.0145 | Moderadamente estable |
-| C | 0.0124 | **0.0190** | **El menos estable en F1** |
-| B | 0.0137 | 0.0122 | Poco estable |
-| E | **0.0171** | 0.0150 | **El menos estable en accuracy** |
+| Modelo | Dropout | Arquitectura | Accuracy std | F1 std | Estabilidad |
+|---|---|---|---|---|---|
+| F3 | 0.3 | [128, 128, 128] | **0.0015** | **0.0006** | **El más estable en ambas métricas** |
+| H2 | 0.0 | [64, 32] | 0.0050 | 0.0076 | Muy estable |
+| H1 | 0.0 | [64, 32] | 0.0051 | 0.0081 | Muy estable |
+| F1 | 0.0 | [32, 32, 32] | 0.0059 | 0.0038 | Estable |
+| F2 | 0.0 | [64, 64, 64] | 0.0093 | 0.0071 | Moderadamente estable |
+| A | 0.0 | [32] | 0.0102 | 0.0078 | Moderadamente estable |
+| G | 0.0 | [64, 32] b=64 | 0.0105 | 0.0145 | Moderadamente estable |
+| C | 0.0 | [128, 64, 32] | 0.0124 | **0.0190** | **El menos estable en F1** |
+| B | 0.0 | [64, 32] | 0.0137 | 0.0122 | Poco estable |
+| E | 0.3 | [128, 64, 32, 16] | **0.0171** | 0.0150 | **El menos estable en accuracy** |
 
 > **Nota**: los valores de esta tabla son los **sin redondear**. En la tabla de la sección 4 aparecen redondeados a 3 decimales (por ejemplo, F3: 0.002 y 0.001). Los rankings de estabilidad son idénticos con ambos redondeos.
 
@@ -368,7 +390,8 @@ Los modelos con dropout (E, F3) rinden peor, pero también cambian otras variabl
 | Experimentos | 4 (3 arquitecturas + 1 variante) | 10 (7 arquitecturas + 3 variantes) |
 | Semillas | 1 | 3 |
 | Early stopping | No | Sí (patience=8) |
-| Dropout | No usado | Activo en E y F3 |
+| Weight decay | No | 1e-4 |
+| Dropout | No usado | 0.3 en E y F3 |
 | pos_weight | No | 3.9 |
 | AUC | No medido | 0.86-0.87 |
 | Tabla de pérdidas finales | No | Sí (train/val/test) |
