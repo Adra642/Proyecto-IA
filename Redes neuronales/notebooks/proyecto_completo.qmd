@@ -1,0 +1,154 @@
+---
+title: "Predicción del abandono bancario"
+subtitle: "Flujo reproducible de análisis, preparación y modelado"
+author: "Equipo de Redes Neuronales"
+lang: es
+jupyter: python3
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  error: false
+---
+
+## Objetivo
+
+Este documento explica el proyecto completo: qué se quiere predecir, cómo se
+validan los datos, cómo se evita la fuga de información y cómo se entrena y
+evalúa la red neuronal. El problema es una clasificación binaria de clientes
+bancarios: `Exited = 1` indica que el cliente abandonó el banco.
+
+El análisis es ejecutable desde `notebooks/` con Quarto. Los módulos de
+`src/` son la única implementación del flujo; este documento los reutiliza y
+no duplica la lógica de limpieza ni de entrenamiento.
+
+## Estructura y reproducibilidad
+
+| Ruta | Responsabilidad |
+|---|---|
+| `data/Customer-Churn-Records.csv` | Datos originales |
+| `src/preprocessing.py` | Limpieza, partición y `DataModule` |
+| `src/model.py` | Pérdida focal y red residual |
+| `src/callbacks.py` | Selección del umbral por F1 |
+| `src/train_lightning.py` | Entrenamiento final |
+| `src/optuna_search.py` | Búsqueda de hiperparámetros |
+| `tests/` | Pruebas automatizadas |
+
+Instala las dependencias con:
+
+```bash
+python -m pip install -r requirements.txt
+pytest tests/ -q
+quarto render
+```
+
+La semilla `42` fija la partición estratificada y permite comparar ejecuciones.
+El preprocesador se ajusta únicamente con entrenamiento; validación y test solo
+se transforman con estadísticas aprendidas en train.
+
+## Inspección inicial
+
+```{python}
+from pathlib import Path
+import pandas as pd
+
+root = Path("..")
+raw_path = root / "data" / "Customer-Churn-Records.csv"
+raw = pd.read_csv(raw_path)
+print(f"Filas: {len(raw):,}; columnas: {raw.shape[1]}")
+raw.head()
+```
+
+El CSV contiene identificadores administrativos (`RowNumber`, `CustomerId`,
+`Surname`) que no representan una señal válida. También contiene `Complain`,
+una variable que puede ocurrir después de la decisión de abandono. Usarla
+introduciría *data leakage*, por lo que se elimina antes de entrenar.
+
+## Limpieza y calidad
+
+```{python}
+import sys
+sys.path.insert(0, str(root))
+
+from src.preprocessing import (
+    TARGET_COLUMN,
+    ChurnDataModule,
+    clean_raw,
+    load_clean,
+)
+
+clean = load_clean(raw_path=raw_path, cache_path=root / "data" / "processed" / "df_limpio.csv")
+print(f"Dimensiones después de limpiar: {clean.shape}")
+print(clean[TARGET_COLUMN].value_counts(normalize=True).rename("proporción"))
+```
+
+`clean_raw()` valida que el target exista, sea binario, no haya nulos y que el
+contrato esperado conserve 15 columnas. Las comprobaciones fallan de forma
+explícita para evitar entrenamientos con entradas inválidas.
+
+## Partición y transformación
+
+```{python}
+data = ChurnDataModule(clean, batch_size=64)
+data.setup()
+
+print("Dimensión de entrada:", data.input_dim)
+for nombre, indices in data.split_indices.items():
+    tasa = clean.iloc[indices][TARGET_COLUMN].mean()
+    print(f"{nombre:>5}: {len(indices):,} filas; churn={tasa:.3%}")
+```
+
+La partición es 80/10/10 y está estratificada. El `ColumnTransformer` aplica:
+
+- imputación, transformación `log1p`, recorte IQR y `RobustScaler` a variables
+  financieras;
+- imputación, recorte IQR y escalado robusto al resto de variables numéricas;
+- imputación por moda y codificación one-hot a variables categóricas.
+
+El resultado es un `TensorDataset` de `float32`. La dimensión final se obtiene
+del transformador, no se fija manualmente en el código del modelo.
+
+## Arquitectura y entrenamiento
+
+La red usa una capa de entrada, bloques residuales
+`Linear -> BatchNorm -> Mish -> Dropout -> Linear` y una salida logit. La
+pérdida focal da más peso a ejemplos difíciles; también se admite
+`weighted_bce`. Las métricas incluyen precisión, recall, F1 y AUROC.
+
+El callback `F1ThresholdCallback` calcula la curva precision-recall sobre la
+validación y guarda el umbral con mejor F1. Esto evita asumir que `0.5` es
+óptimo en un conjunto desbalanceado. El test usa ese umbral seleccionado sin
+ajustarlo con sus etiquetas.
+
+Entrenamiento final:
+
+```bash
+python -m src.train_lightning --epochs 100 --batch-size 64
+```
+
+Búsqueda de hiperparámetros:
+
+```bash
+python -m src.optuna_search --trials 30 \
+  --results-csv resultados/tables/optuna_trials.csv
+```
+
+Después se puede reentrenar con el mejor trial usando
+`--use-optuna-best --optuna-csv resultados/tables/optuna_trials.csv`.
+Los checkpoints, logs y tablas generadas son artefactos reproducibles y están
+excluidos del control de versiones.
+
+## Pruebas y límites del análisis
+
+Las pruebas comprueban la limpieza, el target, la ausencia de nulos y
+duplicados, la estratificación, la prevención de leakage y las dimensiones de
+los tensores. Para afirmar estabilidad del modelo conviene repetir el
+entrenamiento con varias semillas y comparar F1, recall y AUROC, no solo
+accuracy. Este conjunto de datos es demostrativo: las conclusiones no deben
+interpretarse como una política real de retención de clientes sin validación
+temporal, análisis de sesgos y revisión del coste de falsos negativos.
