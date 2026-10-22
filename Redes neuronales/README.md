@@ -158,6 +158,17 @@ Renderizar el proyecto completo:
 quarto render
 ```
 
+Generar el informe HTML completo de resultados desde la raíz del proyecto:
+
+```bash
+quarto render notebooks/proyecto_completo.qmd
+```
+
+El HTML se genera en `dist/notebooks/proyecto_completo.html`. El informe
+ejecuta el preprocesamiento, entrena un modelo base, realiza cinco trials de
+Optuna, vuelve a entrenar el mejor modelo y presenta métricas y gráficas de
+ambos. Para ampliar la búsqueda, cambia `N_TRIALS` en el propio `.qmd`.
+
 Previsualizar mientras se edita:
 
 ```bash
