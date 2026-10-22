@@ -62,7 +62,7 @@ def _suggest_params(trial: optuna.Trial) -> dict:
 
 def _run_seed(
     params: dict,
-    trial: optuna.Trial,
+    trial: optuna.Trial | None,
     frame,
     seed: int,
     max_epochs: int,
@@ -88,6 +88,23 @@ def _run_seed(
         pos_weight=float(data.class_counts[0] / data.class_counts[1]),
     )
     best_score = BestValidationScore()
+    callbacks = [
+        F1ThresholdCallback(),
+        best_score,
+        EarlyStopping(
+            monitor="val_f1_at_threshold",
+            mode="max",
+            patience=patience,
+        ),
+    ]
+    if trial is not None:
+        callbacks.insert(
+            2,
+            PyTorchLightningPruningCallback(
+                trial,
+                monitor="val_f1_at_threshold",
+            ),
+        )
     trainer = pl.Trainer(
         max_epochs=max_epochs,
         accelerator="auto",
@@ -98,19 +115,7 @@ def _run_seed(
         enable_progress_bar=False,
         enable_model_summary=False,
         logger=False,
-        callbacks=[
-            F1ThresholdCallback(),
-            best_score,
-            PyTorchLightningPruningCallback(
-                trial,
-                monitor="val_f1_at_threshold",
-            ),
-            EarlyStopping(
-                monitor="val_f1_at_threshold",
-                mode="max",
-                patience=patience,
-            ),
-        ],
+        callbacks=callbacks,
     )
     try:
         trainer.fit(model, datamodule=data)
@@ -134,11 +139,23 @@ def objective(
     max_epochs: int = 20,
     patience: int = 5,
 ) -> float:
-    """Evalúa una configuración con varias semillas y devuelve su F1 medio."""
+    """Evalúa una configuración con varias semillas y devuelve su F1 medio.
+
+    Pruning se ejecuta únicamente en la primera semilla. Optuna permite un solo
+    valor intermedio por paso y cada semilla reinicia el contador de epochs.
+    Las demás semillas siguen participando en la puntuación final.
+    """
     params = _suggest_params(trial)
     seed_scores = [
-        _run_seed(params, trial, frame, seed, max_epochs, patience)
-        for seed in seeds
+        _run_seed(
+            params,
+            trial if seed_index == 0 else None,
+            frame,
+            seed,
+            max_epochs,
+            patience,
+        )
+        for seed_index, seed in enumerate(seeds)
     ]
     trial.set_user_attr("seed_scores", seed_scores)
     return float(sum(seed_scores) / len(seed_scores))
@@ -154,8 +171,8 @@ def run_study(
     study_name: str = DEFAULT_STUDY_NAME,
 ) -> optuna.Study:
     """Ejecuta o reanuda una búsqueda Optuna persistida en SQLite."""
-    if n_trials < 1:
-        raise ValueError("n_trials debe ser positivo")
+    if n_trials < 0:
+        raise ValueError("n_trials no puede ser negativo")
     if not seeds:
         raise ValueError("seeds no puede estar vacío")
     if max_epochs < 1 or patience < 1:
@@ -174,16 +191,17 @@ def run_study(
         ),
         load_if_exists=True,
     )
-    study.optimize(
-        lambda trial: objective(
-            trial,
-            frame,
-            seeds=seeds,
-            max_epochs=max_epochs,
-            patience=patience,
-        ),
-        n_trials=n_trials,
-    )
+    if n_trials > 0:
+        study.optimize(
+            lambda trial: objective(
+                trial,
+                frame,
+                seeds=seeds,
+                max_epochs=max_epochs,
+                patience=patience,
+            ),
+            n_trials=n_trials,
+        )
     return study
 
 

@@ -507,8 +507,9 @@ participa en la búsqueda.
 ```{python}
 import os
 
-OPTUNA_ENABLED = os.environ.get("OPTUNA_ENABLED", "1") == "1"
-N_TRIALS = int(os.environ.get("OPTUNA_TRIALS", "30"))
+N_TRIALS = int(os.environ.get("OPTUNA_TRIALS", "0"))
+OPTUNA_ENABLED = True
+OPTUNA_RUN = OPTUNA_ENABLED and N_TRIALS > 0
 OPTUNA_EPOCHS = 20
 OPTUNA_PATIENCE = 5
 OPTUNA_SEEDS = [42, 123, 2026]
@@ -524,7 +525,7 @@ mejora estadística.
 Para ejecutar o reanudar la búsqueda desde la raíz del proyecto se puede usar:
 
 ```bash
-OPTUNA_ENABLED=1 OPTUNA_TRIALS=30 \
+OPTUNA_TRIALS=30 \
   quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
 ```
 
@@ -533,10 +534,11 @@ Para añadir más trials basta con volver a ejecutar el comando aumentando
 `OPTUNA_TRIALS`; para empezar un estudio limpio se debe eliminar esa base
 SQLite antes de renderizar.
 
-Para ejecutar únicamente el modelo base, sin importar ni ejecutar Optuna:
+Si se omite `OPTUNA_TRIALS` o se establece en `0`, no se crean trials nuevos.
+El informe carga el mejor trial disponible en la base y lo compara con el modelo
+base. Si la base no contiene trials completados, solo se muestra el modelo base.
 
 ```bash
-OPTUNA_ENABLED=0 \
   quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
 ```
 
@@ -559,12 +561,19 @@ if OPTUNA_ENABLED:
         patience=OPTUNA_PATIENCE,
         study_name=OPTUNA_STUDY_NAME,
     )
+    completed_trials = [
+        trial for trial in study.trials if trial.value is not None
+    ]
+    OPTUNA_RUN = bool(completed_trials)
     trials_table = study.trials_dataframe(
         attrs=("number", "value", "state", "params", "user_attrs", "duration")
     )
     display(trials_table)
-    print(f"Mejor F1 de validación: {study.best_value:.4f}")
-    print(f"Mejor trial: {study.best_trial.number}")
+    if OPTUNA_RUN:
+        print(f"Mejor F1 de validación: {study.best_value:.4f}")
+        print(f"Mejor trial: {study.best_trial.number}")
+    elif N_TRIALS == 0:
+        print("No hay trials completados en la base de Optuna.")
     print(f"Base de datos SQLite: {OPTUNA_DB}")
 
     trial_numbers = [
@@ -589,13 +598,21 @@ if OPTUNA_ENABLED:
             xlabel="Número de trial",
             ylabel="F1 de validación",
         )
-        ax.set_xticks(trial_numbers)
+        max_x_ticks = 12
+        if len(trial_numbers) <= max_x_ticks:
+            visible_trial_ticks = trial_numbers
+        else:
+            tick_indices = np.linspace(
+                0, len(trial_numbers) - 1, max_x_ticks, dtype=int
+            )
+            visible_trial_ticks = [trial_numbers[index] for index in tick_indices]
+        ax.set_xticks(visible_trial_ticks)
         ax.legend()
         ax.spines[["top", "right"]].set_visible(False)
         plt.tight_layout()
         plt.show()
-else:
-    print("Optuna desactivado: se evaluará únicamente el modelo base.")
+    else:
+        print("No hay resultado de Optuna para comparar; se evaluará únicamente el modelo base.")
 ```
 
 ## 8. Análisis de resultados optimizados
@@ -607,7 +624,7 @@ interpretarse con cautela porque la configuración se seleccionó usando
 validación.
 
 ```{python}
-if OPTUNA_ENABLED:
+if OPTUNA_RUN:
     best_params = dict(study.best_params)
     optimized = fit_and_evaluate(best_params, "optuna", seed=42)
     best_seed_scores = study.best_trial.user_attrs.get("seed_scores", [])
@@ -621,7 +638,7 @@ else:
         index=["Modelo base"],
     )
 display(comparison.round(4))
-if OPTUNA_ENABLED:
+if OPTUNA_RUN:
     print(f"Parámetros seleccionados: {best_params}")
     print(f"F1 de validación por semilla: {best_seed_scores}")
     if best_seed_scores:
@@ -636,7 +653,7 @@ validación, no sobre el conjunto de test.
 
 ```{python}
 comparison_results = [(baseline, "Modelo base")]
-if OPTUNA_ENABLED:
+if OPTUNA_RUN:
     comparison_results.append((optimized, "Modelo optimizado"))
 
 fig, axes = plt.subplots(2, 2, figsize=(11, 9))
@@ -695,7 +712,7 @@ base_auc = threshold_metrics(baseline)["AUROC"]
 
 print(f"F1 de test — modelo base: {base_f1:.4f}")
 print(f"AUROC de test — modelo base: {base_auc:.4f}")
-if OPTUNA_ENABLED:
+if OPTUNA_RUN:
     tuned_f1 = threshold_metrics(optimized)["F1"]
     tuned_auc = threshold_metrics(optimized)["AUROC"]
     delta_f1 = tuned_f1 - base_f1

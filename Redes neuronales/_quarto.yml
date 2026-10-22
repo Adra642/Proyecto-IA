@@ -4,7 +4,7 @@ project:
 
 execute:
   execute-dir: project
-  freeze: auto
+  freeze: false
 
 format:
   html:
