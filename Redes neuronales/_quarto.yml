@@ -3,4 +3,11 @@ project:
   output-dir: dist
 
 execute:
-  execute-dir: file
+  execute-dir: project
+  freeze: false
+
+format:
+  html:
+    toc: true
+    code-fold: true
+    html-math-method: katex

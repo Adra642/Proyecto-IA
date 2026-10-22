@@ -1,0 +1,741 @@
+---
+title: "Informe de resultados: predicción del abandono bancario"
+subtitle: "Preparación de datos, red neuronal y optimización de hiperparámetros"
+author: "Equipo de Redes Neuronales"
+date: today
+lang: es
+jupyter: python3
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Mostrar código"
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  error: false
+---
+
+## Introducción
+
+Este informe documenta de forma reproducible el flujo del proyecto para
+clasificar el abandono de clientes bancarios (`Exited = 1`). Se ejecuta desde
+la raíz del proyecto con `quarto render notebooks/proyecto_completo.qmd`.
+Cada bloque de código puede desplegarse con **Mostrar código**; las tablas y
+gráficas se generan a partir de los datos y de los modelos entrenados al
+renderizar el documento.
+
+La evaluación conserva una partición estratificada de entrenamiento,
+validación y test. El preprocesador se ajusta solo con entrenamiento, la
+selección del umbral usa validación y el conjunto de test se reserva para la
+medición final. Optuna maximiza F1 de validación; por ello, sus resultados no
+se presentan como una estimación independiente de generalización.
+
+| Componente | Implementación |
+|---|---|
+| Datos y limpieza | `data/raw/Customer-Churn-Records.csv`, `src/preprocessing.py` |
+| División y transformación | `ChurnDataModule` en `src/preprocessing.py` |
+| Red neuronal y pérdidas | `src/model.py` |
+| Umbral de decisión | `F1ThresholdCallback` en `src/callbacks.py` |
+| Entrenamiento final | `src/train_lightning.py` |
+| Búsqueda de hiperparámetros | `src/optuna_search.py` |
+
+## 1. Carga y limpieza de datos
+
+Se lee el CSV original y se reutiliza `load_clean()` para aplicar las
+validaciones del proyecto. El proceso elimina identificadores administrativos
+(`RowNumber`, `CustomerId`, `Surname`), valida el target binario y verifica
+que no haya valores nulos y que se mantenga el contrato de 15 columnas.
+`Complain` se excluye posteriormente del modelado para prevenir fuga de
+información.
+
+```{python}
+from pathlib import Path
+import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytorch_lightning as pl
+import seaborn as sns
+import torch
+
+from sklearn.metrics import (
+    auc,
+    confusion_matrix,
+    precision_recall_curve,
+    roc_curve,
+)
+
+ROOT = Path.cwd()
+if not (ROOT / "src").is_dir():
+    ROOT = Path.cwd().parent
+if not (ROOT / "src").is_dir():
+    raise FileNotFoundError("No se encuentra la carpeta src/ desde el directorio de ejecución.")
+sys.path.insert(0, str(ROOT))
+
+from src.callbacks import F1ThresholdCallback
+from src.model import ChurnLightningModule
+from src.preprocessing import ChurnDataModule, TARGET_COLUMN, load_clean, load_raw
+
+RAW_PATH = ROOT / "data" / "raw" / "Customer-Churn-Records.csv"
+CLEAN_PATH = ROOT / "data" / "processed" / "df_limpio.csv"
+raw = load_raw(RAW_PATH)
+df_clean = load_clean(raw_path=RAW_PATH, cache_path=CLEAN_PATH)
+
+print(f"Datos originales: {raw.shape[0]:,} filas × {raw.shape[1]} columnas")
+print(f"Datos limpios: {df_clean.shape[0]:,} filas × {df_clean.shape[1]} columnas")
+print(f"Columnas eliminadas durante la limpieza: {sorted(set(raw.columns) - set(df_clean.columns))}")
+```
+
+La limpieza no elimina registros ni modifica la etiqueta: descarta campos
+identificativos y comprueba las condiciones esperadas antes de continuar.
+
+## 2. Inspección del dataset limpio
+
+Se revisan ejemplos, tipos, valores ausentes y duplicados. Las variables
+categóricas y numéricas quedan disponibles para el transformador; `Exited` es
+la etiqueta que se separa de las características.
+
+```{python}
+display(df_clean.head(8))
+display(
+    pd.DataFrame(
+        {
+            "tipo": df_clean.dtypes.astype(str),
+            "valores_nulos": df_clean.isna().sum(),
+            "valores_unicos": df_clean.nunique(),
+        }
+    )
+)
+print(f"Registros duplicados: {df_clean.duplicated().sum():,}")
+print(f"Columnas: {', '.join(df_clean.columns)}")
+```
+
+No se realiza una imputación global sobre todos los registros. Si hubiera
+valores ausentes, los imputadores del pipeline aprenderían sus parámetros
+únicamente a partir del conjunto de entrenamiento.
+
+## 3. Distribución de la variable objetivo
+
+La clase positiva representa a los clientes que abandonaron el banco. La
+distribución permite identificar el desbalance que motiva el uso de métricas
+como F1, recall y AUROC, además de la selección del umbral.
+
+```{python}
+class_counts = df_clean[TARGET_COLUMN].value_counts().reindex([0, 1], fill_value=0)
+class_rates = class_counts / class_counts.sum()
+print(f"Tasa de abandono: {class_rates.loc[1]:.2%}")
+display(
+    pd.DataFrame(
+        {
+            "Clase": ["Permanece (0)", "Abandona (1)"],
+            "clientes": class_counts,
+            "porcentaje": (class_rates * 100).round(2),
+        },
+        index=[0, 1],
+    ).rename(columns={"clientes": "Clientes", "porcentaje": "Porcentaje (%)"})
+)
+
+fig, ax = plt.subplots(figsize=(7, 4))
+bars = ax.bar(
+    ["Permanece (0)", "Abandona (1)"],
+    class_counts.values,
+    color=["#4472C4", "#ED7D31"],
+)
+ax.set(title="Distribución de la variable objetivo", ylabel="Número de clientes")
+ax.bar_label(bars, labels=[f"{n:,}\n({p:.1%})" for n, p in zip(class_counts, class_rates)])
+ax.spines[["top", "right"]].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+## 4. División y preparación del modelo (DataModule)
+
+`ChurnDataModule` divide los datos de forma estratificada (80/10/10), retira
+`Complain` de las características y ajusta el `ColumnTransformer` solo con
+entrenamiento. Las variables financieras reciben `log1p`, recorte IQR y
+escalado robusto; el resto de numéricas se recorta y escala, y las categóricas
+se imputan y codifican mediante *one-hot encoding*.
+
+```{python}
+data = ChurnDataModule(df_clean, batch_size=64)
+data.setup()
+
+split_rows = []
+for split_name, indices in data.split_indices.items():
+    labels = df_clean.iloc[indices][TARGET_COLUMN]
+    split_rows.append(
+        {
+            "Partición": {"train": "Entrenamiento", "val": "Validación", "test": "Test"}[split_name],
+            "Registros": len(indices),
+            "Porcentaje (%)": len(indices) / len(df_clean) * 100,
+            "Tasa de abandono (%)": labels.mean() * 100,
+        }
+    )
+display(pd.DataFrame(split_rows).round(2))
+print(f"Dimensión de entrada tras el preprocesamiento: {data.input_dim}")
+print(f"Columnas en el DataModule: {data.frame.shape[1]} (incluye la etiqueta)")
+print(f"Complain está excluida: {'Complain' not in data.frame.columns}")
+```
+
+| Valor | Explicación | Fórmula |
+|---|---|---|
+| `registros` | Número de filas asignadas a la partición. | Conteo de filas |
+| `porcentaje` | Peso de la partición sobre el conjunto completo. | `registros / total × 100` |
+| `tasa de abandono` | Porcentaje de clientes con `Exited = 1`. | `abandono / registros × 100` |
+
+El resultado se convierte a tensores `float32`. La partición fija con semilla
+42 facilita la comparación entre ejecuciones, aunque no sustituye una
+validación con varias semillas o una evaluación temporal.
+
+### Pruebas automatizadas
+
+El proyecto incluye `tests/test_preprocessing.py`, que se ejecuta con
+`pytest`. Las nueve pruebas comprueban que se eliminan los identificadores,
+que el target es binario, que no hay nulos ni duplicados, que las tres
+particiones conservan una tasa de abandono similar, que las formas de los
+tensores coinciden y que `Complain` no llega a las características. También
+verifican que la dimensión final de entrada es 19. Estas pruebas detectan
+regresiones en la preparación de datos antes de iniciar un entrenamiento.
+
+## 5. Exploración, entrenamiento y test del modelo
+
+El clasificador implementado es una red residual para datos tabulares: capa
+inicial, bloques `Linear → BatchNorm → Mish → Dropout → Linear` con conexión
+residual y una salida logit. La pérdida focal enfatiza ejemplos difíciles; la
+implementación también admite entropía cruzada binaria ponderada.
+
+Para que el informe pueda ejecutarse en un tiempo razonable, se limita el
+entrenamiento de cada modelo a 30 épocas con parada temprana (paciencia 6).
+Se guarda y evalúa el checkpoint con mayor F1 en validación. El callback
+selecciona el umbral exclusivamente con validación y ese umbral se aplica al
+test sin ajustarlo con sus etiquetas.
+
+### Formato de los entrenamientos históricos
+
+Los experimentos anteriores se organizaron como una ablación: cada variante
+modifica una característica respecto a su referencia. Esta tabla conserva ese
+formato para que las configuraciones de la sección 6 puedan interpretarse sin
+confundir una diferencia de arquitectura con una diferencia de optimización.
+El modelo **C** es la referencia histórica y se muestra en negrita.
+
+| Exp. | Topología | Capas ocultas | Neuronas totales | Batch | LR | Dropout |
+|---|---|---:|---:|---:|---:|---:|
+| A | [32] | 1 | 32 | 32 | 1e-3 | 0.0 |
+| B | [64, 32] | 2 | 96 | 32 | 1e-3 | 0.0 |
+| **C (base histórico)** | **[128, 64, 32]** | **3** | **224** | **32** | **1e-3** | **0.0** |
+| E | [128, 64, 32, 16] | 4 | 240 | 32 | 1e-3 | 0.3 |
+| F1 | [32, 32, 32] | 3 | 96 | 32 | 1e-3 | 0.0 |
+| F2 | [64, 64, 64] | 3 | 192 | 32 | 1e-3 | 0.0 |
+| F3 | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 |
+| G | [64, 32] | 2 | 96 | 64 | 1e-3 | 0.0 |
+| H1 | [64, 32] | 2 | 96 | 32 | 5e-4 | 0.0 |
+| H2 | [64, 32] | 2 | 96 | 32 | 1e-4 | 0.0 |
+
+La tabla histórica se presenta como referencia experimental. El bloque de
+código que sigue entrena el modelo residual actual del proyecto; no se
+reconstruyen automáticamente las arquitecturas antiguas porque pertenecen a
+una implementación anterior. Por tanto, la comparación histórica de la
+sección 6 y la evaluación ejecutable del modelo actual deben leerse como dos
+fuentes complementarias.
+
+```{python}
+from pathlib import Path
+import tempfile
+
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+
+MAX_EPOCHS = 30
+EARLY_STOPPING_PATIENCE = 6
+
+
+class TrainingHistory(pl.Callback):
+    def __init__(self):
+        self.rows = []
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+        metrics = trainer.callback_metrics
+
+        def scalar(name):
+            value = metrics.get(name)
+            return float(value.detach().cpu()) if value is not None else np.nan
+
+        train_loss = scalar("train_loss")
+        if np.isnan(train_loss):
+            train_loss = scalar("train_loss_epoch")
+        self.rows.append(
+            {
+                "época": trainer.current_epoch + 1,
+                "pérdida_entrenamiento": train_loss,
+                "pérdida_validación": scalar("val_loss"),
+                "F1_validación": scalar("val_f1_at_threshold"),
+            }
+        )
+
+
+def make_model(input_dim, params, pos_weight):
+    return ChurnLightningModule(
+        input_dim=input_dim,
+        hidden_dim=int(params.get("hidden_dim", 128)),
+        num_blocks=int(params.get("num_blocks", 3)),
+        learning_rate=float(params.get("learning_rate", 1e-3)),
+        weight_decay=float(params.get("weight_decay", 1e-4)),
+        dropout=float(params.get("dropout", 0.25)),
+        loss_name=params.get("loss_name", "focal"),
+        focal_gamma=float(params.get("focal_gamma", 2.0)),
+        focal_alpha=float(params.get("focal_alpha", 0.75)),
+        pos_weight=pos_weight,
+    )
+
+
+def fit_and_evaluate(params, run_name, seed=42):
+    pl.seed_everything(seed, workers=True)
+    batch_size = int(params.get("batch_size", 64))
+    module = ChurnDataModule(df_clean, batch_size=batch_size, num_workers=0)
+    module.setup()
+    pos_weight = float(module.class_counts[0] / module.class_counts[1])
+    model = make_model(module.input_dim, params, pos_weight)
+    history = TrainingHistory()
+
+    with tempfile.TemporaryDirectory(prefix=f"churn_{run_name}_") as temporary_dir:
+        checkpoint = ModelCheckpoint(
+            dirpath=temporary_dir,
+            monitor="val_f1_at_threshold",
+            mode="max",
+            save_top_k=1,
+            filename="mejor-{epoch:02d}",
+        )
+        trainer = pl.Trainer(
+            max_epochs=MAX_EPOCHS,
+            accelerator="auto",
+            devices=1,
+            deterministic=True,
+            num_sanity_val_steps=0,
+            enable_progress_bar=False,
+            enable_model_summary=False,
+            logger=False,
+            callbacks=[
+                F1ThresholdCallback(),
+                checkpoint,
+                EarlyStopping(
+                    monitor="val_f1_at_threshold",
+                    mode="max",
+                    patience=EARLY_STOPPING_PATIENCE,
+                ),
+                history,
+            ],
+        )
+        trainer.fit(model, datamodule=module)
+        if not checkpoint.best_model_path:
+            raise RuntimeError(f"No se generó un checkpoint válido para {run_name}.")
+        best_model = ChurnLightningModule.load_from_checkpoint(checkpoint.best_model_path)
+        trainer.validate(best_model, datamodule=module, verbose=False)
+        test_metrics = trainer.test(best_model, datamodule=module, verbose=False)[0]
+        threshold = float(best_model.threshold)
+
+        test_x, test_y = module.test_dataset.tensors
+        best_model.eval()
+        with torch.inference_mode():
+            probabilities = torch.sigmoid(
+                best_model(test_x.to(next(best_model.parameters()).device))
+            ).cpu().numpy().ravel()
+
+    return {
+        "nombre": run_name,
+        "modelo": best_model,
+        "data": module,
+        "historial": pd.DataFrame(history.rows),
+        "umbral": threshold,
+        "y_test": test_y.numpy().ravel().astype(int),
+        "probabilidades": probabilities,
+        "metricas": test_metrics,
+    }
+
+
+baseline = fit_and_evaluate({}, "base")
+print(f"Épocas registradas: {len(baseline['historial'])}")
+print(f"Umbral elegido en validación: {baseline['umbral']:.4f}")
+print(f"Métricas de test: {baseline['metricas']}")
+```
+
+La siguiente gráfica muestra las pérdidas y el F1 de validación del modelo
+base. La selección del checkpoint y la parada temprana utilizan el F1 de
+validación; no se emplea el test para tomar decisiones de entrenamiento.
+
+```{python}
+history_base = baseline["historial"]
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+axes[0].plot(history_base["época"], history_base["pérdida_entrenamiento"], label="Entrenamiento")
+axes[0].plot(history_base["época"], history_base["pérdida_validación"], label="Validación")
+axes[0].set(title="Pérdida por época (modelo base)", xlabel="Época", ylabel="Pérdida")
+axes[0].legend()
+axes[1].plot(history_base["época"], history_base["F1_validación"], color="#ED7D31")
+axes[1].set(title="F1 de validación (umbral ajustado)", xlabel="Época", ylabel="F1")
+for ax in axes:
+    ax.spines[["top", "right"]].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+| Elemento | Explicación | Lectura |
+|---|---|---|
+| Pérdida de entrenamiento | Línea azul: error medio en los datos usados para ajustar el modelo. | Menor es mejor |
+| Pérdida de validación | Línea naranja: error medio en datos no usados para actualizar los pesos. | Menor es mejor; una separación creciente puede indicar sobreajuste |
+| F1 de validación | Línea naranja del panel derecho, calculada con el umbral ajustado en cada época. | Mayor y estable ayuda a elegir el checkpoint |
+
+## 6. Análisis de resultados del modelo base
+
+Se informan métricas del conjunto de test con el umbral elegido en validación.
+La matriz de confusión permite apreciar falsos positivos y falsos negativos;
+las curvas ROC y precisión-recall resumen el comportamiento al variar el
+umbral. Al estar desbalanceadas las clases, la exactitud por sí sola no es
+suficiente para valorar el modelo.
+
+### Comparación con arquitecturas anteriores
+
+La siguiente tabla reúne los experimentos realizados antes de consolidar el
+flujo actual. Se conservan únicamente las métricas que produce el modelo base
+actual, con el mismo orden y formato. Los valores históricos disponibles son medias ± desviaciones estándar.
+
+| Modelo | accuracy | precision | recall | F1 | AUROC |
+|---|---:|---:|---:|---:|---:|
+| A | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
+| B | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
+| **C (base histórico)** | **0.792 ± 0.012** | **0.495 ± 0.019** | **0.773 ± 0.016** | **0.603 ± 0.019** | **0.864 ± 0.004** |
+| E | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
+| F1 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
+| F2 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | 0.603 ± 0.007 | 0.867 ± 0.006 |
+| F3 | 0.773 ± 0.002 | 0.467 ± 0.002 | 0.802 ± 0.006 | 0.590 ± 0.001 | 0.869 ± 0.003 |
+| G | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
+| H1 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
+| H2 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
+
+```{python}
+def threshold_metrics(result):
+    y_true = result["y_test"]
+    y_pred = (result["probabilidades"] >= result["umbral"]).astype(int)
+    matrix = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    scores = result["metricas"]
+    return {
+        "accuracy": scores["test_accuracy"],
+        "precision": scores["test_precision"],
+        "recall": scores["test_recall"],
+        "F1": scores["test_f1"],
+        "AUROC": scores["test_auroc"],
+        "umbral": result["umbral"],
+        "TN": matrix[0, 0],
+        "FP": matrix[0, 1],
+        "FN": matrix[1, 0],
+        "TP": matrix[1, 1],
+    }
+
+
+base_summary = threshold_metrics(baseline)
+display(pd.DataFrame([base_summary], index=["Modelo base"]).round(4))
+
+```
+
+| Valor | Explicación | Fórmula |
+|---|---|---|
+| `Train/Val/Test Loss` | Pérdida media en entrenamiento, validación y test. | Pérdida media del conjunto |
+| `Accuracy` | Proporción total de predicciones correctas. | `(TP + TN) / (TP + TN + FP + FN)` |
+| `Precision` | Proporción de predicciones de abandono que son correctas. | `TP / (TP + FP)` |
+| `Recall` | Proporción de abandonos reales que se detectan. | `TP / (TP + FN)` |
+| `F1` | Equilibrio entre precision y recall mediante su media armónica. | `2 · Precision · Recall / (Precision + Recall)` |
+| `AUC` / `AUROC` | Área bajo la curva ROC; resume la capacidad de ordenar las clases en todos los umbrales. | `∫ TPR d(FPR)` |
+| `TP`, `TN`, `FP`, `FN` | Verdadero positivo, verdadero negativo, falso positivo y falso negativo. | Conteos de la matriz de confusión |
+| `±` | Variabilidad entre las ejecuciones disponibles. | `media ± desviación estándar` |
+
+```{python}
+y_base = baseline["y_test"]
+p_base = baseline["probabilidades"]
+pred_base = (p_base >= baseline["umbral"]).astype(int)
+base_matrix = confusion_matrix(y_base, pred_base, labels=[0, 1])
+fpr_base, tpr_base, _ = roc_curve(y_base, p_base)
+precision_base, recall_base, _ = precision_recall_curve(y_base, p_base)
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+sns.heatmap(
+    base_matrix,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    cbar=False,
+    xticklabels=["Permanece", "Abandona"],
+    yticklabels=["Permanece", "Abandona"],
+    ax=axes[0],
+)
+axes[0].set(title="Matriz de confusión (base)", xlabel="Predicción", ylabel="Valor real")
+axes[1].plot(fpr_base, tpr_base, label=f"AUROC = {base_summary['AUROC']:.3f}")
+axes[1].plot([0, 1], [0, 1], linestyle="--", color="gray")
+axes[1].set(title="Curva ROC (test)", xlabel="Tasa de falsos positivos", ylabel="Tasa de verdaderos positivos")
+axes[1].legend()
+axes[2].plot(recall_base, precision_base, color="#ED7D31")
+axes[2].set(title="Precisión-recall (test)", xlabel="Recall", ylabel="Precisión")
+for ax in axes[1:]:
+    ax.spines[["top", "right"]].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+| Elemento | Explicación | Fórmula o lectura |
+|---|---|---|
+| Matriz de confusión | Filas: clase real; columnas: clase predicha. La diagonal son aciertos y el resto errores. | Celdas `TN`, `FP`, `FN`, `TP` |
+| Curva ROC, eje X | Tasa de falsos positivos. | `FPR = FP / (FP + TN)` |
+| Curva ROC, eje Y | Tasa de verdaderos positivos, equivalente a recall. | `TPR = TP / (TP + FN)` |
+| Diagonal ROC | Rendimiento de un clasificador aleatorio. | `TPR = FPR` |
+| Curva precisión-recall | Relación entre los abandonos detectados y la fiabilidad de las predicciones positivas. | Eje X: `Recall`; eje Y: `Precision` |
+| Área mayor | Mejor separación ROC o mejor equilibrio entre detectar abandonos y limitar falsas alarmas. | Mayor `AUC` o mayor área PR |
+
+Las cifras de test corresponden a una única partición aleatoria estratificada.
+Son una referencia para este experimento, no una garantía de rendimiento en
+clientes futuros.
+
+## 7. Optimización y ajustes al modelo con Optuna
+
+La búsqueda explora los hiperparámetros del modelo y la configuración del
+entrenamiento, con el mismo conjunto de validación y la misma métrica objetivo
+(F1 con umbral seleccionado en validación). Cada trial se evalúa con tres
+semillas y se puntúa con su F1 medio, lo que reduce la dependencia de una única
+inicialización. Optuna guarda el estudio en SQLite para poder reanudarlo y usa
+pruning para detener configuraciones poco prometedoras. El conjunto de test no
+participa en la búsqueda.
+
+```{python}
+import os
+
+N_TRIALS = int(os.environ.get("OPTUNA_TRIALS", "0"))
+OPTUNA_ENABLED = True
+OPTUNA_RUN = OPTUNA_ENABLED and N_TRIALS > 0
+OPTUNA_EPOCHS = 20
+OPTUNA_PATIENCE = 5
+OPTUNA_SEEDS = [42, 123, 2026]
+OPTUNA_STUDY_NAME = "churn_nn_qmd"
+OPTUNA_DB = ROOT / "artifacts" / "optuna" / "optuna.db"
+```
+
+Cuando Optuna está habilitado, la gráfica muestra la evolución del mejor F1 de
+validación a medida que se completan los trials. Los trials podados o fallidos
+no se incluyen. La búsqueda no se interpreta como exhaustiva ni como prueba de
+mejora estadística.
+
+Para ejecutar o reanudar la búsqueda desde la raíz del proyecto se puede usar:
+
+```bash
+OPTUNA_TRIALS=30 \
+  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+```
+
+La base `Redes neuronales/artifacts/optuna/optuna.db` conserva los trials anteriores.
+Para añadir más trials basta con volver a ejecutar el comando aumentando
+`OPTUNA_TRIALS`; para empezar un estudio limpio se debe eliminar esa base
+SQLite antes de renderizar.
+
+Si se omite `OPTUNA_TRIALS` o se establece en `0`, no se crean trials nuevos.
+El informe carga el mejor trial disponible en la base y lo compara con el modelo
+base. Si la base no contiene trials completados, solo se muestra el modelo base.
+
+```bash
+  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+```
+
+```{python}
+study = None
+optimized = None
+best_params = {}
+best_seed_scores = []
+trial_values = []
+
+if OPTUNA_ENABLED:
+    from src.optuna_search import run_study
+
+    study = run_study(
+        frame=df_clean,
+        database_path=OPTUNA_DB,
+        n_trials=N_TRIALS,
+        seeds=OPTUNA_SEEDS,
+        max_epochs=OPTUNA_EPOCHS,
+        patience=OPTUNA_PATIENCE,
+        study_name=OPTUNA_STUDY_NAME,
+    )
+    completed_trials = [
+        trial for trial in study.trials if trial.value is not None
+    ]
+    OPTUNA_RUN = bool(completed_trials)
+    trials_table = study.trials_dataframe(
+        attrs=("number", "value", "state", "params", "user_attrs", "duration")
+    )
+    display(trials_table)
+    if OPTUNA_RUN:
+        print(f"Mejor F1 de validación: {study.best_value:.4f}")
+        print(f"Mejor trial: {study.best_trial.number}")
+    elif N_TRIALS == 0:
+        print("No hay trials completados en la base de Optuna.")
+    print(f"Base de datos SQLite: {OPTUNA_DB}")
+
+    trial_numbers = [
+        trial.number + 1 for trial in study.trials if trial.value is not None
+    ]
+    trial_values = [
+        trial.value for trial in study.trials if trial.value is not None
+    ]
+    if trial_values:
+        best_so_far = np.maximum.accumulate(trial_values)
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.scatter(trial_numbers, trial_values, color="#4472C4", label="F1 del trial")
+        ax.plot(
+            trial_numbers,
+            best_so_far,
+            color="#ED7D31",
+            marker="o",
+            label="Mejor hasta el trial",
+        )
+        ax.set(
+            title="Optimización de Optuna sobre validación",
+            xlabel="Número de trial",
+            ylabel="F1 de validación",
+        )
+        max_x_ticks = 12
+        if len(trial_numbers) <= max_x_ticks:
+            visible_trial_ticks = trial_numbers
+        else:
+            tick_indices = np.linspace(
+                0, len(trial_numbers) - 1, max_x_ticks, dtype=int
+            )
+            visible_trial_ticks = [trial_numbers[index] for index in tick_indices]
+        ax.set_xticks(visible_trial_ticks)
+        ax.legend()
+        ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
+        plt.show()
+    else:
+        print("No hay resultado de Optuna para comparar; se evaluará únicamente el modelo base.")
+```
+
+## 8. Análisis de resultados optimizados
+
+El mejor conjunto de hiperparámetros se vuelve a entrenar desde cero y se
+evalúa en el mismo conjunto de test que el modelo base. Esta comparación
+mantiene las observaciones de test constantes; la mejora observada debe
+interpretarse con cautela porque la configuración se seleccionó usando
+validación.
+
+```{python}
+if OPTUNA_RUN:
+    best_params = dict(study.best_params)
+    optimized = fit_and_evaluate(best_params, "optuna", seed=42)
+    best_seed_scores = study.best_trial.user_attrs.get("seed_scores", [])
+    comparison = pd.DataFrame(
+        [threshold_metrics(baseline), threshold_metrics(optimized)],
+        index=["Modelo base", "Modelo optimizado"],
+    )
+else:
+    comparison = pd.DataFrame(
+        [threshold_metrics(baseline)],
+        index=["Modelo base"],
+    )
+display(comparison.round(4))
+if OPTUNA_RUN:
+    print(f"Parámetros seleccionados: {best_params}")
+    print(f"F1 de validación por semilla: {best_seed_scores}")
+    if best_seed_scores:
+        print(f"F1 medio de validación: {np.mean(best_seed_scores):.4f}")
+    print(f"Umbral optimizado elegido en validación: {optimized['umbral']:.4f}")
+    print(f"Métricas de test del modelo optimizado: {optimized['metricas']}")
+```
+
+Se comparan tanto métricas agregadas como las matrices de confusión y curvas
+ROC. El umbral de cada modelo se eligió de forma independiente usando su
+validación, no sobre el conjunto de test.
+
+```{python}
+comparison_results = [(baseline, "Modelo base")]
+if OPTUNA_RUN:
+    comparison_results.append((optimized, "Modelo optimizado"))
+
+fig, axes = plt.subplots(2, 2, figsize=(11, 9))
+for result, title, ax in [
+    (result, title, ax)
+    for (result, title), ax in zip(comparison_results, axes[0])
+]:
+    y_true = result["y_test"]
+    y_pred = (result["probabilidades"] >= result["umbral"]).astype(int)
+    matrix = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    sns.heatmap(
+        matrix,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        cbar=False,
+        xticklabels=["Permanece", "Abandona"],
+        yticklabels=["Permanece", "Abandona"],
+        ax=ax,
+    )
+    ax.set(title=f"Matriz de confusión — {title}", xlabel="Predicción", ylabel="Valor real")
+
+for result, label in comparison_results:
+    fpr, tpr, _ = roc_curve(result["y_test"], result["probabilidades"])
+    axes[1, 0].plot(
+        fpr,
+        tpr,
+        label=f"{label} (AUC = {threshold_metrics(result)['AUROC']:.3f})",
+    )
+    precision, recall, _ = precision_recall_curve(
+        result["y_test"], result["probabilidades"]
+    )
+    axes[1, 1].plot(recall, precision, label=label)
+
+axes[1, 0].plot([0, 1], [0, 1], linestyle="--", color="gray")
+axes[1, 0].set(title="Curvas ROC (test)", xlabel="Tasa de falsos positivos", ylabel="Tasa de verdaderos positivos")
+axes[1, 1].set(title="Curvas precisión-recall (test)", xlabel="Recall", ylabel="Precisión")
+axes[1, 0].legend()
+axes[1, 1].legend()
+for ax in axes.flat:
+    ax.spines[["top", "right"]].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+## 9. Conclusiones
+
+Los resultados que siguen se calculan directamente de las ejecuciones de este
+informe. Una diferencia positiva de F1 o AUROC en la partición de test es
+descriptiva de esta corrida, pero no acredita por sí sola una mejora
+generalizable.
+
+```{python}
+base_f1 = threshold_metrics(baseline)["F1"]
+base_auc = threshold_metrics(baseline)["AUROC"]
+
+print(f"F1 de test — modelo base: {base_f1:.4f}")
+print(f"AUROC de test — modelo base: {base_auc:.4f}")
+if OPTUNA_RUN:
+    tuned_f1 = threshold_metrics(optimized)["F1"]
+    tuned_auc = threshold_metrics(optimized)["AUROC"]
+    delta_f1 = tuned_f1 - base_f1
+    delta_auc = tuned_auc - base_auc
+    print(f"F1 de test — modelo optimizado: {tuned_f1:.4f} ({delta_f1:+.4f})")
+    print(f"AUROC de test — modelo optimizado: {tuned_auc:.4f} ({delta_auc:+.4f})")
+    print(f"Trials completados: {len(trial_values)}")
+else:
+    print("Optuna no se ejecutó; no hay comparación optimizada.")
+```
+
+- El flujo elimina identificadores y `Complain`, conserva la etiqueta binaria
+  y ajusta el preprocesamiento únicamente con entrenamiento.
+- La partición estratificada mantiene proporciones comparables entre train,
+  validación y test. La selección del umbral y de los hiperparámetros se limita
+  a validación.
+- La comparación de métricas en test permite describir el modelo base frente
+  al modelo optimizado en esta ejecución. La conclusión debe considerar
+  precision, recall, F1, AUROC y los tipos de error, no solo accuracy.
+- Para una conclusión más robusta conviene repetir con varias semillas,
+  evaluar temporalmente, analizar posibles sesgos y ponderar el coste de los
+  falsos negativos antes de usar el modelo en decisiones reales.
+
+El conjunto de datos tiene carácter demostrativo. No se recomienda utilizar
+estas predicciones como política de retención de clientes sin validación
+adicional, análisis de impacto y revisión del dominio.
