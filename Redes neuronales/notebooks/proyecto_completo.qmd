@@ -132,10 +132,12 @@ print(f"Tasa de abandono: {class_rates.loc[1]:.2%}")
 display(
     pd.DataFrame(
         {
+            "Clase": ["Permanece (0)", "Abandona (1)"],
             "clientes": class_counts,
             "porcentaje": (class_rates * 100).round(2),
-        }
-    ).rename(index={0: "Permanece (0)", 1: "Abandona (1)"})
+        },
+        index=[0, 1],
+    ).rename(columns={"clientes": "Clientes", "porcentaje": "Porcentaje (%)"})
 )
 
 fig, ax = plt.subplots(figsize=(7, 4))
@@ -168,22 +170,23 @@ for split_name, indices in data.split_indices.items():
     labels = df_clean.iloc[indices][TARGET_COLUMN]
     split_rows.append(
         {
-            "partición": {"train": "Entrenamiento", "val": "Validación", "test": "Test"}[split_name],
-            "registros": len(indices),
-            "porcentaje": len(indices) / len(df_clean) * 100,
-            "tasa de abandono": labels.mean() * 100,
+            "Partición": {"train": "Entrenamiento", "val": "Validación", "test": "Test"}[split_name],
+            "Registros": len(indices),
+            "Porcentaje (%)": len(indices) / len(df_clean) * 100,
+            "Tasa de abandono (%)": labels.mean() * 100,
         }
     )
-display(pd.DataFrame(split_rows).set_index("partición").round(2))
+display(pd.DataFrame(split_rows).round(2))
 print(f"Dimensión de entrada tras el preprocesamiento: {data.input_dim}")
 print(f"Columnas en el DataModule: {data.frame.shape[1]} (incluye la etiqueta)")
 print(f"Complain está excluida: {'Complain' not in data.frame.columns}")
 ```
 
-**Leyenda de la tabla:** `registros` es el número de filas de cada partición,
-`porcentaje` es su proporción sobre el conjunto completo y `tasa de abandono`
-es el porcentaje de observaciones con `Exited = 1`. La similitud entre las
-tasas confirma que la partición fue estratificada.
+| Valor | Explicación | Fórmula |
+|---|---|---|
+| `registros` | Número de filas asignadas a la partición. | Conteo de filas |
+| `porcentaje` | Peso de la partición sobre el conjunto completo. | `registros / total × 100` |
+| `tasa de abandono` | Porcentaje de clientes con `Exited = 1`. | `abandono / registros × 100` |
 
 El resultado se convierte a tensores `float32`. La partición fija con semilla
 42 facilita la comparación entre ejecuciones, aunque no sustituye una
@@ -211,6 +214,34 @@ entrenamiento de cada modelo a 30 épocas con parada temprana (paciencia 6).
 Se guarda y evalúa el checkpoint con mayor F1 en validación. El callback
 selecciona el umbral exclusivamente con validación y ese umbral se aplica al
 test sin ajustarlo con sus etiquetas.
+
+### Formato de los entrenamientos históricos
+
+Los experimentos anteriores se organizaron como una ablación: cada variante
+modifica una característica respecto a su referencia. Esta tabla conserva ese
+formato para que las configuraciones de la sección 6 puedan interpretarse sin
+confundir una diferencia de arquitectura con una diferencia de optimización.
+El modelo **C** es la referencia histórica y se muestra en negrita.
+
+| Exp. | Topología | Capas ocultas | Neuronas totales | Batch | LR | Dropout |
+|---|---|---:|---:|---:|---:|---:|
+| A | [32] | 1 | 32 | 32 | 1e-3 | 0.0 |
+| B | [64, 32] | 2 | 96 | 32 | 1e-3 | 0.0 |
+| **C (base histórico)** | **[128, 64, 32]** | **3** | **224** | **32** | **1e-3** | **0.0** |
+| E | [128, 64, 32, 16] | 4 | 240 | 32 | 1e-3 | 0.3 |
+| F1 | [32, 32, 32] | 3 | 96 | 32 | 1e-3 | 0.0 |
+| F2 | [64, 64, 64] | 3 | 192 | 32 | 1e-3 | 0.0 |
+| F3 | [128, 128, 128] | 3 | 384 | 32 | 1e-3 | 0.3 |
+| G | [64, 32] | 2 | 96 | 64 | 1e-3 | 0.0 |
+| H1 | [64, 32] | 2 | 96 | 32 | 5e-4 | 0.0 |
+| H2 | [64, 32] | 2 | 96 | 32 | 1e-4 | 0.0 |
+
+La tabla histórica se presenta como referencia experimental. El bloque de
+código que sigue entrena el modelo residual actual del proyecto; no se
+reconstruyen automáticamente las arquitecturas antiguas porque pertenecen a
+una implementación anterior. Por tanto, la comparación histórica de la
+sección 6 y la evaluación ejecutable del modelo actual deben leerse como dos
+fuentes complementarias.
 
 ```{python}
 from pathlib import Path
@@ -350,12 +381,11 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Leyenda de la figura:** la línea azul representa la pérdida del conjunto de
-entrenamiento y la naranja la pérdida de validación; valores menores indican
-un error medio menor. En el panel derecho, la línea naranja muestra el F1
-calculado con el umbral seleccionado en cada época. Una separación creciente
-entre las pérdidas puede indicar sobreajuste, mientras que un F1 de validación
-estable ayuda a elegir el checkpoint.
+| Elemento | Explicación | Lectura |
+|---|---|---|
+| Pérdida de entrenamiento | Línea azul: error medio en los datos usados para ajustar el modelo. | Menor es mejor |
+| Pérdida de validación | Línea naranja: error medio en datos no usados para actualizar los pesos. | Menor es mejor; una separación creciente puede indicar sobreajuste |
+| F1 de validación | Línea naranja del panel derecho, calculada con el umbral ajustado en cada época. | Mayor y estable ayuda a elegir el checkpoint |
 
 ## 6. Análisis de resultados del modelo base
 
@@ -368,35 +398,21 @@ suficiente para valorar el modelo.
 ### Comparación con arquitecturas anteriores
 
 La siguiente tabla reúne los experimentos realizados antes de consolidar el
-flujo actual. El modelo **C** se resalta porque es la referencia base elegida
-para comparar la profundidad y el tamaño de las capas; los modelos F, G y H
-son variaciones de anchura, batch y tasa de aprendizaje. Los valores son
-media ± desviación estándar de las ejecuciones disponibles.
+flujo actual. Se conservan únicamente las métricas que produce el modelo base
+actual, con el mismo orden y formato. Los valores históricos disponibles son medias ± desviaciones estándar.
 
-| Modelo | Arquitectura | Capas | Neuronas | Params | Batch | LR | Dropout | Épocas | Train Loss | Val Loss | Test Loss | Accuracy | Precision | Recall | F1 | AUC |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| A | [32] | 1 | 32 | 673 | 32 | 1e-3 | 0.0 | 31 | 0.719 ± 0.001 | 0.746 ± 0.002 | 0.732 ± 0.004 | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
-| B | [64, 32] | 2 | 96 | 3.393 | 32 | 1e-3 | 0.0 | 21 | 0.696 ± 0.001 | 0.741 ± 0.006 | 0.733 ± 0.006 | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
-| **C (base)** | **[128, 64, 32]** | **3** | **224** | **12.929** | **32** | **1e-3** | **0.0** | **13** | **0.733 ± 0.006** | **0.743 ± 0.005** | **0.735 ± 0.011** | **0.792 ± 0.012** | **0.495 ± 0.019** | **0.773 ± 0.016** | **0.603 ± 0.019** | **0.864 ± 0.004** |
-| E | [128, 64, 32, 16] | 4 | 240 | 13.441 | 32 | 1e-3 | 0.3 | 26 | 0.740 ± 0.016 | 0.742 ± 0.004 | 0.727 ± 0.008 | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
-| F1 | [32, 32, 32] | 3 | 96 | 2.785 | 32 | 1e-3 | 0.0 | 18 | 0.719 ± 0.001 | 0.745 ± 0.010 | 0.727 ± 0.011 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
-| F2 | [64, 64, 64] | 3 | 192 | 9.665 | 32 | 1e-3 | 0.0 | 14 | 0.690 ± 0.024 | 0.749 ± 0.006 | 0.732 ± 0.017 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | 0.603 ± 0.007 | 0.867 ± 0.006 |
-| F3 | [128, 128, 128] | 3 | 384 | 35.713 | 32 | 1e-3 | 0.3 | 24 | 0.728 ± 0.014 | 0.747 ± 0.004 | 0.724 ± 0.008 | 0.773 ± 0.002 | 0.467 ± 0.002 | 0.802 ± 0.006 | 0.590 ± 0.001 | 0.869 ± 0.003 |
-| G | [64, 32] | 2 | 96 | 3.393 | 64 | 1e-3 | 0.0 | 31 | 0.697 ± 0.013 | 0.742 ± 0.002 | 0.726 ± 0.003 | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
-| H1 | [64, 32] | 2 | 96 | 3.393 | 32 | 5e-4 | 0.0 | 38 | 0.696 ± 0.016 | 0.743 ± 0.009 | 0.734 ± 0.004 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
-| H2 | [64, 32] | 2 | 96 | 3.393 | 32 | 1e-4 | 0.0 | 108 | 0.700 ± 0.011 | 0.746 ± 0.012 | 0.732 ± 0.002 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
-
-**Leyenda de la tabla:** `Train/Val/Test Loss` es la pérdida media en
-entrenamiento, validación y test; `Accuracy = (TP + TN) / (TP + TN + FP + FN)`
-es la proporción de aciertos; `Precision = TP / (TP + FP)` mide qué proporción
-de los clientes predichos como abandono realmente abandona; `Recall = TP / (TP
-+ FN)` mide qué proporción de los abandonos reales se detecta; `F1 = 2 ·
-Precision · Recall / (Precision + Recall)` combina precision y recall; y
-`AUC` es el área bajo la curva ROC, que resume la capacidad de ordenar las dos
-clases para todos los umbrales. `TP`, `TN`, `FP` y `FN` son verdaderos
-positivos, verdaderos negativos, falsos positivos y falsos negativos,
-respectivamente. En las columnas con `±`, el primer valor es la media y el
-segundo la desviación estándar.
+| Modelo | accuracy | precision | recall | F1 | AUROC |
+|---|---:|---:|---:|---:|---:|
+| A | 0.766 ± 0.010 | 0.459 ± 0.013 | 0.797 ± 0.012 | 0.582 ± 0.008 | 0.867 ± 0.002 |
+| B | 0.782 ± 0.014 | 0.479 ± 0.019 | 0.784 ± 0.010 | 0.595 ± 0.012 | 0.863 ± 0.003 |
+| **C (base histórico)** | **0.792 ± 0.012** | **0.495 ± 0.019** | **0.773 ± 0.016** | **0.603 ± 0.019** | **0.864 ± 0.004** |
+| E | 0.781 ± 0.017 | 0.479 ± 0.023 | 0.788 ± 0.015 | 0.595 ± 0.015 | 0.866 ± 0.004 |
+| F1 | 0.776 ± 0.006 | 0.471 ± 0.008 | 0.783 ± 0.012 | 0.588 ± 0.004 | 0.867 ± 0.003 |
+| F2 | 0.787 ± 0.009 | 0.487 ± 0.014 | 0.793 ± 0.012 | 0.603 ± 0.007 | 0.867 ± 0.006 |
+| F3 | 0.773 ± 0.002 | 0.467 ± 0.002 | 0.802 ± 0.006 | 0.590 ± 0.001 | 0.869 ± 0.003 |
+| G | 0.788 ± 0.011 | 0.488 ± 0.016 | 0.775 ± 0.015 | 0.599 ± 0.015 | 0.863 ± 0.001 |
+| H1 | 0.781 ± 0.005 | 0.477 ± 0.007 | 0.775 ± 0.018 | 0.590 ± 0.008 | 0.864 ± 0.002 |
+| H2 | 0.785 ± 0.005 | 0.483 ± 0.008 | 0.775 ± 0.010 | 0.595 ± 0.008 | 0.865 ± 0.002 |
 
 ```{python}
 def threshold_metrics(result):
@@ -421,6 +437,20 @@ def threshold_metrics(result):
 base_summary = threshold_metrics(baseline)
 display(pd.DataFrame([base_summary], index=["Modelo base"]).round(4))
 
+```
+
+| Valor | Explicación | Fórmula |
+|---|---|---|
+| `Train/Val/Test Loss` | Pérdida media en entrenamiento, validación y test. | Pérdida media del conjunto |
+| `Accuracy` | Proporción total de predicciones correctas. | `(TP + TN) / (TP + TN + FP + FN)` |
+| `Precision` | Proporción de predicciones de abandono que son correctas. | `TP / (TP + FP)` |
+| `Recall` | Proporción de abandonos reales que se detectan. | `TP / (TP + FN)` |
+| `F1` | Equilibrio entre precision y recall mediante su media armónica. | `2 · Precision · Recall / (Precision + Recall)` |
+| `AUC` / `AUROC` | Área bajo la curva ROC; resume la capacidad de ordenar las clases en todos los umbrales. | `∫ TPR d(FPR)` |
+| `TP`, `TN`, `FP`, `FN` | Verdadero positivo, verdadero negativo, falso positivo y falso negativo. | Conteos de la matriz de confusión |
+| `±` | Variabilidad entre las ejecuciones disponibles. | `media ± desviación estándar` |
+
+```{python}
 y_base = baseline["y_test"]
 p_base = baseline["probabilidades"]
 pred_base = (p_base >= baseline["umbral"]).astype(int)
@@ -452,14 +482,14 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Leyenda de las figuras:** en la matriz, las filas son la clase real y las
-columnas la clase predicha; los aciertos aparecen en la diagonal y los
-errores fuera de ella. En la curva ROC, el eje X es la tasa de falsos positivos
-`FP / (FP + TN)` y el eje Y la tasa de verdaderos positivos o recall
-`TP / (TP + FN)`; la diagonal discontinua representa un clasificador aleatorio.
-En precisión-recall, el eje X es recall y el eje Y precision. Un área mayor
-indica mejor separación o mejor equilibrio entre detectar abandonos y limitar
-falsas alarmas.
+| Elemento | Explicación | Fórmula o lectura |
+|---|---|---|
+| Matriz de confusión | Filas: clase real; columnas: clase predicha. La diagonal son aciertos y el resto errores. | Celdas `TN`, `FP`, `FN`, `TP` |
+| Curva ROC, eje X | Tasa de falsos positivos. | `FPR = FP / (FP + TN)` |
+| Curva ROC, eje Y | Tasa de verdaderos positivos, equivalente a recall. | `TPR = TP / (TP + FN)` |
+| Diagonal ROC | Rendimiento de un clasificador aleatorio. | `TPR = FPR` |
+| Curva precisión-recall | Relación entre los abandonos detectados y la fiabilidad de las predicciones positivas. | Eje X: `Recall`; eje Y: `Precision` |
+| Área mayor | Mejor separación ROC o mejor equilibrio entre detectar abandonos y limitar falsas alarmas. | Mayor `AUC` o mayor área PR |
 
 Las cifras de test corresponden a una única partición aleatoria estratificada.
 Son una referencia para este experimento, no una garantía de rendimiento en
@@ -590,15 +620,6 @@ print(f"Parámetros seleccionados: {best_params}")
 print(f"Umbral optimizado elegido en validación: {optimized['umbral']:.4f}")
 print(f"Métricas de test del modelo optimizado: {optimized['metricas']}")
 ```
-
-**Leyenda de la tabla:** `accuracy` es la proporción total de predicciones
-correctas; `precision` es la proporción de predicciones positivas correctas;
-`recall` es la proporción de abandonos reales detectados; `F1` es la media
-armónica de precision y recall, `2 · precision · recall / (precision +
-recall)`; `AUROC` es el área bajo la curva ROC; y `umbral` es la probabilidad
-a partir de la cual se clasifica un cliente como abandono. `TN`, `FP`, `FN` y
-`TP` representan verdaderos negativos, falsos positivos, falsos negativos y
-verdaderos positivos.
 
 Se comparan tanto métricas agregadas como las matrices de confusión y curvas
 ROC. El umbral de cada modelo se eligió de forma independiente usando su
