@@ -35,7 +35,7 @@ se presentan como una estimación independiente de generalización.
 
 | Componente | Implementación |
 |---|---|
-| Datos y limpieza | `data/Customer-Churn-Records.csv`, `src/preprocessing.py` |
+| Datos y limpieza | `data/raw/Customer-Churn-Records.csv`, `src/preprocessing.py` |
 | División y transformación | `ChurnDataModule` en `src/preprocessing.py` |
 | Red neuronal y pérdidas | `src/model.py` |
 | Umbral de decisión | `F1ThresholdCallback` en `src/callbacks.py` |
@@ -61,7 +61,6 @@ import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
 import torch
-import optuna
 
 from sklearn.metrics import (
     auc,
@@ -81,7 +80,7 @@ from src.callbacks import F1ThresholdCallback
 from src.model import ChurnLightningModule
 from src.preprocessing import ChurnDataModule, TARGET_COLUMN, load_clean, load_raw
 
-RAW_PATH = ROOT / "data" / "Customer-Churn-Records.csv"
+RAW_PATH = ROOT / "data" / "raw" / "Customer-Churn-Records.csv"
 CLEAN_PATH = ROOT / "data" / "processed" / "df_limpio.csv"
 raw = load_raw(RAW_PATH)
 df_clean = load_clean(raw_path=RAW_PATH, cache_path=CLEAN_PATH)
@@ -292,8 +291,8 @@ def make_model(input_dim, params, pos_weight):
     )
 
 
-def fit_and_evaluate(params, run_name):
-    pl.seed_everything(42, workers=True)
+def fit_and_evaluate(params, run_name, seed=42):
+    pl.seed_everything(seed, workers=True)
     batch_size = int(params.get("batch_size", 64))
     module = ChurnDataModule(df_clean, batch_size=batch_size, num_workers=0)
     module.setup()
@@ -499,104 +498,104 @@ clientes futuros.
 
 La búsqueda explora los hiperparámetros del modelo y la configuración del
 entrenamiento, con el mismo conjunto de validación y la misma métrica objetivo
-(F1 con umbral seleccionado en validación). Se ejecutan cinco trials para
-mantener acotado el tiempo de renderizado; se pueden ampliar modificando
-`N_TRIALS`. El conjunto de test no participa en la búsqueda.
+(F1 con umbral seleccionado en validación). Cada trial se evalúa con tres
+semillas y se puntúa con su F1 medio, lo que reduce la dependencia de una única
+inicialización. Optuna guarda el estudio en SQLite para poder reanudarlo y usa
+pruning para detener configuraciones poco prometedoras. El conjunto de test no
+participa en la búsqueda.
 
 ```{python}
-from pytorch_lightning.callbacks import EarlyStopping
+import os
 
-N_TRIALS = 5
+OPTUNA_ENABLED = os.environ.get("OPTUNA_ENABLED", "1") == "1"
+N_TRIALS = int(os.environ.get("OPTUNA_TRIALS", "30"))
 OPTUNA_EPOCHS = 20
 OPTUNA_PATIENCE = 5
-
-
-def optuna_objective(trial):
-    params = {
-        "batch_size": trial.suggest_categorical("batch_size", [32, 64, 128]),
-        "loss_name": trial.suggest_categorical("loss_name", ["focal", "weighted_bce"]),
-        "hidden_dim": trial.suggest_categorical("hidden_dim", [64, 128, 256]),
-        "num_blocks": trial.suggest_int("num_blocks", 1, 5),
-        "learning_rate": trial.suggest_float("learning_rate", 1e-4, 3e-3, log=True),
-        "weight_decay": trial.suggest_float("weight_decay", 1e-6, 1e-2, log=True),
-        "dropout": trial.suggest_float("dropout", 0.05, 0.5),
-        "focal_gamma": trial.suggest_float("focal_gamma", 0.5, 4.0),
-        "focal_alpha": trial.suggest_float("focal_alpha", 0.5, 0.95),
-    }
-    pl.seed_everything(42, workers=True)
-    module = ChurnDataModule(df_clean, batch_size=params["batch_size"], num_workers=0)
-    module.setup()
-    model = make_model(
-        module.input_dim,
-        params,
-        float(module.class_counts[0] / module.class_counts[1]),
-    )
-    trainer = pl.Trainer(
-        max_epochs=OPTUNA_EPOCHS,
-        accelerator="auto",
-        devices=1,
-        deterministic=True,
-        num_sanity_val_steps=0,
-        enable_checkpointing=False,
-        enable_progress_bar=False,
-        enable_model_summary=False,
-        logger=False,
-        callbacks=[
-            F1ThresholdCallback(),
-            EarlyStopping(
-                monitor="val_f1_at_threshold",
-                mode="max",
-                patience=OPTUNA_PATIENCE,
-            ),
-        ],
-    )
-    trainer.fit(model, datamodule=module)
-    score = trainer.callback_metrics.get("val_f1_at_threshold")
-    if score is None:
-        raise RuntimeError(f"El trial {trial.number} no produjo F1 de validación.")
-    return float(score.detach().cpu())
-
-
-study = optuna.create_study(
-    direction="maximize",
-    sampler=optuna.samplers.TPESampler(seed=42),
-)
-study.optimize(optuna_objective, n_trials=N_TRIALS)
-
-trials_table = study.trials_dataframe(
-    attrs=("number", "value", "state", "params", "duration")
-)
-results_dir = ROOT / "resultados" / "tables"
-results_dir.mkdir(parents=True, exist_ok=True)
-trials_table.to_csv(results_dir / "optuna_trials_informe.csv", index=False)
-display(trials_table)
-print(f"Mejor F1 de validación: {study.best_value:.4f}")
-print(f"Mejor trial: {study.best_trial.number}")
-print(f"Tabla guardada en: {results_dir / 'optuna_trials_informe.csv'}")
+OPTUNA_SEEDS = [42, 123, 2026]
+OPTUNA_STUDY_NAME = "churn_nn_qmd"
+OPTUNA_DB = ROOT / "artifacts" / "optuna" / "optuna.db"
 ```
 
-La gráfica muestra la evolución del mejor F1 de validación a medida que se
-completan los trials. Al tratarse de un número limitado de ensayos, no se
-interpreta como una búsqueda exhaustiva ni como prueba de mejora estadística.
+Cuando Optuna está habilitado, la gráfica muestra la evolución del mejor F1 de
+validación a medida que se completan los trials. Los trials podados o fallidos
+no se incluyen. La búsqueda no se interpreta como exhaustiva ni como prueba de
+mejora estadística.
+
+Para ejecutar o reanudar la búsqueda desde la raíz del proyecto se puede usar:
+
+```bash
+OPTUNA_ENABLED=1 OPTUNA_TRIALS=30 \
+  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+```
+
+La base `Redes neuronales/artifacts/optuna/optuna.db` conserva los trials anteriores.
+Para añadir más trials basta con volver a ejecutar el comando aumentando
+`OPTUNA_TRIALS`; para empezar un estudio limpio se debe eliminar esa base
+SQLite antes de renderizar.
+
+Para ejecutar únicamente el modelo base, sin importar ni ejecutar Optuna:
+
+```bash
+OPTUNA_ENABLED=0 \
+  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+```
 
 ```{python}
-trial_numbers = [trial.number + 1 for trial in study.trials if trial.value is not None]
-trial_values = [trial.value for trial in study.trials if trial.value is not None]
-best_so_far = np.maximum.accumulate(trial_values)
+study = None
+optimized = None
+best_params = {}
+best_seed_scores = []
+trial_values = []
 
-fig, ax = plt.subplots(figsize=(8, 4))
-ax.scatter(trial_numbers, trial_values, color="#4472C4", label="F1 del trial")
-ax.plot(trial_numbers, best_so_far, color="#ED7D31", marker="o", label="Mejor hasta el trial")
-ax.set(
-    title="Optimización de Optuna sobre validación",
-    xlabel="Número de trial",
-    ylabel="F1 de validación",
-)
-ax.set_xticks(trial_numbers)
-ax.legend()
-ax.spines[["top", "right"]].set_visible(False)
-plt.tight_layout()
-plt.show()
+if OPTUNA_ENABLED:
+    from src.optuna_search import run_study
+
+    study = run_study(
+        frame=df_clean,
+        database_path=OPTUNA_DB,
+        n_trials=N_TRIALS,
+        seeds=OPTUNA_SEEDS,
+        max_epochs=OPTUNA_EPOCHS,
+        patience=OPTUNA_PATIENCE,
+        study_name=OPTUNA_STUDY_NAME,
+    )
+    trials_table = study.trials_dataframe(
+        attrs=("number", "value", "state", "params", "user_attrs", "duration")
+    )
+    display(trials_table)
+    print(f"Mejor F1 de validación: {study.best_value:.4f}")
+    print(f"Mejor trial: {study.best_trial.number}")
+    print(f"Base de datos SQLite: {OPTUNA_DB}")
+
+    trial_numbers = [
+        trial.number + 1 for trial in study.trials if trial.value is not None
+    ]
+    trial_values = [
+        trial.value for trial in study.trials if trial.value is not None
+    ]
+    if trial_values:
+        best_so_far = np.maximum.accumulate(trial_values)
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.scatter(trial_numbers, trial_values, color="#4472C4", label="F1 del trial")
+        ax.plot(
+            trial_numbers,
+            best_so_far,
+            color="#ED7D31",
+            marker="o",
+            label="Mejor hasta el trial",
+        )
+        ax.set(
+            title="Optimización de Optuna sobre validación",
+            xlabel="Número de trial",
+            ylabel="F1 de validación",
+        )
+        ax.set_xticks(trial_numbers)
+        ax.legend()
+        ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
+        plt.show()
+else:
+    print("Optuna desactivado: se evaluará únicamente el modelo base.")
 ```
 
 ## 8. Análisis de resultados optimizados
@@ -608,17 +607,27 @@ interpretarse con cautela porque la configuración se seleccionó usando
 validación.
 
 ```{python}
-best_params = dict(study.best_params)
-optimized = fit_and_evaluate(best_params, "optuna")
-
-comparison = pd.DataFrame(
-    [threshold_metrics(baseline), threshold_metrics(optimized)],
-    index=["Modelo base", "Modelo optimizado"],
-)
+if OPTUNA_ENABLED:
+    best_params = dict(study.best_params)
+    optimized = fit_and_evaluate(best_params, "optuna", seed=42)
+    best_seed_scores = study.best_trial.user_attrs.get("seed_scores", [])
+    comparison = pd.DataFrame(
+        [threshold_metrics(baseline), threshold_metrics(optimized)],
+        index=["Modelo base", "Modelo optimizado"],
+    )
+else:
+    comparison = pd.DataFrame(
+        [threshold_metrics(baseline)],
+        index=["Modelo base"],
+    )
 display(comparison.round(4))
-print(f"Parámetros seleccionados: {best_params}")
-print(f"Umbral optimizado elegido en validación: {optimized['umbral']:.4f}")
-print(f"Métricas de test del modelo optimizado: {optimized['metricas']}")
+if OPTUNA_ENABLED:
+    print(f"Parámetros seleccionados: {best_params}")
+    print(f"F1 de validación por semilla: {best_seed_scores}")
+    if best_seed_scores:
+        print(f"F1 medio de validación: {np.mean(best_seed_scores):.4f}")
+    print(f"Umbral optimizado elegido en validación: {optimized['umbral']:.4f}")
+    print(f"Métricas de test del modelo optimizado: {optimized['metricas']}")
 ```
 
 Se comparan tanto métricas agregadas como las matrices de confusión y curvas
@@ -626,10 +635,14 @@ ROC. El umbral de cada modelo se eligió de forma independiente usando su
 validación, no sobre el conjunto de test.
 
 ```{python}
+comparison_results = [(baseline, "Modelo base")]
+if OPTUNA_ENABLED:
+    comparison_results.append((optimized, "Modelo optimizado"))
+
 fig, axes = plt.subplots(2, 2, figsize=(11, 9))
 for result, title, ax in [
-    (baseline, "Modelo base", axes[0, 0]),
-    (optimized, "Modelo optimizado", axes[0, 1]),
+    (result, title, ax)
+    for (result, title), ax in zip(comparison_results, axes[0])
 ]:
     y_true = result["y_test"]
     y_pred = (result["probabilidades"] >= result["umbral"]).astype(int)
@@ -646,7 +659,7 @@ for result, title, ax in [
     )
     ax.set(title=f"Matriz de confusión — {title}", xlabel="Predicción", ylabel="Valor real")
 
-for result, label in [(baseline, "Modelo base"), (optimized, "Modelo optimizado")]:
+for result, label in comparison_results:
     fpr, tpr, _ = roc_curve(result["y_test"], result["probabilidades"])
     axes[1, 0].plot(
         fpr,
@@ -678,17 +691,20 @@ generalizable.
 
 ```{python}
 base_f1 = threshold_metrics(baseline)["F1"]
-tuned_f1 = threshold_metrics(optimized)["F1"]
 base_auc = threshold_metrics(baseline)["AUROC"]
-tuned_auc = threshold_metrics(optimized)["AUROC"]
-delta_f1 = tuned_f1 - base_f1
-delta_auc = tuned_auc - base_auc
 
 print(f"F1 de test — modelo base: {base_f1:.4f}")
-print(f"F1 de test — modelo optimizado: {tuned_f1:.4f} ({delta_f1:+.4f})")
 print(f"AUROC de test — modelo base: {base_auc:.4f}")
-print(f"AUROC de test — modelo optimizado: {tuned_auc:.4f} ({delta_auc:+.4f})")
-print(f"Trials completados: {len(trial_values)}")
+if OPTUNA_ENABLED:
+    tuned_f1 = threshold_metrics(optimized)["F1"]
+    tuned_auc = threshold_metrics(optimized)["AUROC"]
+    delta_f1 = tuned_f1 - base_f1
+    delta_auc = tuned_auc - base_auc
+    print(f"F1 de test — modelo optimizado: {tuned_f1:.4f} ({delta_f1:+.4f})")
+    print(f"AUROC de test — modelo optimizado: {tuned_auc:.4f} ({delta_auc:+.4f})")
+    print(f"Trials completados: {len(trial_values)}")
+else:
+    print("Optuna no se ejecutó; no hay comparación optimizada.")
 ```
 
 - El flujo elimina identificadores y `Complain`, conserva la etiqueta binaria

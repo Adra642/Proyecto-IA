@@ -10,10 +10,11 @@ documentación reproducible y los notebooks.
 ```text
 .
 ├── data/
-│   ├── Customer-Churn-Records.csv
+│   ├── raw/Customer-Churn-Records.csv
 │   └── processed/df_limpio.csv
 ├── notebooks/                  # Informes y análisis Quarto
-├── resultados/                 # CSV exportados y figuras generadas
+├── artifacts/                  # Estado y salidas regenerables
+│   └── optuna/optuna.db       # Estudio persistente de Optuna
 ├── src/
 │   ├── preprocessing.py        # Limpieza, split y LightningDataModule
 │   ├── model.py                # FocalLoss y ChurnLightningModule
@@ -92,7 +93,7 @@ El valor predeterminado es `--num-workers 0`, adecuado para este dataset y
 especialmente seguro para búsquedas de hiperparámetros. En un entrenamiento
 final puedes probar `--num-workers 2` si el rendimiento lo requiere.
 
-El mejor checkpoint se guarda en `lightning_logs/` y el threshold se recalcula
+El mejor checkpoint se guarda en `artifacts/logs/` y el threshold se recalcula
 con la validación del checkpoint seleccionado antes del test.
 
 ## Optuna
@@ -104,38 +105,27 @@ decay, dropout, tipo de pérdida, gamma y alpha focales.
 python -m src.optuna_search --trials 30
 ```
 
-Optuna ejecuta los trials con un único proceso de carga, limita los hilos de
-PyTorch y libera la memoria al terminar cada trial para evitar acumulación de
-RAM.
-
-Los resultados se escriben en:
+Optuna ejecuta los trials con un único proceso de carga, evalúa cada
+configuración con varias semillas, usa pruning y guarda el estudio en SQLite:
 
 ```text
-resultados/tables/optuna_trials.csv
+artifacts/optuna/optuna.db
 ```
 
-El CSV contiene el estado, valor objetivo y parámetros de cada trial. Para
+La base permite reanudar la búsqueda sin perder los trials anteriores. Para
 reentrenar con el mejor trial:
 
 ```bash
 python -m src.train_lightning \
 	--use-optuna-best \
-	--optuna-csv resultados/tables/optuna_trials.csv \
+	--optuna-db artifacts/optuna/optuna.db \
+	--optuna-study churn_nn_qmd \
 	--epochs 100
 ```
 
-CSV es un formato de resultados, no un backend de reanudación de Optuna. Cada
-ejecución crea un estudio nuevo y sobrescribe el CSV indicado. Para conservar
-experimentos, usa rutas distintas, por ejemplo:
-
-```bash
-python -m src.optuna_search --trials 50 \
-	--results-csv resultados/tables/optuna_trials_seed_1.csv
-```
-
-Para elegir el modelo final, prioriza `value` (F1 de validación con threshold
-optimizado), revisa precision y recall, y confirma el resultado con varias
-semillas antes de informar el rendimiento en test.
+Para elegir el modelo final, prioriza `value` (F1 medio de validación con
+threshold optimizado), revisa precision y recall, y confirma el resultado con
+varias semillas antes de informar el rendimiento en test.
 
 ## Tests
 
@@ -165,9 +155,18 @@ quarto render notebooks/proyecto_completo.qmd
 ```
 
 El HTML se genera en `dist/notebooks/proyecto_completo.html`. El informe
-ejecuta el preprocesamiento, entrena un modelo base, realiza cinco trials de
-Optuna, vuelve a entrenar el mejor modelo y presenta métricas y gráficas de
-ambos. Para ampliar la búsqueda, cambia `N_TRIALS` en el propio `.qmd`.
+ejecuta el preprocesamiento, entrena un modelo base y puede ejecutar Optuna de
+forma opcional:
+
+```bash
+OPTUNA_ENABLED=1 OPTUNA_TRIALS=30 quarto render notebooks/proyecto_completo.qmd
+```
+
+Para renderizar solo el modelo base:
+
+```bash
+OPTUNA_ENABLED=0 quarto render notebooks/proyecto_completo.qmd
+```
 
 Previsualizar mientras se edita:
 

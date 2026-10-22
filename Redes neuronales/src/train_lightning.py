@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import argparse
-import pandas as pd
+from pathlib import Path
 
+import optuna
 import torch
 from src.lightning_config import configure_warnings
 
@@ -25,27 +26,29 @@ def main() -> None:
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--use-optuna-best", action="store_true")
     parser.add_argument(
-        "--optuna-csv",
-        default="resultados/tables/optuna_trials.csv",
+        "--optuna-db",
+        default="artifacts/optuna/optuna.db",
     )
+    parser.add_argument("--optuna-study", default="churn_nn_qmd")
     args = parser.parse_args()
 
     best_params = {}
     if args.use_optuna_best:
-        trials = pd.read_csv(args.optuna_csv)
-        completed = trials[trials["state"] == "COMPLETE"].dropna(subset=["value"])
-        if completed.empty:
-            raise ValueError(f"No hay trials de Optuna completados en {args.optuna_csv}")
-        best_trial = completed.loc[completed["value"].idxmax()]
-        best_params = {
-            key.removeprefix("params_"): value
-            for key, value in best_trial.items()
-            if key.startswith("params_") and pd.notna(value)
-        }
+        database_path = Path(args.optuna_db).resolve()
+        if not database_path.exists():
+            raise FileNotFoundError(f"No existe la base de Optuna: {database_path}")
+        study = optuna.load_study(
+            study_name=args.optuna_study,
+            storage=f"sqlite:///{database_path}",
+        )
+        if study.best_trial is None:
+            raise ValueError(f"No hay trials completados en {database_path}")
+        best_trial = study.best_trial
+        best_params = dict(best_trial.params)
         args.batch_size = int(best_params["batch_size"])
         print(
-            f"Trial de Optuna usado: {int(best_trial['number'])}; "
-            f"F1={float(best_trial['value']):.4f}"
+            f"Trial de Optuna usado: {best_trial.number}; "
+            f"F1={best_trial.value:.4f}"
         )
 
     data = ChurnDataModule(
@@ -78,6 +81,7 @@ def main() -> None:
         accelerator="auto",
         devices=1,
         deterministic=True,
+        default_root_dir="artifacts/logs",
         callbacks=[
             F1ThresholdCallback(),
             checkpoint,

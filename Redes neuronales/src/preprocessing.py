@@ -29,7 +29,7 @@ DROP_COMPLAIN = True
 ID_COLUMNS_TO_DROP = ["RowNumber", "CustomerId", "Surname"]
 EXPECTED_COLUMNS_AFTER_CLEAN = 15
 TARGET_COLUMN = "Exited"
-DEFAULT_RAW_PATH = Path("data/Customer-Churn-Records.csv")
+DEFAULT_RAW_PATH = Path("data/raw/Customer-Churn-Records.csv")
 DEFAULT_CLEAN_PATH = Path("data/processed/df_limpio.csv")
 
 

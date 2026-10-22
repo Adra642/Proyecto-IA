@@ -32,10 +32,16 @@ profile_default/
 data/raw/*.xlsx
 data/raw/*.csv
 data/raw/*.zip
+!data/raw/Customer-Churn-Records.csv
 # --- Resultados generados automáticamente ---
 # Los resultados y modelos se regeneran mediante los scripts de src/.
 lightning_logs/
-resultados/tables/optuna_trials*.csv
+artifacts/optuna/*.db
+artifacts/optuna/*.csv
+artifacts/models/
+artifacts/logs/
+dist/
+.pytest_cache/
 
 # --- Quarto / R ---
 .quarto/
@@ -75,3 +81,4 @@ logs/
 **/*.quarto_ipynb
 
 /.quarto/
+_freeze/
