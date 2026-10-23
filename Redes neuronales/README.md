@@ -151,21 +151,21 @@ quarto render
 Generar el informe HTML completo de resultados desde la raíz del proyecto:
 
 ```bash
-quarto render notebooks/proyecto_completo.qmd
+quarto render index.qmd
 ```
 
-El HTML se genera en `dist/notebooks/proyecto_completo.html`. El informe
+El HTML se genera en `dist/index.html`. El informe
 ejecuta el preprocesamiento, entrena un modelo base y puede ejecutar Optuna de
 forma opcional:
 
 ```bash
-OPTUNA_ENABLED=1 OPTUNA_TRIALS=30 quarto render notebooks/proyecto_completo.qmd
+OPTUNA_ENABLED=1 OPTUNA_TRIALS=30 quarto render index.qmd
 ```
 
 Para renderizar solo el modelo base:
 
 ```bash
-OPTUNA_ENABLED=0 quarto render notebooks/proyecto_completo.qmd
+OPTUNA_ENABLED=0 quarto render index.qmd
 ```
 
 Previsualizar mientras se edita:

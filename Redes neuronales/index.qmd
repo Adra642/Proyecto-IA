@@ -22,7 +22,7 @@ execute:
 
 Este informe documenta de forma reproducible el flujo del proyecto para
 clasificar el abandono de clientes bancarios (`Exited = 1`). Se ejecuta desde
-la raíz del proyecto con `quarto render notebooks/proyecto_completo.qmd`.
+la raíz del proyecto con `quarto render index.qmd`.
 Cada bloque de código puede desplegarse con **Mostrar código**; las tablas y
 gráficas se generan a partir de los datos y de los modelos entrenados al
 renderizar el documento.
@@ -330,7 +330,7 @@ def fit_and_evaluate(params, run_name, seed=42):
         )
         trainer.fit(model, datamodule=module)
         if not checkpoint.best_model_path:
-            raise RuntimeError(f"No se generó un checkpoint válido para {run_name}.")
+            raise RuntimeError("No se generó ningún checkpoint durante el entrenamiento")
         best_model = ChurnLightningModule.load_from_checkpoint(checkpoint.best_model_path)
         trainer.validate(best_model, datamodule=module, verbose=False)
         test_metrics = trainer.test(best_model, datamodule=module, verbose=False)[0]
@@ -526,7 +526,7 @@ Para ejecutar o reanudar la búsqueda desde la raíz del proyecto se puede usar:
 
 ```bash
 OPTUNA_TRIALS=30 \
-  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+    quarto render index.qmd
 ```
 
 La base `Redes neuronales/artifacts/optuna/optuna.db` conserva los trials anteriores.
@@ -539,7 +539,7 @@ El informe carga el mejor trial disponible en la base y lo compara con el modelo
 base. Si la base no contiene trials completados, solo se muestra el modelo base.
 
 ```bash
-  quarto render "Redes neuronales/notebooks/proyecto_completo.qmd"
+    quarto render index.qmd
 ```
 
 ```{python}

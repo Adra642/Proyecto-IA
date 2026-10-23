@@ -82,3 +82,5 @@ logs/
 
 /.quarto/
 _freeze/
+
+.wrangler
