@@ -79,6 +79,10 @@ plugins = ["pydantic.mypy"]
 module = ["kagglehub.*", "rank_bm25.*", "fitz.*", "pymupdf.*", "markdownify.*", "sentence_transformers.*", "sklearn.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["data_pipeline.fetchers.arxiv", "tests.unit.test_arxiv_wikipedia"]
+disallow_untyped_calls = false  # pymupdf.Document is untyped
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-m 'not integration' --cov=core --cov=rag --cov=data_pipeline --cov-report=term-missing"

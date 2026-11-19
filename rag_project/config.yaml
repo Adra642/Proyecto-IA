@@ -37,3 +37,36 @@ sources:
     url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
     license: "See Kaggle dataset page (license not verified)"
     fallback_url: ""  # raw CSV URL used if kagglehub fails
+
+  a3:  # arXiv papers: metadata + abstract + intro/results/conclusion excerpts
+    enabled: true
+    queries:
+      - "all:bank AND all:customer AND all:churn"
+      - "all:customer AND all:attrition AND all:banking"
+      - "all:explainable AND all:churn AND all:SHAP"
+      - "all:complaints AND all:churn AND all:bank"
+    per_query: 10
+    max_papers: 25
+    section_max_chars: 3000
+    api_interval_seconds: 3     # arXiv API etiquette
+    pdf_interval_seconds: 15    # arxiv.org robots.txt Crawl-delay
+
+  a4:  # Wikipedia concept pages (CC BY-SA)
+    enabled: true
+    pages:
+      - {title: "Customer attrition", topic: churn, columns: [Exited]}
+      - {title: "Churn rate", topic: churn, columns: [Exited]}
+      - {title: "Customer retention", topic: churn, columns: [Exited, Tenure]}
+      - {title: "Customer lifetime value", topic: churn, columns: [Balance, Tenure]}
+      - {title: "Net promoter score", topic: satisfaction, columns: [Satisfaction Score]}
+      - {title: "Customer satisfaction", topic: satisfaction, columns: [Satisfaction Score]}
+      - {title: "Credit score", topic: credit_score, columns: [CreditScore]}
+      - {title: "Credit card", topic: cards, columns: [HasCrCard, Card Type]}
+      - {title: "Loyalty program", topic: loyalty, columns: [Point Earned]}
+      - {title: "Retail banking", topic: banking_products, columns: [NumOfProducts]}
+      - {title: "Cross-selling", topic: cross_selling, columns: [NumOfProducts]}
+      - {title: "Deposit insurance", topic: deposits_rates, columns: [Balance]}
+      - {title: "Open banking", topic: digital_banking, columns: [IsActiveMember]}
+      - {title: "SCHUFA", topic: credit_score, geography: DE, columns: [CreditScore, Geography]}
+      - {title: "Interchange fee", topic: cards, columns: [Card Type]}
+      - {title: "General Data Protection Regulation", topic: privacy_ai, geography: EU, columns: [Gender, Age]}
