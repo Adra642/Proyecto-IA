@@ -1,0 +1,33 @@
+# Defaults for the RAG project. Override with environment variables
+# (e.g. LLM_PROVIDER=groq, LLM__MODELS__GROQ=...) and secrets from .env.
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  logs_dir: logs
+  chroma_dir: chroma_db
+
+http:
+  user_agent: "rag-project-student-bot/0.1 (academic project; contact via GitHub repo)"
+  min_interval_seconds: 1.0     # polite delay between calls to the same host
+  timeout_seconds: 30.0
+  max_retries: 4
+  backoff_base_seconds: 1.0
+  respect_robots: true
+
+llm:
+  provider: gemini              # gemini | groq | deepseek
+  fallback_order: []            # e.g. [gemini, groq, deepseek]
+  temperature: 0.0
+  max_retries: 2
+  models:                       # verify current names in each provider's docs
+    gemini: gemini-2.5-flash
+    groq: llama-3.3-70b-versatile
+    deepseek: deepseek-chat
+
+embeddings:
+  model: intfloat/multilingual-e5-small
+  query_prefix: "query: "
+  passage_prefix: "passage: "
+
+# Per-source options are added in Stage 1.
+sources: {}
