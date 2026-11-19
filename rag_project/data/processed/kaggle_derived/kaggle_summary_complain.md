@@ -22,7 +22,7 @@ Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Ger
 
 | Segment | Customers | Churned | Churn rate | Mean balance | Mean points |
 |---|---|---|---|---|---|
-| 0.0 | 7,956 | 4 | 0.1% | 72,718.52 | 606.8 |
-| 1.0 | 2,044 | 2,034 | 99.5% | 91,149.87 | 605.2 |
+| 0 | 7,956 | 4 | 0.1% | 72,718.52 | 606.8 |
+| 1 | 2,044 | 2,034 | 99.5% | 91,149.87 | 605.2 |
 
-In plain language: by complaint filed, the highest churn rate is 99.5% (1.0) and the lowest is 0.1% (0.0).
+In plain language: by complaint filed, the highest churn rate is 99.5% (1) and the lowest is 0.1% (0).

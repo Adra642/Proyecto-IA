@@ -126,6 +126,8 @@ def segment_stats(df: pd.DataFrame, by: list[str]) -> pd.DataFrame:
         mean_points=("Point Earned", "mean"),
     ).reset_index()
     out["share"] = out["customers"] / len(df)
+    # Labels as text: iterrows() would otherwise upcast an all-numeric row to float ("4.0").
+    out[by] = out[by].astype(str)
     return out
 
 

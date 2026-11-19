@@ -71,9 +71,9 @@ def test_bands(df: pd.DataFrame) -> None:
 
 def test_products_and_card_type(df: pd.DataFrame) -> None:
     p = segment_stats(df, ["NumOfProducts"]).set_index("NumOfProducts")
-    assert p.loc[1, "customers"] == 6 and p.loc[1, "churn_rate"] == 0.5
-    assert p.loc[2, "churn_rate"] == 0.25
-    assert p.loc[4, "churn_rate"] == 1.0
+    assert p.loc["1", "customers"] == 6 and p.loc["1", "churn_rate"] == 0.5
+    assert p.loc["2", "churn_rate"] == 0.25
+    assert p.loc["4", "churn_rate"] == 1.0
     c = segment_stats(df, ["Card Type"]).set_index("Card Type")
     assert c.loc["GOLD", "mean_points"] == 175
     assert c.loc["SILVER", "churn_rate"] == 0.75
@@ -107,6 +107,8 @@ def test_stats_keys(df: pd.DataFrame) -> None:
     assert stats["geography_x_num_of_products.Germany|1.churn_rate"] == 1.0
     assert stats["geography_x_num_of_products.France|1.customers"] == 3
     assert stats["age_band.50-59.churn_rate"] == 1.0
+    assert stats["num_of_products.4.churn_rate"] == 1.0  # not "4.0"
+    assert stats["complain.1.customers"] == 5 and stats["satisfaction_score.1.churn_rate"] == 1.0
     assert stats["card_type.DIAMOND.mean_points"] == 550
     assert stats["leakage.share_churners_complained"] == 1.0
     json.dumps(stats, allow_nan=True)
@@ -123,8 +125,12 @@ def test_documents(df: pd.DataFrame, raw: pd.DataFrame) -> None:
         "kaggle_segment_geography_germany",
         "kaggle_summary_geography",
         "kaggle_segment_geography_x_num_of_products_germany_3",
+        "kaggle_segment_num_of_products_4",
+        "kaggle_segment_complain_1",
     ):
         assert needed in ids
+    four = next(d for d in docs if d.doc_id == "kaggle_segment_num_of_products_4")
+    assert "NumOfProducts = 4." in four.text and "4.0" not in four.text
     germany = next(d for d in docs if d.doc_id == "kaggle_segment_geography_germany")
     assert germany.metadata.geography == "DE"
     assert "Churn rate: 50.0%" in germany.text

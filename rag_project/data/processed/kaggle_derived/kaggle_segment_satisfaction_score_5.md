@@ -1,6 +1,6 @@
 ---
-doc_id: kaggle_segment_satisfaction_score_5.0
-title: 'Churn segment: Satisfaction Score = 5.0'
+doc_id: kaggle_segment_satisfaction_score_5
+title: 'Churn segment: Satisfaction Score = 5'
 source: kaggle_derived
 source_type: dataset_stats
 url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
@@ -16,9 +16,9 @@ license: See Kaggle dataset page (license not verified)
 format: generated
 ---
 
-# Churn segment card: Satisfaction Score = 5.0
+# Churn segment card: Satisfaction Score = 5
 
-Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 5.0.
+Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 5.
 
 - Customers in segment: 2,004 (20.0% of 10,000 customers)
 - Churned customers (Exited = 1): 397
@@ -29,4 +29,4 @@ Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Ger
 - Mean age: 39.1
 - Mean loyalty points earned: 599.7
 
-In plain language: customers with Satisfaction Score = 5.0 left the bank at a rate of 19.8%, which is about the same as the overall churn rate.
+In plain language: customers with Satisfaction Score = 5 left the bank at a rate of 19.8%, which is about the same as the overall churn rate.

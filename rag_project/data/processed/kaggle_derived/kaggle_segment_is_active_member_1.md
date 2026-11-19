@@ -1,6 +1,6 @@
 ---
-doc_id: kaggle_segment_is_active_member_1.0
-title: 'Churn segment: IsActiveMember = 1.0'
+doc_id: kaggle_segment_is_active_member_1
+title: 'Churn segment: IsActiveMember = 1'
 source: kaggle_derived
 source_type: dataset_stats
 url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
@@ -16,9 +16,9 @@ license: See Kaggle dataset page (license not verified)
 format: generated
 ---
 
-# Churn segment card: IsActiveMember = 1.0
+# Churn segment card: IsActiveMember = 1
 
-Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Active member. Segment: IsActiveMember = 1.0.
+Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Active member. Segment: IsActiveMember = 1.
 
 - Customers in segment: 5,151 (51.5% of 10,000 customers)
 - Churned customers (Exited = 1): 735
@@ -29,4 +29,4 @@ Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Ger
 - Mean age: 39.8
 - Mean loyalty points earned: 605.4
 
-In plain language: customers with IsActiveMember = 1.0 left the bank at a rate of 14.3%, which is 0.70 times the overall churn rate (lower).
+In plain language: customers with IsActiveMember = 1 left the bank at a rate of 14.3%, which is 0.70 times the overall churn rate (lower).
