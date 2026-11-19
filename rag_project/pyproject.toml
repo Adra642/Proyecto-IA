@@ -80,7 +80,7 @@ module = ["kagglehub.*", "rank_bm25.*", "fitz.*", "pymupdf.*", "markdownify.*", 
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["data_pipeline.util", "tests.unit.test_arxiv_wikipedia", "tests.unit.test_eurlex"]
+module = ["data_pipeline.util", "tests.*"]
 disallow_untyped_calls = false  # pymupdf.Document is untyped
 
 [tool.pytest.ini_options]

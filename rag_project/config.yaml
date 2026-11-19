@@ -116,3 +116,39 @@ sources:
       - {celex: "32016R0679", title: "General Data Protection Regulation (GDPR) 2016/679", topic: privacy_ai, columns: [Gender, Age]}
       - {celex: "32024R1689", title: "Artificial Intelligence Act 2024/1689", topic: privacy_ai, columns: [CreditScore, Gender, Age]}
       - {celex: "32023L2225", title: "Consumer Credit Directive 2023/2225", topic: credit_score, columns: [CreditScore]}
+
+  b1:  # Banco de Espana, Portal del Cliente Bancario (Spanish)
+    enabled: true
+    pages:
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/productosservici/cuentasdepositos/cuentascorriente/", title: "Cuentas corrientes, depositos a la vista y libretas de ahorro", language: es, geography: ES, topic: switching, columns: [NumOfProducts, Balance]}
+      - {url: "https://clientebancario.bde.es/pcb/es/blog/traslado_de_cuenta.html", title: "Traslado de cuenta: como cambiar de banco", language: es, geography: ES, topic: switching, columns: [Exited, NumOfProducts]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/productosservici/serviciospago/tarjetas/", title: "Tarjetas de pago", language: es, geography: ES, topic: cards, columns: [HasCrCard, Card Type]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarrecl/", title: "Como realizar una reclamacion", language: es, geography: ES, topic: complaints, columns: [Complain]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarconsulta/", title: "Como realizar una consulta", language: es, geography: ES, topic: complaints, columns: [Complain]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/comisiones/", title: "Comisiones de productos bancarios", language: es, geography: ES, topic: cards, columns: [Balance, HasCrCard]}
+      - {url: "https://www.bde.es/wbe/es/publicaciones/informes-memorias-anuales/memoria-reclamaciones/", title: "Memoria de Reclamaciones del Banco de Espana", language: es, geography: ES, topic: complaints, columns: [Complain]}
+
+  b5:  # ECB Household Finance and Consumption Survey (wealth and deposits by age and country)
+    enabled: true
+    pages:
+      - {url: "https://www.ecb.europa.eu/stats/ecb_surveys/hfcs/html/index.en.html", title: "Household Finance and Consumption Survey overview", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+      - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/201903_Research_Report_HFCS.pdf", format: pdf, max_chars: 60000, title: "HFCS research report", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+      - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/WealthSurveys.pdf", format: pdf, max_chars: 60000, title: "Wealth surveys at the ECB", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+
+  b7:  # Credit reporting systems: CIRBE (ES), SCHUFA (DE), FICP (FR)
+    enabled: true
+    pages:
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/cirbe/", title: "CIRBE Central de Informacion de Riesgos", language: es, geography: ES, topic: credit_score, columns: [CreditScore, Geography]}
+      - {url: "https://www.schufa.de/scoring-daten/index.html", title: "SCHUFA Scoring und Daten", language: de, geography: DE, topic: credit_score, columns: [CreditScore, Geography]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/fichiers-incident-bancaire/fichier-incidents-remboursement-credits", title: "FICP fichier des incidents de remboursement des credits", language: fr, geography: FR, topic: credit_score, columns: [CreditScore, Geography]}
+
+  b8:  # Consumer pages of Banque de France (FR) and BaFin / Bundesbank (DE)
+    enabled: true
+    pages:
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/connaitre-pratiques-bancaires-assurance", title: "Banque de France pratiques bancaires et assurance", language: fr, geography: FR, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/droit-au-compte-bancaire", title: "Banque de France droit au compte bancaire", language: fr, geography: FR, topic: switching, columns: [NumOfProducts, Geography]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/connaitre-pratiques-bancaires-assurance/compte-frais/le-plafonnement-des-frais-bancaires-et-loffre-clientele-fragile", title: "Banque de France plafonnement des frais bancaires", language: fr, geography: FR, topic: cards, columns: [Balance, HasCrCard]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/hilfe-kontakt/beschwerden-streitschlichtung/beschwerden-streitschlichtung_node.html", title: "BaFin Beschwerden und Streitschlichtung", language: de, geography: DE, topic: complaints, columns: [Complain]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/konten-zahlungen/konten-zahlungen_node.html", title: "BaFin Konten und Zahlungen", language: de, geography: DE, topic: switching, columns: [NumOfProducts, HasCrCard]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/kredite-immobilienfinanzierung/kredite/verbraucherkreditrichtlinie/verbraucherkreditrichtlinie_node.html", title: "BaFin Verbraucherkreditrichtlinie", language: de, geography: DE, topic: credit_score, columns: [CreditScore]}
+      - {url: "https://www.bundesbank.de/de/service/schlichtungsstelle/schlichtungsverfahren", title: "Bundesbank Schlichtungsverfahren", language: de, geography: DE, topic: complaints, columns: [Complain]}
