@@ -105,3 +105,14 @@ sources:
       - {id: NY.GDP.PCAP.CD, name: "GDP per capita (current US$)", unit: "US$", last: 5, topic: macro, columns: [EstimatedSalary, Balance]}
       - {id: FS.AST.PRVT.GD.ZS, name: "Domestic credit to private sector (% of GDP)", unit: "% of GDP", last: 5, topic: deposits_rates, columns: [Balance, CreditScore]}
       - {id: FX.OWN.TOTL.ZS, name: "Account ownership (% of adults, Global Findex)", unit: "% of adults", last: 5, topic: banking_products, columns: [NumOfProducts, Geography]}
+
+  a6:  # EU legal texts by CELEX id (EUR-Lex HTML, Cellar XHTML/PDF fallback)
+    enabled: true
+    documents:
+      - {celex: "32014L0049", title: "Deposit Guarantee Schemes Directive 2014/49/EU", topic: deposit_guarantee, columns: [Balance, NumOfProducts]}
+      - {celex: "32014L0092", title: "Payment Accounts Directive 2014/92/EU (account switching)", topic: switching, columns: [NumOfProducts, Exited]}
+      - {celex: "32015L2366", title: "Payment Services Directive 2 (PSD2) 2015/2366", topic: payments, columns: [HasCrCard, IsActiveMember]}
+      - {celex: "32015R0751", title: "Interchange Fee Regulation 2015/751", topic: cards, columns: [HasCrCard, Card Type]}
+      - {celex: "32016R0679", title: "General Data Protection Regulation (GDPR) 2016/679", topic: privacy_ai, columns: [Gender, Age]}
+      - {celex: "32024R1689", title: "Artificial Intelligence Act 2024/1689", topic: privacy_ai, columns: [CreditScore, Gender, Age]}
+      - {celex: "32023L2225", title: "Consumer Credit Directive 2023/2225", topic: credit_score, columns: [CreditScore]}

@@ -13,7 +13,6 @@ from data_pipeline.fetchers.arxiv import (
     ArxivEntry,
     ArxivFetcher,
     parse_atom,
-    pdf_text,
     round_robin,
     select_sections,
 )
@@ -21,6 +20,7 @@ from data_pipeline.fetchers.base import FetchContext, FetchItem
 from data_pipeline.fetchers.wikipedia import WikipediaFetcher, wiki_to_markdown
 from data_pipeline.http import HttpClient
 from data_pipeline.resilience import RateLimiter
+from data_pipeline.util import pdf_text
 
 FIX = Path(__file__).parent.parent / "fixtures"
 

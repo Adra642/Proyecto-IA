@@ -15,6 +15,7 @@ from core.logging_setup import get_logger
 from core.models import Document, DocumentMetadata
 from data_pipeline.cache import CachedPayload
 from data_pipeline.fetchers.base import BaseFetcher, FetchItem, register_fetcher
+from data_pipeline.util import pdf_text
 
 log = get_logger(__name__)
 
@@ -122,14 +123,6 @@ def select_sections(text: str, max_chars: int) -> list[tuple[str, str]]:
             if body:
                 kept.append((title, body))
     return kept
-
-
-def pdf_text(data: bytes) -> str:
-    """Extract plain text from PDF bytes with pymupdf."""
-    import pymupdf
-
-    with pymupdf.open(stream=data, filetype="pdf") as doc:
-        return "\n".join(str(page.get_text()) for page in doc)
 
 
 @register_fetcher("a3")
