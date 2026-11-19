@@ -29,5 +29,11 @@ embeddings:
   query_prefix: "query: "
   passage_prefix: "passage: "
 
-# Per-source options are added in Stage 1.
-sources: {}
+# Per-source options (ids follow RAG_PROJECT_PLAN.md Section 4).
+sources:
+  a1:  # Kaggle Bank Customer Churn CSV -> derived documents (A2)
+    enabled: true
+    dataset: radheshyamkollipara/bank-customer-churn
+    url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
+    license: "See Kaggle dataset page (license not verified)"
+    fallback_url: ""  # raw CSV URL used if kagglehub fails
