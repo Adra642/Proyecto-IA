@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+import datetime as dt
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -32,8 +32,8 @@ class DocumentMetadata(BaseModel):
     geography: Geography
     topic: str
     columns: list[str] = Field(default_factory=list)
-    date: date | None = None
-    retrieved_at: date
+    date: dt.date | None = None
+    retrieved_at: dt.date
     license: str
     format: Literal["csv", "json", "html", "pdf", "generated"] = "generated"
 

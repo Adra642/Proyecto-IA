@@ -146,9 +146,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         raise ConfigError(f"Config file not found: {path}")
 
     class _Loaded(Settings):
-        model_config = SettingsConfigDict(
-            **{**Settings.model_config, "yaml_file": path}  # type: ignore[typeddict-item]
-        )
+        model_config = SettingsConfigDict(**{**Settings.model_config, "yaml_file": path})
 
     try:
         return _Loaded()
