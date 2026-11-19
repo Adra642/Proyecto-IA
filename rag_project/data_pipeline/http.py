@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
@@ -64,7 +64,7 @@ class HttpClient:
         self,
         url: str,
         *,
-        params: Mapping[str, Any] | None = None,
+        params: Mapping[str, Any] | Sequence[tuple[str, Any]] | None = None,
         headers: Mapping[str, str] | None = None,
         check_robots: bool = True,
         min_interval: float | None = None,
@@ -87,11 +87,12 @@ class HttpClient:
         if check_robots and self._settings.respect_robots:
             self._check_robots(url)
         host = urlsplit(url).netloc
+        query: Any = params  # httpx accepts mappings and lists of pairs
 
         def attempt() -> httpx.Response:
             self._limiter.wait(host, min_interval)
             try:
-                resp = self._client.get(url, params=params, headers=headers)
+                resp = self._client.get(url, params=query, headers=headers)
             except httpx.TransportError as exc:
                 raise RetryableError(f"{type(exc).__name__}: {exc}") from exc
             if resp.status_code in _RETRY_STATUS:

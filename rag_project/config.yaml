@@ -70,3 +70,38 @@ sources:
       - {title: "SCHUFA", topic: credit_score, geography: DE, columns: [CreditScore, Geography]}
       - {title: "Interchange fee", topic: cards, columns: [Card Type]}
       - {title: "General Data Protection Regulation", topic: privacy_ai, geography: EU, columns: [Gender, Age]}
+
+  a5:  # ECB Data Portal (SDMX CSV). kind=change_dates: periods are dates the value changed
+    enabled: true
+    series:
+      - {series: "FM/B.U2.EUR.4F.KR.DFR.LEV", name: "ECB deposit facility rate", subject: "the ECB deposit facility rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "FM/B.U2.EUR.4F.KR.MRR_FR.LEV", name: "ECB main refinancing operations rate", subject: "the ECB main refinancing operations rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "FM/B.U2.EUR.4F.KR.MLFR.LEV", name: "ECB marginal lending facility rate", subject: "the ECB marginal lending facility rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "ICP/M.U2.N.000000.4.ANR", name: "Euro area inflation (HICP annual rate)", subject: "euro area HICP inflation", last: 6, geography: EU, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.FR.N.000000.4.ANR", name: "France inflation (HICP annual rate)", subject: "HICP inflation in France", last: 6, geography: FR, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.DE.N.000000.4.ANR", name: "Germany inflation (HICP annual rate)", subject: "HICP inflation in Germany", last: 6, geography: DE, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.ES.N.000000.4.ANR", name: "Spain inflation (HICP annual rate)", subject: "HICP inflation in Spain", last: 6, geography: ES, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "MIR/M.FR.B.L22.F.R.A.2250.EUR.N", name: "France household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in France (new business)", last: 6, geography: FR, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.DE.B.L22.F.R.A.2250.EUR.N", name: "Germany household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in Germany (new business)", last: 6, geography: DE, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.ES.B.L22.F.R.A.2250.EUR.N", name: "Spain household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in Spain (new business)", last: 6, geography: ES, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.FR.B.A2C.A.R.A.2250.EUR.N", name: "France mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in France (new business)", last: 6, geography: FR, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.DE.B.A2C.A.R.A.2250.EUR.N", name: "Germany mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in Germany (new business)", last: 6, geography: DE, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.ES.B.A2C.A.R.A.2250.EUR.N", name: "Spain mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in Spain (new business)", last: 6, geography: ES, topic: deposits_rates, columns: [Balance, Geography]}
+
+  b2:  # Eurostat dissemination API, one note per dataset and country
+    enabled: true
+    countries: [FR, DE, ES]
+    datasets:
+      - {dataset: une_rt_a, name: "Unemployment rate", unit: "%", last: 4, filters: {age: "Y15-74", sex: T, unit: PC_ACT}, topic: macro, columns: [EstimatedSalary, Age]}
+      - {dataset: prc_hicp_manr, name: "HICP inflation (annual rate)", unit: "%", last: 6, filters: {coicop: CP00, unit: RCH_A}, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {dataset: isoc_ci_ac_i, name: "Share of individuals using internet banking", unit: "%", last: 4, filters: {indic_is: I_IUBK, ind_type: IND_TOTAL, unit: PC_IND}, topic: digital_banking, columns: [IsActiveMember, Age]}
+      - {dataset: ilc_di03, name: "Median equivalised income", unit: EUR, last: 4, filters: {age: TOTAL, sex: T, statinfo: MED_EI, unit: EUR}, topic: macro, columns: [EstimatedSalary, Age]}
+      - {dataset: earn_nt_net, name: "Annual net earnings of a single person at average earnings", unit: EUR, last: 3, filters: {currency: EUR, estruct: NET, ecase: P1_NCH_AW100}, topic: macro, columns: [EstimatedSalary]}
+
+  b3:  # World Bank indicators for FRA, DEU, ESP
+    enabled: true
+    indicators:
+      - {id: FP.CPI.TOTL.ZG, name: "Inflation, consumer prices", unit: "%", last: 5, topic: inflation, columns: [Balance]}
+      - {id: NY.GDP.PCAP.CD, name: "GDP per capita (current US$)", unit: "US$", last: 5, topic: macro, columns: [EstimatedSalary, Balance]}
+      - {id: FS.AST.PRVT.GD.ZS, name: "Domestic credit to private sector (% of GDP)", unit: "% of GDP", last: 5, topic: deposits_rates, columns: [Balance, CreditScore]}
+      - {id: FX.OWN.TOTL.ZS, name: "Account ownership (% of adults, Global Findex)", unit: "% of adults", last: 5, topic: banking_products, columns: [NumOfProducts, Geography]}
