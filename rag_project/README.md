@@ -113,7 +113,7 @@ documents derived from the dataset; surnames in external text are logged as coll
 ## Tests and quality
 ```bash
 uv run pytest                    # unit tests, offline (coverage report included)
-uv run pytest -m integration     # real LLM / embedding calls; needs keys, downloads the e5 model
+uv run pytest -m integration     # real LLM / embedding calls and live fetches; needs keys, downloads the e5 model
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy
@@ -123,7 +123,7 @@ The hooks live in `.pre-commit-config.yaml` (ruff only; mypy runs through `poe t
 From the repo root: `uv run --project rag_project pre-commit install -c rag_project/.pre-commit-config.yaml`.
 
 ## Task shortcuts (identical on Linux and Windows)
-`uv run poe test | test-integration | lint | typecheck | export-reqs`; `pipeline`, `index`, `eval`,
+`uv run poe pipeline | test | test-integration | lint | typecheck | export-reqs`; `index`, `eval`,
 `app` and `docs` are defined but their modules arrive in later stages.
 
 ## Deployment, Quarto docs

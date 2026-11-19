@@ -199,3 +199,12 @@ def test_pii_scan_ignores_front_matter(tmp_path: Path) -> None:
     doc.metadata.license = "See Kaggle dataset page"
     write_documents([doc], tmp_path)
     assert scan(tmp_path, {"See", "Page"}, set()).ok
+
+
+def test_pii_derived_check_is_case_sensitive(tmp_path: Path) -> None:
+    ok = mk("d", source="kaggle_derived", text=LONG + " Age band, see the leakage check.")
+    write_documents([ok], tmp_path)
+    assert scan(tmp_path, {"Band", "See"}, set()).ok
+    leak = mk("e", source="kaggle_derived", text=LONG + " Customer Band churned.")
+    write_documents([leak], tmp_path)
+    assert not scan(tmp_path, {"Band", "See"}, set()).ok

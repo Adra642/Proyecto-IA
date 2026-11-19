@@ -2,7 +2,9 @@
 
 Scoped rules (decided with the team):
 * no ``CustomerId`` anywhere in ``data/processed``;
-* no surname in documents derived from the dataset (``kaggle_derived``);
+* no surname in documents derived from the dataset (``kaggle_derived``), matched exactly as
+  stored in the CSV (case-sensitive), so ordinary lowercase words that happen to be surnames
+  ("band", "see") used by our own templates do not trigger false alarms;
 * surnames found in *external* documents are reported as collisions (many surnames are
   ordinary words or authors' names) and logged, not treated as failures.
 """
@@ -55,6 +57,11 @@ def scan(processed_dir: Path, surnames: set[str], ids: set[str]) -> PiiReport:
         if surnames
         else None
     )
+    exact_re = (
+        re.compile(r"\b(" + "|".join(re.escape(s) for s in sorted(surnames)) + r")\b")
+        if surnames
+        else None
+    )
     id_re = re.compile(r"\b(" + "|".join(sorted(ids)) + r")\b") if ids else None
     for path in sorted(processed_dir.glob("*/*.md")):
         report.checked_files += 1
@@ -63,15 +70,16 @@ def scan(processed_dir: Path, surnames: set[str], ids: set[str]) -> PiiReport:
         rel = f"{path.parent.name}/{path.name}"
         if id_re and (m := id_re.search(text)):
             report.violations.append(f"CustomerId {m.group(1)} in {rel}")
-        if surname_re is None:
-            continue
-        hits = {m.group(1).lower() for m in surname_re.finditer(text)}
-        if not hits:
+        if surname_re is None or exact_re is None:
             continue
         if path.parent.name == DERIVED_SOURCE:
-            report.violations.append(f"surname(s) {sorted(hits)[:3]} in derived document {rel}")
+            exact = {m.group(1) for m in exact_re.finditer(text)}
+            if exact:
+                report.violations.append(
+                    f"surname(s) {sorted(exact)[:3]} in derived document {rel}"
+                )
         else:
-            for hit in hits:
+            for hit in {m.group(1).lower() for m in surname_re.finditer(text)}:
                 report.collisions.setdefault(hit, []).append(rel)
     return report
 
