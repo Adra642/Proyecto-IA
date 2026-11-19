@@ -59,6 +59,7 @@ def scan(processed_dir: Path, surnames: set[str], ids: set[str]) -> PiiReport:
     for path in sorted(processed_dir.glob("*/*.md")):
         report.checked_files += 1
         text = path.read_text(encoding="utf-8")
+        text = text.split("---\n", 2)[-1]  # body only: front matter holds our own metadata words
         rel = f"{path.parent.name}/{path.name}"
         if id_re and (m := id_re.search(text)):
             report.violations.append(f"CustomerId {m.group(1)} in {rel}")

@@ -10,8 +10,8 @@ http:
   user_agent: "rag-project-student-bot/0.1 (academic project; contact via GitHub repo)"
   min_interval_seconds: 1.0     # polite delay between calls to the same host
   timeout_seconds: 30.0
-  max_retries: 4
-  backoff_base_seconds: 1.0
+  max_retries: 5
+  backoff_base_seconds: 2.0
   respect_robots: true
 
 llm:
@@ -53,6 +53,7 @@ sources:
 
   a4:  # Wikipedia concept pages (CC BY-SA)
     enabled: true
+    interval_seconds: 2   # Wikimedia rate-limits aggressive clients
     pages:
       - {title: "Customer attrition", topic: churn, columns: [Exited]}
       - {title: "Churn rate", topic: churn, columns: [Exited]}
@@ -67,7 +68,7 @@ sources:
       - {title: "Cross-selling", topic: cross_selling, columns: [NumOfProducts]}
       - {title: "Deposit insurance", topic: deposits_rates, columns: [Balance]}
       - {title: "Open banking", topic: digital_banking, columns: [IsActiveMember]}
-      - {title: "SCHUFA", topic: credit_score, geography: DE, columns: [CreditScore, Geography]}
+      - {title: "Schufa", topic: credit_score, geography: DE, columns: [CreditScore, Geography]}
       - {title: "Interchange fee", topic: cards, columns: [Card Type]}
       - {title: "General Data Protection Regulation", topic: privacy_ai, geography: EU, columns: [Gender, Age]}
 

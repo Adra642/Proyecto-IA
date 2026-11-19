@@ -73,3 +73,13 @@ def test_pipeline_end_to_end_is_sorted_and_deterministic() -> None:
     assert [d.doc_id for d in once] == ["a", "z"]
     assert "cookies" not in once[1].text
     assert [d.text for d in clean_documents(once)] == [d.text for d in once]
+
+
+def test_body_class_with_sidebar_does_not_remove_the_page() -> None:
+    page = (
+        '<html><body class="layout-no-sidebars"><nav>menu</nav><main><h1>Droit au compte</h1><p>'
+        + "Tout le monde a droit a un compte bancaire en France. " * 8
+        + "</p></main></body></html>"
+    )
+    md = html_to_markdown(page, "T")
+    assert md.startswith("# Droit au compte") and "menu" not in md and len(md) > 200

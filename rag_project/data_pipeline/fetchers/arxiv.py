@@ -20,7 +20,8 @@ from data_pipeline.util import pdf_text
 log = get_logger(__name__)
 
 API = "https://export.arxiv.org/api/query"
-PDF = "https://export.arxiv.org/pdf/{id}"
+# export.arxiv.org disallows /pdf in robots.txt; arxiv.org allows it (Crawl-delay 15 s)
+PDF = "https://arxiv.org/pdf/{id}"
 WANTED = ("introduction", "result", "discussion", "conclusion")
 KNOWN_HEADINGS = {
     "abstract", "introduction", "background", "related work", "methodology", "methods",

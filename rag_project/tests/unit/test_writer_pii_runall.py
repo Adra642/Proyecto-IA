@@ -192,3 +192,10 @@ def test_parse_source_ids(settings: Settings) -> None:
     assert "a1" in run_all.parse_source_ids(None, settings)
     with pytest.raises(SystemExit, match="Unknown"):
         run_all.parse_source_ids("zz", settings)
+
+
+def test_pii_scan_ignores_front_matter(tmp_path: Path) -> None:
+    doc = mk("d", source="kaggle_derived")
+    doc.metadata.license = "See Kaggle dataset page"
+    write_documents([doc], tmp_path)
+    assert scan(tmp_path, {"See", "Page"}, set()).ok

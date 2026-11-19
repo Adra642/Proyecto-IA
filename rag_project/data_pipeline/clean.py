@@ -28,6 +28,7 @@ _DROP_TAGS = (
     "script", "style", "noscript", "nav", "header", "footer", "aside", "form", "iframe",
     "svg", "button", "select", "dialog", "template", "figure",
 )  # fmt: skip
+_CONTAINERS = {"html", "body", "main", "article"}
 _DROP_ROLES = {"navigation", "banner", "contentinfo", "search", "dialog", "complementary"}
 _DROP_CLASS = re.compile(
     r"cookie|consent|breadcrumb|social|newsletter|sidebar|skip-?link|toolbar|pagination|"
@@ -61,8 +62,8 @@ def looks_like_html(text: str) -> bool:
 
 
 def _is_boilerplate(tag: Tag) -> bool:
-    if tag.attrs is None:
-        return False
+    if tag.attrs is None or tag.name in _CONTAINERS or tag.find(["main", "article"]) is not None:
+        return False  # e.g. <body class="layout-no-sidebars"> must not be dropped
     if tag.get("role") in _DROP_ROLES:
         return True
     marker = " ".join([*(tag.get("class") or []), str(tag.get("id") or "")])

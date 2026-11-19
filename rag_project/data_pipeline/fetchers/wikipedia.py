@@ -43,7 +43,8 @@ class WikipediaFetcher(BaseFetcher):
             "format": "json",
             "formatversion": 2,
         }
-        return self.get(API, params=params, check_robots=False).content
+        interval = float(self.options.get("interval_seconds", 2.0))
+        return self.get(API, params=params, check_robots=False, min_interval=interval).content
 
     def _parse(self, item: FetchItem, payload: CachedPayload) -> list[Document]:
         page = json.loads(payload.text())["query"]["pages"][0]
