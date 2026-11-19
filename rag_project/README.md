@@ -100,7 +100,7 @@ so running the pipeline twice with the same cache gives byte-identical `data/pro
 
 Sources (`config.yaml` -> `sources`): A1/A2 Kaggle churn CSV and derived analytics, A3 arXiv,
 A4 Wikipedia, A5 ECB Data Portal, A6 EU law (EUR-Lex with Cellar fallback), B1 Banco de España,
-B2 Eurostat, B3 World Bank, B5 ECB HFCS, B7 credit registers (CIRBE, SCHUFA, FICP), B8 Banque de
+B2 Eurostat, B3 World Bank, B4 ECB press releases (RSS), B5 ECB HFCS, B6 EBA consumer pages, B7 credit registers (CIRBE, SCHUFA, FICP), B8 Banque de
 France / BaFin / Bundesbank. Each has an `enabled` flag and its own options (queries, pages, series).
 
 Privacy: `RowNumber`, `CustomerId` and `Surname` are dropped before any document is created.
@@ -160,6 +160,8 @@ Design patterns in use so far:
 ## Troubleshooting
 - *Missing API key:* the error names the variable; set it in `.env` or the environment.
 - *Rate limits:* set `llm.fallback_order` or switch `LLM_PROVIDER`.
+- *Model not found (404):* provider models get retired; list what your key can use and update `llm.models` in `config.yaml` (Gemini 2.5 models are retired; the default is `gemini-3.5-flash-lite`).
+- *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary between runs; the evaluation caches answers.
 - *Kaggle:* the public dataset downloads anonymously with `kagglehub`. If it ever needs auth, set
   `KAGGLE_USERNAME` / `KAGGLE_KEY`, or put a raw CSV URL in `sources.a1.fallback_url`.
 - *EUR-Lex blocking:* EUR-Lex answers bots with an empty challenge page; the fetcher detects it

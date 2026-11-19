@@ -9,6 +9,7 @@ MODULES = (
     "arxiv",
     "wikipedia",
     "ecb",
+    "ecb_press",
     "eurlex",
     "eurostat",
     "worldbank",

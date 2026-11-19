@@ -20,9 +20,9 @@ llm:
   temperature: 0.0
   max_retries: 2
   models:                       # verify current names in each provider's docs
-    gemini: gemini-2.5-flash
-    groq: llama-3.3-70b-versatile
-    deepseek: deepseek-chat
+    gemini: gemini-3.5-flash-lite   # verified live with a key on 2026-11-19; 2.5-* are retired (404)
+    groq: llama-3.3-70b-versatile   # listed as production model in Groq docs (not called: no key)
+    deepseek: deepseek-flash        # per DeepSeek docs 2026-11-19 (deepseek-chat no longer listed; not called: no key)
 
 embeddings:
   model: intfloat/multilingual-e5-small
@@ -153,3 +153,21 @@ sources:
       - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/konten-zahlungen/konten-zahlungen_node.html", title: "BaFin Konten und Zahlungen", language: de, geography: DE, topic: switching, columns: [NumOfProducts, HasCrCard]}
       - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/kredite-immobilienfinanzierung/kredite/verbraucherkreditrichtlinie/verbraucherkreditrichtlinie_node.html", title: "BaFin Verbraucherkreditrichtlinie", language: de, geography: DE, topic: credit_score, columns: [CreditScore]}
       - {url: "https://www.bundesbank.de/de/service/schlichtungsstelle/schlichtungsverfahren", title: "Bundesbank Schlichtungsverfahren", language: de, geography: DE, topic: complaints, columns: [Complain]}
+
+  b4:  # ECB press releases from the RSS feed (only the latest items are in the feed)
+    enabled: true
+    feed_url: "https://www.ecb.europa.eu/rss/press.xml"
+    link_contains: ["/press/pr/"]
+    title_regex: ""          # e.g. "monetary|interest" to keep only some releases
+    max_articles: 10
+
+  b6:  # European Banking Authority: consumer protection and guidelines
+    enabled: true
+    pages:
+      - {url: "https://www.eba.europa.eu/activities/information-consumers/how-complain", title: "EBA how to complain", language: en, geography: EU, topic: complaints, columns: [Complain]}
+      - {url: "https://www.eba.europa.eu/activities/information-consumers", title: "EBA information for consumers", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.eba.europa.eu/regulation-and-policy/consumer-protection", title: "EBA consumer protection overview", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/guidelines-product-oversight-and-governance-arrangements-retail-banking-products", title: "EBA guidelines on product oversight and governance for retail banking products", language: en, geography: EU, topic: cross_selling, columns: [NumOfProducts, Card Type]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/regulatory-technical-standards-complaints-handling-procedures-issuers-arts", title: "EBA RTS on complaints handling", language: en, geography: EU, topic: complaints, columns: [Complain]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/credit-risk/guidelines-loan-origination-and-monitoring", title: "EBA guidelines on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}
+      - {url: "https://www.eba.europa.eu/sites/default/files/document_library/Publications/Guidelines/2020/Guidelines%20on%20loan%20origination%20and%20monitoring/884283/EBA%20GL%202020%2006%20Final%20Report%20on%20GL%20on%20loan%20origination%20and%20monitoring.pdf", format: pdf, max_chars: 60000, title: "EBA final report on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}

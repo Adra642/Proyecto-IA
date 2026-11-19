@@ -27,7 +27,7 @@ def trimmed(options: dict[str, Any]) -> dict[str, Any]:
 
 
 @pytest.mark.parametrize(
-    "source_id", ["a1", "a3", "a4", "a5", "a6", "b1", "b2", "b3", "b5", "b7", "b8"]
+    "source_id", ["a1", "a3", "a4", "a5", "a6", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8"]
 )
 def test_source_returns_documents(source_id: str, tmp_path: Path) -> None:
     load_all()

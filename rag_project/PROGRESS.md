@@ -30,14 +30,15 @@ Pending / open:
 Done:
 - Infrastructure: polite `HttpClient` (User-Agent, robots.txt, >=1 s per host, retry/backoff), `RawCache`
   with manifest, `BaseFetcher` (Template Method) + `@register_fetcher` registry.
-- 11 sources, all verified live: A1/A2 Kaggle CSV + derived analytics (66 docs, `stats.json`), A3 arXiv
+- 13 sources, all verified live (B4 and B6 added in a follow-up commit): A1/A2 Kaggle CSV + derived analytics (66 docs, `stats.json`), A3 arXiv
   (19 papers: abstract + intro/results/conclusion excerpts), A4 Wikipedia (16), A5 ECB (13 series notes),
   A6 EU law (7, EUR-Lex bot challenge detected, Cellar XHTML fallback), B1 Banco de Espana (7, ES),
   B2 Eurostat (15), B3 World Bank (12), B5 ECB HFCS (3), B7 credit registers (3: ES/DE/FR),
   B8 Banque de France / BaFin / Bundesbank (7: FR/DE).
 - `clean.py` (HTML to Markdown, normalize, dedupe, min length), `build_docs.py` (pure stats functions,
   segment cards, summaries, dictionary, findings with Complain leakage check), `writer.py`, `pii_check.py`, `run_all.py`.
-- Corpus: 168 documents, about 385k words, formats csv/json/html/pdf/generated, languages en/es/fr/de.
+- B4 ECB press releases (3 docs from the RSS feed) and B6 EBA consumer pages/guidelines (7 docs, incl. the loan-origination PDF).
+- Corpus: 178 documents, about 399k words, formats csv/json/html/pdf/generated, languages en/es/fr/de.
 
 Verified (commands run):
 - `uv run python -m data_pipeline.run_all` (cold, then cached): 11 sources ok, 0 fetch errors in the last run.
@@ -63,5 +64,11 @@ Open issues / for the team:
 - B5 HFCS: the ECB does not expose the statistical tables at a stable URL, so the corpus has the HFCS overview page and two research PDFs (first 60k characters), not wealth-by-age tables. Replace or add a source if the team finds a direct table.
 - arXiv: 19 unique papers (4 queries overlap), not 25; the "results" excerpt of some papers is picked by a heading heuristic and can be imperfect.
 - User-Agent is generic (`rag-project-student-bot`); Wikimedia asks for contact details, the team may add a contact URL in `config.yaml`.
-- B4/B6 (optional sources) not implemented.
+- B4 only sees what is in the ECB RSS feed (about 15 recent items, 3 are HTML press releases); the 29 Oct 2026 monetary policy decision was no longer in it and the ECB listing pages are JavaScript-rendered. B6: the EBA Consumer Trends Report page could not be located (guessed URLs gave 404), so it is not in the corpus.
 - A first cold run takes about 8 minutes (arXiv crawl delay); later runs take seconds.
+
+### Follow-up: LLM model names (2026-11-19)
+- Gemini, called live with the team's key: `gemini-2.5-flash` and `gemini-2.5-flash-lite` are retired for new users (404), `gemini-3.7-flash` and `gemini-3.8-flash` timed out (504) in our test, `gemini-3.5-flash`, `gemini-3.6-flash` and `gemini-3.5-flash-lite` work. On a RAG-style prompt latency was about 1 s (3.5-flash-lite) versus 5 to 13 s (3.5-flash, 3.6-flash); all gave the correct cited answer. Default is now `gemini-3.5-flash-lite` **[DECISION: confirm with the team; a stronger model can be set in `config.yaml`]**.
+- **Caveat:** the Gemini 3.5 models ignore `temperature` (langchain-google-genai warns "uses fixed sampling defaults"). The plan's `temperature=0` for a fair, reproducible comparison cannot be enforced for Gemini; mitigation: cache evaluation answers (key includes provider and model) and score the cached answers.
+- Groq `llama-3.3-70b-versatile` is still a production model in the Groq docs; DeepSeek docs now list `deepseek-flash` and `deepseek-v4-pro` and no longer mention `deepseek-chat`, so the default is `deepseek-flash`. Both checked against the docs only (no keys), not called.
+- Smoke tests: Gemini passes live; Groq and DeepSeek are skipped (no keys). The smoke test now skips providers whose key is empty.

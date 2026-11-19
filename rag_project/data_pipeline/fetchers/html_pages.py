@@ -95,3 +95,11 @@ class RegulatorsFetcher(HtmlPageFetcher):
     """Banque de France (FR) and BaFin / Bundesbank (DE) consumer pages."""
 
     source_name = "regulators"
+
+
+@register_fetcher("b6")
+class EbaFetcher(HtmlPageFetcher):
+    """European Banking Authority consumer-protection pages and guidelines."""
+
+    source_name = "eba"
+    default_license = "EBA publications: reuse authorised with acknowledgement of the source"
