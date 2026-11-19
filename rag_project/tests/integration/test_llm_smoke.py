@@ -10,7 +10,7 @@ pytestmark = pytest.mark.integration
 def test_provider_answers_one_call(provider: Provider) -> None:
     settings = load_settings()
     key = settings.api_key_for(provider)
-    if key is None:
+    if key is None or not key.get_secret_value().strip():
         pytest.skip(f"No API key for {provider}")
     answer = ADAPTERS[provider](settings).invoke("Reply with the single word: pong")
     assert answer.strip()

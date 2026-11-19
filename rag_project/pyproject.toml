@@ -76,8 +76,12 @@ modules = ["factory"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["kagglehub.*", "rank_bm25.*", "fitz.*", "pymupdf.*", "markdownify.*", "sentence_transformers.*"]
+module = ["kagglehub.*", "rank_bm25.*", "fitz.*", "pymupdf.*", "markdownify.*", "sentence_transformers.*", "sklearn.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["data_pipeline.util", "tests.*"]
+disallow_untyped_calls = false  # pymupdf.Document is untyped
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
