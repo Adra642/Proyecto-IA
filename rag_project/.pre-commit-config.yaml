@@ -1,0 +1,18 @@
+# Install from the repo root: pre-commit install -c rag_project/.pre-commit-config.yaml
+# (or from rag_project/: uv run pre-commit install). Hooks only touch rag_project/.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --project rag_project ruff check --config rag_project/pyproject.toml
+        language: system
+        types: [python]
+        files: ^rag_project/
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --project rag_project ruff format --config rag_project/pyproject.toml
+        language: system
+        types: [python]
+        files: ^rag_project/
+      # mypy runs via `uv run poe typecheck` (needs the project cwd), not as a hook.

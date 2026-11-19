@@ -52,3 +52,51 @@ explicit = true
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["docs/_site", "docs/.quarto"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "D", "SIM"]
+ignore = ["D100", "D104", "D107", "D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["core", "rag", "data_pipeline", "eval", "app", "tests"]
+modules = ["factory"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["kagglehub.*", "rank_bm25.*", "fitz.*", "pymupdf.*", "markdownify.*", "sentence_transformers.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not integration' --cov=core --cov=rag --cov=data_pipeline --cov-report=term-missing"
+markers = ["integration: real network / LLM / model downloads (excluded by default)"]
+
+[tool.coverage.run]
+omit = ["*/__main__.py"]
+
+[tool.poe.tasks]
+pipeline = "python -m data_pipeline.run_all"
+index = "python -m rag.index --rebuild"
+eval = "python -m eval.run_eval"
+app = "python app/app.py"
+test = "pytest"
+test-integration = "pytest -m integration --no-cov"
+lint = ["_ruff-check", "_ruff-format"]
+typecheck = "mypy"
+docs = "quarto render docs"
+export-reqs = "uv export --no-dev --no-hashes -o requirements.txt"
+_ruff-check = "ruff check ."
+_ruff-format = "ruff format --check ."
