@@ -1,0 +1,13 @@
+RowNumber,CustomerId,Surname,CreditScore,Geography,Gender,Age,Tenure,Balance,NumOfProducts,HasCrCard,IsActiveMember,EstimatedSalary,Exited,Complain,Satisfaction Score,Card Type,Point Earned
+1,15000001,Zorrilla,600,France,Female,25,1,0,1,1,1,50000,0,0,3,GOLD,100
+2,15000002,Quimby,700,France,Male,35,2,1000,1,1,1,60000,0,0,3,GOLD,200
+3,15000003,Okonkwo,650,France,Female,45,5,2000,2,0,0,70000,1,1,2,SILVER,300
+4,15000004,Vasquez,500,France,Male,55,7,3000,1,1,0,80000,1,1,2,SILVER,400
+5,15000005,Lindqvist,800,Germany,Female,65,9,100000,3,1,1,90000,0,0,4,DIAMOND,500
+6,15000006,Brandtner,750,Germany,Male,42,3,120000,1,0,0,110000,1,1,1,DIAMOND,600
+7,15000007,Hoffmeier,620,Germany,Female,38,4,110000,2,1,1,100000,0,0,5,PLATINUM,700
+8,15000008,Kaufmann,580,Germany,Male,52,6,130000,4,1,0,120000,1,1,2,PLATINUM,800
+9,15000009,Iglesias,690,Spain,Female,29,0,0,1,0,1,40000,0,0,3,GOLD,150
+10,15000010,Jimenez,710,Spain,Male,33,8,500,2,1,1,45000,0,0,4,GOLD,250
+11,15000011,Kowalczyk,540,Spain,Female,48,10,600,1,1,0,55000,1,1,1,SILVER,350
+12,15000012,Larrea,660,Spain,Male,61,2,700,2,0,1,65000,0,0,5,SILVER,450

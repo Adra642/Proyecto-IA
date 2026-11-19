@@ -10,8 +10,8 @@ http:
   user_agent: "rag-project-student-bot/0.1 (academic project; contact via GitHub repo)"
   min_interval_seconds: 1.0     # polite delay between calls to the same host
   timeout_seconds: 30.0
-  max_retries: 4
-  backoff_base_seconds: 1.0
+  max_retries: 5
+  backoff_base_seconds: 2.0
   respect_robots: true
 
 llm:
@@ -20,14 +20,154 @@ llm:
   temperature: 0.0
   max_retries: 2
   models:                       # verify current names in each provider's docs
-    gemini: gemini-2.5-flash
-    groq: llama-3.3-70b-versatile
-    deepseek: deepseek-chat
+    gemini: gemini-3.5-flash-lite   # verified live with a key on 2026-11-19; 2.5-* are retired (404)
+    groq: llama-3.3-70b-versatile   # listed as production model in Groq docs (not called: no key)
+    deepseek: deepseek-flash        # per DeepSeek docs 2026-11-19 (deepseek-chat no longer listed; not called: no key)
 
 embeddings:
   model: intfloat/multilingual-e5-small
   query_prefix: "query: "
   passage_prefix: "passage: "
 
-# Per-source options are added in Stage 1.
-sources: {}
+# Per-source options (ids follow RAG_PROJECT_PLAN.md Section 4).
+sources:
+  a1:  # Kaggle Bank Customer Churn CSV -> derived documents (A2)
+    enabled: true
+    dataset: radheshyamkollipara/bank-customer-churn
+    url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
+    license: "See Kaggle dataset page (license not verified)"
+    fallback_url: ""  # raw CSV URL used if kagglehub fails
+
+  a3:  # arXiv papers: metadata + abstract + intro/results/conclusion excerpts
+    enabled: true
+    queries:
+      - "all:bank AND all:customer AND all:churn"
+      - "all:customer AND all:attrition AND all:banking"
+      - "all:explainable AND all:churn AND all:SHAP"
+      - "all:complaints AND all:churn AND all:bank"
+    per_query: 10
+    max_papers: 25
+    section_max_chars: 3000
+    api_interval_seconds: 3     # arXiv API etiquette
+    pdf_interval_seconds: 15    # arxiv.org robots.txt Crawl-delay
+
+  a4:  # Wikipedia concept pages (CC BY-SA)
+    enabled: true
+    interval_seconds: 2   # Wikimedia rate-limits aggressive clients
+    pages:
+      - {title: "Customer attrition", topic: churn, columns: [Exited]}
+      - {title: "Churn rate", topic: churn, columns: [Exited]}
+      - {title: "Customer retention", topic: churn, columns: [Exited, Tenure]}
+      - {title: "Customer lifetime value", topic: churn, columns: [Balance, Tenure]}
+      - {title: "Net promoter score", topic: satisfaction, columns: [Satisfaction Score]}
+      - {title: "Customer satisfaction", topic: satisfaction, columns: [Satisfaction Score]}
+      - {title: "Credit score", topic: credit_score, columns: [CreditScore]}
+      - {title: "Credit card", topic: cards, columns: [HasCrCard, Card Type]}
+      - {title: "Loyalty program", topic: loyalty, columns: [Point Earned]}
+      - {title: "Retail banking", topic: banking_products, columns: [NumOfProducts]}
+      - {title: "Cross-selling", topic: cross_selling, columns: [NumOfProducts]}
+      - {title: "Deposit insurance", topic: deposits_rates, columns: [Balance]}
+      - {title: "Open banking", topic: digital_banking, columns: [IsActiveMember]}
+      - {title: "Schufa", topic: credit_score, geography: DE, columns: [CreditScore, Geography]}
+      - {title: "Interchange fee", topic: cards, columns: [Card Type]}
+      - {title: "General Data Protection Regulation", topic: privacy_ai, geography: EU, columns: [Gender, Age]}
+
+  a5:  # ECB Data Portal (SDMX CSV). kind=change_dates: periods are dates the value changed
+    enabled: true
+    series:
+      - {series: "FM/B.U2.EUR.4F.KR.DFR.LEV", name: "ECB deposit facility rate", subject: "the ECB deposit facility rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "FM/B.U2.EUR.4F.KR.MRR_FR.LEV", name: "ECB main refinancing operations rate", subject: "the ECB main refinancing operations rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "FM/B.U2.EUR.4F.KR.MLFR.LEV", name: "ECB marginal lending facility rate", subject: "the ECB marginal lending facility rate", kind: change_dates, last: 4, topic: deposits_rates, columns: [Balance]}
+      - {series: "ICP/M.U2.N.000000.4.ANR", name: "Euro area inflation (HICP annual rate)", subject: "euro area HICP inflation", last: 6, geography: EU, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.FR.N.000000.4.ANR", name: "France inflation (HICP annual rate)", subject: "HICP inflation in France", last: 6, geography: FR, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.DE.N.000000.4.ANR", name: "Germany inflation (HICP annual rate)", subject: "HICP inflation in Germany", last: 6, geography: DE, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "ICP/M.ES.N.000000.4.ANR", name: "Spain inflation (HICP annual rate)", subject: "HICP inflation in Spain", last: 6, geography: ES, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {series: "MIR/M.FR.B.L22.F.R.A.2250.EUR.N", name: "France household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in France (new business)", last: 6, geography: FR, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.DE.B.L22.F.R.A.2250.EUR.N", name: "Germany household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in Germany (new business)", last: 6, geography: DE, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.ES.B.L22.F.R.A.2250.EUR.N", name: "Spain household deposit rate up to 1 year", subject: "the bank interest rate on household deposits up to one year in Spain (new business)", last: 6, geography: ES, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.FR.B.A2C.A.R.A.2250.EUR.N", name: "France mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in France (new business)", last: 6, geography: FR, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.DE.B.A2C.A.R.A.2250.EUR.N", name: "Germany mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in Germany (new business)", last: 6, geography: DE, topic: deposits_rates, columns: [Balance, Geography]}
+      - {series: "MIR/M.ES.B.A2C.A.R.A.2250.EUR.N", name: "Spain mortgage rate for households", subject: "the bank interest rate on household house-purchase loans in Spain (new business)", last: 6, geography: ES, topic: deposits_rates, columns: [Balance, Geography]}
+
+  b2:  # Eurostat dissemination API, one note per dataset and country
+    enabled: true
+    countries: [FR, DE, ES]
+    datasets:
+      - {dataset: une_rt_a, name: "Unemployment rate", unit: "%", last: 4, filters: {age: "Y15-74", sex: T, unit: PC_ACT}, topic: macro, columns: [EstimatedSalary, Age]}
+      - {dataset: prc_hicp_manr, name: "HICP inflation (annual rate)", unit: "%", last: 6, filters: {coicop: CP00, unit: RCH_A}, topic: inflation, columns: [Balance, EstimatedSalary]}
+      - {dataset: isoc_ci_ac_i, name: "Share of individuals using internet banking", unit: "%", last: 4, filters: {indic_is: I_IUBK, ind_type: IND_TOTAL, unit: PC_IND}, topic: digital_banking, columns: [IsActiveMember, Age]}
+      - {dataset: ilc_di03, name: "Median equivalised income", unit: EUR, last: 4, filters: {age: TOTAL, sex: T, statinfo: MED_EI, unit: EUR}, topic: macro, columns: [EstimatedSalary, Age]}
+      - {dataset: earn_nt_net, name: "Annual net earnings of a single person at average earnings", unit: EUR, last: 3, filters: {currency: EUR, estruct: NET, ecase: P1_NCH_AW100}, topic: macro, columns: [EstimatedSalary]}
+
+  b3:  # World Bank indicators for FRA, DEU, ESP
+    enabled: true
+    indicators:
+      - {id: FP.CPI.TOTL.ZG, name: "Inflation, consumer prices", unit: "%", last: 5, topic: inflation, columns: [Balance]}
+      - {id: NY.GDP.PCAP.CD, name: "GDP per capita (current US$)", unit: "US$", last: 5, topic: macro, columns: [EstimatedSalary, Balance]}
+      - {id: FS.AST.PRVT.GD.ZS, name: "Domestic credit to private sector (% of GDP)", unit: "% of GDP", last: 5, topic: deposits_rates, columns: [Balance, CreditScore]}
+      - {id: FX.OWN.TOTL.ZS, name: "Account ownership (% of adults, Global Findex)", unit: "% of adults", last: 5, topic: banking_products, columns: [NumOfProducts, Geography]}
+
+  a6:  # EU legal texts by CELEX id (EUR-Lex HTML, Cellar XHTML/PDF fallback)
+    enabled: true
+    documents:
+      - {celex: "32014L0049", title: "Deposit Guarantee Schemes Directive 2014/49/EU", topic: deposit_guarantee, columns: [Balance, NumOfProducts]}
+      - {celex: "32014L0092", title: "Payment Accounts Directive 2014/92/EU (account switching)", topic: switching, columns: [NumOfProducts, Exited]}
+      - {celex: "32015L2366", title: "Payment Services Directive 2 (PSD2) 2015/2366", topic: payments, columns: [HasCrCard, IsActiveMember]}
+      - {celex: "32015R0751", title: "Interchange Fee Regulation 2015/751", topic: cards, columns: [HasCrCard, Card Type]}
+      - {celex: "32016R0679", title: "General Data Protection Regulation (GDPR) 2016/679", topic: privacy_ai, columns: [Gender, Age]}
+      - {celex: "32024R1689", title: "Artificial Intelligence Act 2024/1689", topic: privacy_ai, columns: [CreditScore, Gender, Age]}
+      - {celex: "32023L2225", title: "Consumer Credit Directive 2023/2225", topic: credit_score, columns: [CreditScore]}
+
+  b1:  # Banco de Espana, Portal del Cliente Bancario (Spanish)
+    enabled: true
+    pages:
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/productosservici/cuentasdepositos/cuentascorriente/", title: "Cuentas corrientes, depositos a la vista y libretas de ahorro", language: es, geography: ES, topic: switching, columns: [NumOfProducts, Balance]}
+      - {url: "https://clientebancario.bde.es/pcb/es/blog/traslado_de_cuenta.html", title: "Traslado de cuenta: como cambiar de banco", language: es, geography: ES, topic: switching, columns: [Exited, NumOfProducts]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/productosservici/serviciospago/tarjetas/", title: "Tarjetas de pago", language: es, geography: ES, topic: cards, columns: [HasCrCard, Card Type]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarrecl/", title: "Como realizar una reclamacion", language: es, geography: ES, topic: complaints, columns: [Complain]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarconsulta/", title: "Como realizar una consulta", language: es, geography: ES, topic: complaints, columns: [Complain]}
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/comisiones/", title: "Comisiones de productos bancarios", language: es, geography: ES, topic: cards, columns: [Balance, HasCrCard]}
+      - {url: "https://www.bde.es/wbe/es/publicaciones/informes-memorias-anuales/memoria-reclamaciones/", title: "Memoria de Reclamaciones del Banco de Espana", language: es, geography: ES, topic: complaints, columns: [Complain]}
+
+  b5:  # ECB Household Finance and Consumption Survey (wealth and deposits by age and country)
+    enabled: true
+    pages:
+      - {url: "https://www.ecb.europa.eu/stats/ecb_surveys/hfcs/html/index.en.html", title: "Household Finance and Consumption Survey overview", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+      - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/201903_Research_Report_HFCS.pdf", format: pdf, max_chars: 60000, title: "HFCS research report", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+      - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/WealthSurveys.pdf", format: pdf, max_chars: 60000, title: "Wealth surveys at the ECB", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+
+  b7:  # Credit reporting systems: CIRBE (ES), SCHUFA (DE), FICP (FR)
+    enabled: true
+    pages:
+      - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/cirbe/", title: "CIRBE Central de Informacion de Riesgos", language: es, geography: ES, topic: credit_score, columns: [CreditScore, Geography]}
+      - {url: "https://www.schufa.de/scoring-daten/index.html", title: "SCHUFA Scoring und Daten", language: de, geography: DE, topic: credit_score, columns: [CreditScore, Geography]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/fichiers-incident-bancaire/fichier-incidents-remboursement-credits", title: "FICP fichier des incidents de remboursement des credits", language: fr, geography: FR, topic: credit_score, columns: [CreditScore, Geography]}
+
+  b8:  # Consumer pages of Banque de France (FR) and BaFin / Bundesbank (DE)
+    enabled: true
+    pages:
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/connaitre-pratiques-bancaires-assurance", title: "Banque de France pratiques bancaires et assurance", language: fr, geography: FR, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/droit-au-compte-bancaire", title: "Banque de France droit au compte bancaire", language: fr, geography: FR, topic: switching, columns: [NumOfProducts, Geography]}
+      - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/connaitre-pratiques-bancaires-assurance/compte-frais/le-plafonnement-des-frais-bancaires-et-loffre-clientele-fragile", title: "Banque de France plafonnement des frais bancaires", language: fr, geography: FR, topic: cards, columns: [Balance, HasCrCard]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/hilfe-kontakt/beschwerden-streitschlichtung/beschwerden-streitschlichtung_node.html", title: "BaFin Beschwerden und Streitschlichtung", language: de, geography: DE, topic: complaints, columns: [Complain]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/konten-zahlungen/konten-zahlungen_node.html", title: "BaFin Konten und Zahlungen", language: de, geography: DE, topic: switching, columns: [NumOfProducts, HasCrCard]}
+      - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/kredite-immobilienfinanzierung/kredite/verbraucherkreditrichtlinie/verbraucherkreditrichtlinie_node.html", title: "BaFin Verbraucherkreditrichtlinie", language: de, geography: DE, topic: credit_score, columns: [CreditScore]}
+      - {url: "https://www.bundesbank.de/de/service/schlichtungsstelle/schlichtungsverfahren", title: "Bundesbank Schlichtungsverfahren", language: de, geography: DE, topic: complaints, columns: [Complain]}
+
+  b4:  # ECB press releases from the RSS feed (only the latest items are in the feed)
+    enabled: true
+    feed_url: "https://www.ecb.europa.eu/rss/press.xml"
+    link_contains: ["/press/pr/"]
+    title_regex: ""          # e.g. "monetary|interest" to keep only some releases
+    max_articles: 10
+
+  b6:  # European Banking Authority: consumer protection and guidelines
+    enabled: true
+    pages:
+      - {url: "https://www.eba.europa.eu/activities/information-consumers/how-complain", title: "EBA how to complain", language: en, geography: EU, topic: complaints, columns: [Complain]}
+      - {url: "https://www.eba.europa.eu/activities/information-consumers", title: "EBA information for consumers", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.eba.europa.eu/regulation-and-policy/consumer-protection", title: "EBA consumer protection overview", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/guidelines-product-oversight-and-governance-arrangements-retail-banking-products", title: "EBA guidelines on product oversight and governance for retail banking products", language: en, geography: EU, topic: cross_selling, columns: [NumOfProducts, Card Type]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/regulatory-technical-standards-complaints-handling-procedures-issuers-arts", title: "EBA RTS on complaints handling", language: en, geography: EU, topic: complaints, columns: [Complain]}
+      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/credit-risk/guidelines-loan-origination-and-monitoring", title: "EBA guidelines on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}
+      - {url: "https://www.eba.europa.eu/sites/default/files/document_library/Publications/Guidelines/2020/Guidelines%20on%20loan%20origination%20and%20monitoring/884283/EBA%20GL%202020%2006%20Final%20Report%20on%20GL%20on%20loan%20origination%20and%20monitoring.pdf", format: pdf, max_chars: 60000, title: "EBA final report on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}
