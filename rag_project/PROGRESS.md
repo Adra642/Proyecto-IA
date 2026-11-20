@@ -87,7 +87,7 @@ Verified:
 
 Stage 1 bug fixed here: single numeric segments were labelled "4.0" (pandas upcast), giving `kaggle_segment_num_of_products_4.0` and `num_of_products.4.0.*` keys in `stats.json`; labels are now plain text ("4"), docs and stats regenerated.
 
-[DECISION] chunk size: `config.yaml` is set to 600 / 90 overlap (best quality at the smallest context, tied with 1000). To be confirmed by the team.
+[DECISION] chunk size: 600 characters / 90 overlap, **confirmed by the user on 2026-11-20** (best quality at the smallest context, tied with 1000).
 
 Open issues / limits:
 - The experiment separates sizes weakly: 10 questions (one = 0.1), and the atomic documents are not affected by size. Stage 3's larger evaluation and the ablation in Stage 5 will give more signal.
