@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "64ded62d7bfad3b1"
+  },
+  "answer": {
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "mode": "rag",
+    "answer": "The arXiv paper proposes a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking [arxiv_2606_07582]. It addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research [arxiv_2606_07582].",
+    "chunks": [
+      {
+        "chunk_id": "arxiv_2606_07582#0030",
+        "doc_id": "arxiv_2606_07582",
+        "text": ". Probability calibration analysis further shows that the framework produces reliable predictions suitable for costsensitive business decisions. The empirical findings yield several key insights into hybrid modeling for tabular data. First, the observed error correlation of 0.62 between FT-Transformer and XGBoost demonstrates that models with different inductive biases generate partially independent errors, which enable meaningful ensemble gains. The meta-learner successfully recovers 89.1% of cases where one base model was correct and the other failed",
+        "score": 0.9053432941436768,
+        "metadata": {
+          "columns": "Exited",
+          "chunk_index": 30,
+          "format": "pdf",
+          "source_type": "paper",
+          "topic": "churn",
+          "source": "arxiv",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "language": "en",
+          "geography": "global",
+          "doc_hash": "ad61a68284957ec31eac7d2f5fefdab6d67685693e748e96d7460b85ba7e3e93",
+          "retrieved_at": "2026-11-19",
+          "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > CONCLUSION (excerpt)",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "doc_id": "arxiv_2606_07582",
+          "date": "2026-05-26"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0002",
+        "doc_id": "arxiv_2606_07582",
+        "text": "Customer churn prediction is essential across data-driven industries such as insurance, digital banking, eCommerce, and subscription platforms, where retaining existing customers is typically more cost-effective than acquiring new ones. Predicting churn on structured datasets remains challenging due to class imbalance, nonlinear feature interactions, and heterogeneous feature types. Tree-based ensemble methods consistently demonstrate strong performance in these contexts, often outperforming conventional neural networks",
+        "score": 0.9041113257408142,
+        "metadata": {
+          "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > Abstract",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "chunk_index": 2,
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "retrieved_at": "2026-11-19",
+          "columns": "Exited",
+          "doc_id": "arxiv_2606_07582",
+          "source_type": "paper",
+          "language": "en",
+          "format": "pdf",
+          "geography": "global",
+          "date": "2026-05-26",
+          "source": "arxiv",
+          "topic": "churn",
+          "doc_hash": "ad61a68284957ec31eac7d2f5fefdab6d67685693e748e96d7460b85ba7e3e93"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0003",
+        "doc_id": "arxiv_2606_07582",
+        "text": ". This study introduces a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking. The proposed framework addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research. The FT-Transformer captures higher-order feature interactions using self-attention, while XGBoost captures gradient-boosted decision boundaries with complementary inductive biases",
+        "score": 0.9007042646408081,
+        "metadata": {
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "format": "pdf",
+          "date": "2026-05-26",
+          "topic": "churn",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "language": "en",
+          "columns": "Exited",
+          "source_type": "paper",
+          "source": "arxiv",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "chunk_index": 3,
+          "doc_id": "arxiv_2606_07582",
+          "geography": "global",
+          "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > Abstract",
+          "retrieved_at": "2026-11-19",
+          "doc_hash": "ad61a68284957ec31eac7d2f5fefdab6d67685693e748e96d7460b85ba7e3e93"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0033",
+        "doc_id": "arxiv_2606_07582",
+        "text": "Full paper: https://arxiv.org/abs/2606.07582",
+        "score": 0.9004683494567871,
+        "metadata": {
+          "format": "pdf",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "columns": "Exited",
+          "date": "2026-05-26",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "language": "en",
+          "source": "arxiv",
+          "doc_hash": "ad61a68284957ec31eac7d2f5fefdab6d67685693e748e96d7460b85ba7e3e93",
+          "chunk_index": 33,
+          "topic": "churn",
+          "doc_id": "arxiv_2606_07582",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "retrieved_at": "2026-11-19",
+          "source_type": "paper",
+          "geography": "global",
+          "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > CONCLUSION (excerpt)"
+        }
+      }
+    ],
+    "cited_ids": [
+      "arxiv_2606_07582"
+    ],
+    "latency_s": 1.0987287850002758,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

@@ -11,11 +11,38 @@ from pydantic import BaseModel, Field
 QUESTIONS_PATH = Path(__file__).parent / "questions.json"
 
 
+class TextGold(BaseModel):
+    """A gold value read from a processed document: ``pattern`` has one capture group."""
+
+    doc_id: str
+    pattern: str
+
+
+class BestSpec(BaseModel):
+    """Pick the segment with the highest ``metric``.
+
+    Looks at the ``stats.json`` keys ``<segmentation>.<label>.<metric>``.
+    """
+
+    segmentation: str
+    metric: str
+
+
+class GoldNumber(BaseModel):
+    """A gold number as generated from ``stats.json`` or a document (never typed by hand)."""
+
+    value: float
+    tolerance: float
+    display: str
+    percent: bool = False
+
+
 class Question(BaseModel):
     """One evaluation question with its gold sources.
 
-    ``gold_numbers_from`` maps a name to a ``stats.json`` key; ``generate_gold.py``
-    (Stage 3) fills the numbers so none is typed by hand.
+    ``gold_numbers_from`` maps a name to a ``stats.json`` key and ``gold_numbers_from_text``
+    to a regex over a processed document; ``generate_gold.py`` fills ``gold_numbers``,
+    ``gold_facts`` and ``gold_answer`` (from ``gold_answer_template``).
     """
 
     id: str
@@ -24,7 +51,12 @@ class Question(BaseModel):
     question: str
     gold_answer: str
     gold_source_ids: list[str] = Field(default_factory=list)
+    gold_answer_template: str | None = None
     gold_numbers_from: dict[str, str] = Field(default_factory=dict)
+    gold_numbers_from_text: dict[str, TextGold] = Field(default_factory=dict)
+    gold_best_from: dict[str, BestSpec] = Field(default_factory=dict)
+    gold_numbers: dict[str, GoldNumber] = Field(default_factory=dict)
+    gold_facts: dict[str, str] = Field(default_factory=dict)
 
 
 def load_questions(path: Path = QUESTIONS_PATH) -> list[Question]:

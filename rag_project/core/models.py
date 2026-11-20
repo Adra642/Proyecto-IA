@@ -79,3 +79,16 @@ class RetrievedChunk(BaseModel):
     text: str
     score: float
     metadata: dict[str, Any]
+
+
+class RagAnswer(BaseModel):
+    """An answer with the evidence behind it (JSON-serialisable, so it can be cached)."""
+
+    question: str
+    mode: Literal["no_rag", "rag"]
+    answer: str
+    chunks: list[RetrievedChunk] = Field(default_factory=list)
+    cited_ids: list[str] = Field(default_factory=list)
+    latency_s: float
+    model: str
+    refused: bool = False  # answered by a deterministic guard, without calling the LLM

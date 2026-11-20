@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "64ded62d7bfad3b1"
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
+    "mode": "rag",
+    "answer": "Based on the provided context:\n\n* The Card Type with the highest churn rate is **DIAMOND**, with a churn rate of 21.8% [kaggle_summary_card_type].\n* The Card Type with the highest average loyalty points earned is **PLATINUM**, with a mean of 608.8 points [kaggle_summary_card_type].",
+    "chunks": [
+      {
+        "chunk_id": "kaggle_summary_card_type#0000",
+        "doc_id": "kaggle_summary_card_type",
+        "text": "# Churn rate by Card type\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| DIAMOND | 2,507 | 546 | 21.8% | 79,120.02 | 606.0 |\n| GOLD | 2,502 | 482 | 19.3% | 76,695.36 | 607.2 |\n| PLATINUM | 2,495 | 508 | 20.4% | 75,692.71 | 608.8 |\n| SILVER | 2,496 | 502 | 20.1% | 74,423.04 | 604.0 |\n\nIn plain language: by card type, the highest churn rate is 21.8% (DIAMOND) and the lowest is 19.3% (GOLD).",
+        "score": 0.882893443107605,
+        "metadata": {
+          "date": "",
+          "license": "See Kaggle dataset page (license not verified)",
+          "geography": "EU",
+          "source_type": "dataset_stats",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "topic": "churn",
+          "source": "kaggle_derived",
+          "title": "Churn rate by Card type",
+          "doc_id": "kaggle_summary_card_type",
+          "language": "en",
+          "columns": "Card Type,Exited,Point Earned",
+          "header_path": "",
+          "format": "generated",
+          "retrieved_at": "2026-11-19",
+          "chunk_index": 0,
+          "doc_hash": "19a4422bb55556da86bcc3659da18554940c5cea66a5d2e980c0a399eac7ee07"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_card_type_silver#0000",
+        "doc_id": "kaggle_segment_card_type_silver",
+        "text": "# Churn segment card: Card Type = SILVER\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Card type. Segment: Card Type = SILVER.\n\n- Customers in segment: 2,496 (25.0% of 10,000 customers)\n- Churned customers (Exited = 1): 502\n- Churn rate: 20.1% (overall churn rate: 20.4%)\n- Mean balance: 74,423.04\n- Mean estimated salary: 101,092.52\n- Mean credit score: 650.4\n- Mean age: 38.7\n- Mean loyalty points earned: 604.0\n\nIn plain language: customers with Card Type = SILVER left the bank at a rate of 20.1%, which is about the same as the overall churn rate.",
+        "score": 0.8774185180664062,
+        "metadata": {
+          "geography": "EU",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "header_path": "",
+          "source": "kaggle_derived",
+          "format": "generated",
+          "title": "Churn segment: Card Type = SILVER",
+          "chunk_index": 0,
+          "columns": "Card Type,Exited,Point Earned",
+          "date": "",
+          "topic": "churn",
+          "doc_hash": "24d181b984158a86b1671960c929ec493b2503d2834f822d0679b346c7f5ef37",
+          "doc_id": "kaggle_segment_card_type_silver",
+          "license": "See Kaggle dataset page (license not verified)",
+          "source_type": "dataset_stats",
+          "retrieved_at": "2026-11-19",
+          "language": "en"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_card_type_gold#0000",
+        "doc_id": "kaggle_segment_card_type_gold",
+        "text": "# Churn segment card: Card Type = GOLD\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Card type. Segment: Card Type = GOLD.\n\n- Customers in segment: 2,502 (25.0% of 10,000 customers)\n- Churned customers (Exited = 1): 482\n- Churn rate: 19.3% (overall churn rate: 20.4%)\n- Mean balance: 76,695.36\n- Mean estimated salary: 100,550.96\n- Mean credit score: 652.3\n- Mean age: 38.9\n- Mean loyalty points earned: 607.2\n\nIn plain language: customers with Card Type = GOLD left the bank at a rate of 19.3%, which is 0.95 times the overall churn rate (lower).",
+        "score": 0.8735045194625854,
+        "metadata": {
+          "header_path": "",
+          "title": "Churn segment: Card Type = GOLD",
+          "language": "en",
+          "retrieved_at": "2026-11-19",
+          "chunk_index": 0,
+          "topic": "churn",
+          "license": "See Kaggle dataset page (license not verified)",
+          "source": "kaggle_derived",
+          "source_type": "dataset_stats",
+          "doc_hash": "cffa4a64b4c8783240161ac47d63f744bc9df190aed224da77699d6cd83b8cc8",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "columns": "Card Type,Exited,Point Earned",
+          "geography": "EU",
+          "date": "",
+          "format": "generated",
+          "doc_id": "kaggle_segment_card_type_gold"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_card_type_platinum#0000",
+        "doc_id": "kaggle_segment_card_type_platinum",
+        "text": "# Churn segment card: Card Type = PLATINUM\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Card type. Segment: Card Type = PLATINUM.\n\n- Customers in segment: 2,495 (24.9% of 10,000 customers)\n- Churned customers (Exited = 1): 508\n- Churn rate: 20.4% (overall churn rate: 20.4%)\n- Mean balance: 75,692.71\n- Mean estimated salary: 100,197.54\n- Mean credit score: 648.3\n- Mean age: 39.0\n- Mean loyalty points earned: 608.8\n\nIn plain language: customers with Card Type = PLATINUM left the bank at a rate of 20.4%, which is about the same as the overall churn rate.",
+        "score": 0.873195230960846,
+        "metadata": {
+          "format": "generated",
+          "geography": "EU",
+          "columns": "Card Type,Exited,Point Earned",
+          "source": "kaggle_derived",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "source_type": "dataset_stats",
+          "date": "",
+          "retrieved_at": "2026-11-19",
+          "doc_hash": "b3eeeb887715b77e3211bdc777637d1e7693aecc66dc74ba544dbf70ad66b981",
+          "language": "en",
+          "header_path": "",
+          "doc_id": "kaggle_segment_card_type_platinum",
+          "topic": "churn",
+          "title": "Churn segment: Card Type = PLATINUM",
+          "chunk_index": 0,
+          "license": "See Kaggle dataset page (license not verified)"
+        }
+      }
+    ],
+    "cited_ids": [
+      "kaggle_summary_card_type"
+    ],
+    "latency_s": 0.7153138559988292,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

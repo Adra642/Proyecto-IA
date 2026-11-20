@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "What harmonised coverage level per depositor does Directive 2014/49/EU on deposit guarantee schemes set?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "64ded62d7bfad3b1"
+  },
+  "answer": {
+    "question": "What harmonised coverage level per depositor does Directive 2014/49/EU on deposit guarantee schemes set?",
+    "mode": "rag",
+    "answer": "Directive 2014/49/EU sets the harmonised coverage level at EUR 100 000 [eurlex_32014l0049].",
+    "chunks": [
+      {
+        "chunk_id": "eurlex_32014l0049#0023",
+        "doc_id": "eurlex_32014l0049",
+        "text": "(23) Directive 2009/14/EC of the European Parliament and of the Council ( 8 ) introduced a fixed coverage level of EUR 100 000, which has put some Member States in the situation of having to lower their coverage level, with risks of undermining depositor confidence. While harmonisation is essential in order to secure the level playing field and financial stability in the internal market, risks of undermining depositor confidence should be taken into account",
+        "score": 0.9277763962745667,
+        "metadata": {
+          "source_type": "regulation",
+          "chunk_index": 23,
+          "geography": "EU",
+          "doc_hash": "421cc6daa3d566627699915dffa6e262c6785955f5baa337dc0ec28cd28f9ac9",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0049",
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "columns": "Balance,NumOfProducts",
+          "format": "html",
+          "date": "",
+          "header_path": "DIRECTIVE 2014/49/EU OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 16 April 2014",
+          "doc_id": "eurlex_32014l0049",
+          "title": "Deposit Guarantee Schemes Directive 2014/49/EU",
+          "source": "eurlex",
+          "topic": "deposit_guarantee",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32014l0049#0021",
+        "doc_id": "eurlex_32014l0049",
+        "text": "(21) On the one hand, the coverage level laid down in this Directive should not leave too great a proportion of deposits without protection in the interests both of consumer protection and of the stability of the financial system. On the other hand, the cost of funding DGSs should be taken into account. It is therefore reasonable to set the harmonised coverage level at EUR 100 000.",
+        "score": 0.9237104654312134,
+        "metadata": {
+          "header_path": "DIRECTIVE 2014/49/EU OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 16 April 2014",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0049",
+          "chunk_index": 21,
+          "source": "eurlex",
+          "topic": "deposit_guarantee",
+          "columns": "Balance,NumOfProducts",
+          "geography": "EU",
+          "doc_id": "eurlex_32014l0049",
+          "date": "",
+          "source_type": "regulation",
+          "retrieved_at": "2026-11-19",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "format": "html",
+          "language": "en",
+          "title": "Deposit Guarantee Schemes Directive 2014/49/EU",
+          "doc_hash": "421cc6daa3d566627699915dffa6e262c6785955f5baa337dc0ec28cd28f9ac9"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32014l0049#0024",
+        "doc_id": "eurlex_32014l0049",
+        "text": ". Therefore, Member States should be able to apply a higher coverage level if they provided for a coverage level that was higher than the harmonised level before the application of Directive 2009/14/EC. Such higher coverage level should be limited in time and in scope and the Member States concerned should adjust the target level and contributions paid to their DGSs proportionately",
+        "score": 0.9205257296562195,
+        "metadata": {
+          "format": "html",
+          "doc_hash": "421cc6daa3d566627699915dffa6e262c6785955f5baa337dc0ec28cd28f9ac9",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "doc_id": "eurlex_32014l0049",
+          "chunk_index": 24,
+          "columns": "Balance,NumOfProducts",
+          "topic": "deposit_guarantee",
+          "geography": "EU",
+          "source": "eurlex",
+          "title": "Deposit Guarantee Schemes Directive 2014/49/EU",
+          "source_type": "regulation",
+          "date": "",
+          "language": "en",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0049",
+          "header_path": "DIRECTIVE 2014/49/EU OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 16 April 2014",
+          "retrieved_at": "2026-11-19"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32014l0049#0007",
+        "doc_id": "eurlex_32014l0049",
+        "text": "(6) Directive 94/19/EC is based on the principle of minimum harmonisation. Consequently, a variety of DGSs with very distinct features currently exist in the Union. As a result of the common requirements laid down in this Directive, a uniform level of protection should be provided for depositors throughout the Union while ensuring the same level of stability of DGSs. At the same time, those common requirements are of the utmost importance in order to eliminate market distortions. This Directive therefore contributes to the completion of the internal market.",
+        "score": 0.9142142534255981,
+        "metadata": {
+          "topic": "deposit_guarantee",
+          "retrieved_at": "2026-11-19",
+          "header_path": "DIRECTIVE 2014/49/EU OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 16 April 2014",
+          "source_type": "regulation",
+          "format": "html",
+          "columns": "Balance,NumOfProducts",
+          "geography": "EU",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "doc_id": "eurlex_32014l0049",
+          "chunk_index": 7,
+          "language": "en",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014L0049",
+          "title": "Deposit Guarantee Schemes Directive 2014/49/EU",
+          "doc_hash": "421cc6daa3d566627699915dffa6e262c6785955f5baa337dc0ec28cd28f9ac9",
+          "source": "eurlex",
+          "date": ""
+        }
+      }
+    ],
+    "cited_ids": [
+      "eurlex_32014l0049"
+    ],
+    "latency_s": 35.12878947799982,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

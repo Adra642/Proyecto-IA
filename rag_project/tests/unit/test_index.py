@@ -67,9 +67,7 @@ def test_atomic_docs_are_one_chunk_and_laws_are_split(repo: VectorStoreRepositor
     law = repo.query("coverage level", k=50, where={"doc_id": "dgs"})
     assert len(de) == 1 and len(law) > 3
     assert all(
-        h.metadata["header_path"] == "Deposit guarantee > Article 6"
-        for h in law
-        if h.metadata["chunk_index"] > 0
+        h.metadata["header_path"] == "Article 6" for h in law if h.metadata["chunk_index"] > 0
     )
 
 

@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a"
+  },
+  "answer": {
+    "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
+    "mode": "rag",
+    "answer": "Based on the study \"Prediction of Customer Churn in Banking Industry\", the authors found that the ANN (artificial neural network) structure excelled other classifiers to distinguish churned customers [arxiv_2301_13099]. The ANN structure had five nodes in a single hidden layer [arxiv_2301_13099].",
+    "chunks": [
+      {
+        "chunk_id": "arxiv_2301_13099#0013",
+        "doc_id": "arxiv_2301_13099",
+        "text": "In this study we compared the performance of different supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. Among six different models we developed, random forest and ANN appeared to be the superior ones in terms of overall performance; however, random forest turned out to be remarkably vulnerable to overfitting, an issue which wasn’t resolved satisfactorily after feature selection, but was minimized after addressing the class imbalance",
+        "score": 0.8896828293800354,
+        "metadata": {
+          "doc_hash": "7e7228c5cdbe8f9d1c500e294441c7f42d239690de14d043cd56c53cc7af5af0",
+          "title": "Prediction of Customer Churn in Banking Industry",
+          "topic": "churn",
+          "geography": "global",
+          "date": "2023-01-30",
+          "source": "arxiv",
+          "retrieved_at": "2026-11-19",
+          "format": "pdf",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "language": "en",
+          "chunk_index": 13,
+          "doc_id": "arxiv_2301_13099",
+          "columns": "Exited",
+          "header_path": "Discussion (excerpt)",
+          "source_type": "paper",
+          "url": "https://arxiv.org/abs/2301.13099"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0002",
+        "doc_id": "arxiv_2301_13099",
+        "text": "With the growing competition in banking industry, banks are required to follow customer retention strategies while they are trying to increase their market share by acquiring new customers. This study compares the performance of six supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. The effect of feature selection, class imbalance, and outliers will be discussed for ANN and random forest as the two competing models",
+        "score": 0.8804091811180115,
+        "metadata": {
+          "url": "https://arxiv.org/abs/2301.13099",
+          "chunk_index": 2,
+          "columns": "Exited",
+          "topic": "churn",
+          "doc_hash": "7e7228c5cdbe8f9d1c500e294441c7f42d239690de14d043cd56c53cc7af5af0",
+          "date": "2023-01-30",
+          "format": "pdf",
+          "source_type": "paper",
+          "geography": "global",
+          "retrieved_at": "2026-11-19",
+          "title": "Prediction of Customer Churn in Banking Industry",
+          "language": "en",
+          "doc_id": "arxiv_2301_13099",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "source": "arxiv",
+          "header_path": "Abstract"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0014",
+        "doc_id": "arxiv_2301_13099",
+        "text": ". On the other hand, ANN didn’t demonstrate any serious concern regarding overfitting and improved the performance substantially over the balanced data. It was also shown that ANN is robust to outliers while the intervention of such noises in the unseen data can adversely affect the performance of random forest to a greater extent. Therefore, based on our findings, ANN structure with five nodes in a single hidden layer excels other classifiers (Figure A. 1, A. 2) to distinguish churned customers",
+        "score": 0.870238721370697,
+        "metadata": {
+          "header_path": "Discussion (excerpt)",
+          "doc_hash": "7e7228c5cdbe8f9d1c500e294441c7f42d239690de14d043cd56c53cc7af5af0",
+          "retrieved_at": "2026-11-19",
+          "topic": "churn",
+          "geography": "global",
+          "url": "https://arxiv.org/abs/2301.13099",
+          "chunk_index": 14,
+          "date": "2023-01-30",
+          "source": "arxiv",
+          "columns": "Exited",
+          "title": "Prediction of Customer Churn in Banking Industry",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "language": "en",
+          "doc_id": "arxiv_2301_13099",
+          "format": "pdf",
+          "source_type": "paper"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0002",
+        "doc_id": "arxiv_2606_07582",
+        "text": "Customer churn prediction is essential across data-driven industries such as insurance, digital banking, eCommerce, and subscription platforms, where retaining existing customers is typically more cost-effective than acquiring new ones. Predicting churn on structured datasets remains challenging due to class imbalance, nonlinear feature interactions, and heterogeneous feature types. Tree-based ensemble methods consistently demonstrate strong performance in these contexts, often outperforming conventional neural networks",
+        "score": 0.8698505163192749,
+        "metadata": {
+          "topic": "churn",
+          "doc_hash": "b5f37944aaf4cae49f5292fb8b2c2df89618e034245b5070acdf6706b12e66ab",
+          "chunk_index": 2,
+          "source": "arxiv",
+          "doc_id": "arxiv_2606_07582",
+          "header_path": "Abstract",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "columns": "Exited",
+          "retrieved_at": "2026-11-19",
+          "format": "pdf",
+          "language": "en",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "geography": "global",
+          "source_type": "paper",
+          "date": "2026-05-26"
+        }
+      }
+    ],
+    "cited_ids": [
+      "arxiv_2301_13099"
+    ],
+    "latency_s": 0.9640311439979996,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}
