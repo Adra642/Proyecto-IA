@@ -186,13 +186,18 @@ def plot(rows: Sequence[dict[str, Any]], path: Path) -> None:
     ]
     fig, ax = plt.subplots(figsize=(8, 4.8), facecolor="#fcfcfb")
     ax.set_facecolor("#fcfcfb")
+    # Series that coincide (e.g. hit@3 = hit@5 = 1.0) are drawn nested (wider line underneath)
+    # and share one end label, so none is hidden or unreadable.
+    widths = {"hit@1": 2, "hit@3": 5, "hit@5": 2, "mrr": 2}
+    end_labels: dict[float, list[str]] = {}
     for key, color, style in series:
         values = [r[key] for r in data]
-        ax.plot(sizes, values, style, color=color, linewidth=2, marker="o", markersize=7,
-                markeredgecolor="#fcfcfb", markeredgewidth=2)  # fmt: skip
-        ax.annotate(key.upper() if key == "mrr" else key, (sizes[-1], values[-1]),
-                    xytext=(10, 0), textcoords="offset points", va="center",
-                    color="#0b0b0b", fontsize=10)  # fmt: skip
+        ax.plot(sizes, values, style, color=color, linewidth=widths[key], marker="o",
+                markersize=7, markeredgecolor="#fcfcfb", markeredgewidth=2)  # fmt: skip
+        end_labels.setdefault(values[-1], []).append("MRR" if key == "mrr" else key)
+    for y, names in end_labels.items():
+        ax.annotate(" = ".join(names), (sizes[-1], y), xytext=(10, 0), textcoords="offset points",
+                    va="center", color="#0b0b0b", fontsize=10)  # fmt: skip
     ax.set_ylim(0, 1.05)
     ax.set_xlabel("Chunk size (characters)", color="#52514e")
     ax.set_ylabel("Share of questions (MRR: mean reciprocal rank)", color="#52514e")
@@ -231,8 +236,9 @@ def run(
             )
             summaries.append(summary)
             details.extend(results)
-    write_csv(out_dir / "chunking_results.csv", summaries)
-    write_csv(out_dir / "chunking_detail.csv", detail_rows(details))
+            # Save after every variant so an interrupted run keeps what it already measured.
+            write_csv(out_dir / "chunking_results.csv", summaries)
+            write_csv(out_dir / "chunking_detail.csv", detail_rows(details))
     plot(summaries, out_dir / "chunking_results.png")
     return summaries
 
