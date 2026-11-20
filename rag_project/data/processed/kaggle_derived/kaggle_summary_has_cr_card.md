@@ -22,7 +22,7 @@ Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Ger
 
 | Segment | Customers | Churned | Churn rate | Mean balance | Mean points |
 |---|---|---|---|---|---|
-| 0.0 | 2,945 | 613 | 20.8% | 77,920.79 | 610.4 |
-| 1.0 | 7,055 | 1,425 | 20.2% | 75,886.91 | 604.9 |
+| 0 | 2,945 | 613 | 20.8% | 77,920.79 | 610.4 |
+| 1 | 7,055 | 1,425 | 20.2% | 75,886.91 | 604.9 |
 
-In plain language: by has credit card, the highest churn rate is 20.8% (0.0) and the lowest is 20.2% (1.0).
+In plain language: by has credit card, the highest churn rate is 20.8% (0) and the lowest is 20.2% (1).

@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+from core.corpus import read_front_matter
 from core.logging_setup import get_logger
 from core.models import Document
 
@@ -75,14 +76,6 @@ def write_stats(stats: dict[str, float], path: Path) -> None:
     """Write ``stats.json`` (sorted keys; NaN becomes null)."""
     safe = {k: _json_safe(v) for k, v in sorted(stats.items())}
     _write_text(path, json.dumps(safe, indent=2, ensure_ascii=False) + "\n")
-
-
-def read_front_matter(path: Path) -> dict[str, Any]:
-    """Parse the YAML front matter of a processed document."""
-    text = path.read_text(encoding="utf-8")
-    _, front, _ = text.split("---\n", 2)
-    data: dict[str, Any] = yaml.safe_load(front)
-    return data
 
 
 def build_sources_md(processed_dir: Path) -> str:

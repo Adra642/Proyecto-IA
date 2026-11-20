@@ -15,6 +15,7 @@ from pydantic_settings import (
 )
 
 from core.exceptions import ConfigError
+from core.models import SourceType
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = PROJECT_ROOT / "config.yaml"
@@ -60,6 +61,32 @@ class EmbeddingSettings(BaseModel):
     passage_prefix: str = "passage: "
 
 
+def _default_atomic() -> list[SourceType]:
+    return ["dataset_stats", "macro_data"]
+
+
+class ChunkingSettings(BaseModel):
+    """Chunking strategy; atomic source types are never split."""
+
+    strategy: Literal["markdown_recursive", "fixed"] = "markdown_recursive"
+    chunk_size: int = Field(default=600, ge=50)
+    chunk_overlap: int = Field(default=90, ge=0)
+    atomic_source_types: list[SourceType] = Field(default_factory=lambda: _default_atomic())
+
+    @model_validator(mode="after")
+    def _overlap_smaller_than_size(self) -> ChunkingSettings:
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be smaller than chunk_size")
+        return self
+
+
+class IndexSettings(BaseModel):
+    """Vector index options."""
+
+    collection: str = "rag_churn"
+    batch_size: int = Field(default=32, ge=1)
+
+
 class Settings(BaseSettings):
     """All project settings.
 
@@ -79,6 +106,8 @@ class Settings(BaseSettings):
     http: HttpSettings
     llm: LLMSettings
     embeddings: EmbeddingSettings = EmbeddingSettings()
+    chunking: ChunkingSettings = ChunkingSettings()
+    index: IndexSettings = IndexSettings()
     sources: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     # Shortcut env var (LLM_PROVIDER) that overrides ``llm.provider``.

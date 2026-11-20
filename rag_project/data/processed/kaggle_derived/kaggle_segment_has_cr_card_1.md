@@ -1,6 +1,6 @@
 ---
-doc_id: kaggle_segment_has_cr_card_1.0
-title: 'Churn segment: HasCrCard = 1.0'
+doc_id: kaggle_segment_has_cr_card_1
+title: 'Churn segment: HasCrCard = 1'
 source: kaggle_derived
 source_type: dataset_stats
 url: https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn
@@ -16,9 +16,9 @@ license: See Kaggle dataset page (license not verified)
 format: generated
 ---
 
-# Churn segment card: HasCrCard = 1.0
+# Churn segment card: HasCrCard = 1
 
-Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Has credit card. Segment: HasCrCard = 1.0.
+Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Segmentation: Has credit card. Segment: HasCrCard = 1.
 
 - Customers in segment: 7,055 (70.5% of 10,000 customers)
 - Churned customers (Exited = 1): 1,425
@@ -29,4 +29,4 @@ Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Ger
 - Mean age: 38.8
 - Mean loyalty points earned: 604.9
 
-In plain language: customers with HasCrCard = 1.0 left the bank at a rate of 20.2%, which is about the same as the overall churn rate.
+In plain language: customers with HasCrCard = 1 left the bank at a rate of 20.2%, which is about the same as the overall churn rate.

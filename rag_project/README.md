@@ -5,8 +5,8 @@ French, German and Spanish retail banking. It turns the Kaggle *Bank Customer Ch
 computed text documents and combines them with public sources (papers, Wikipedia, ECB/Eurostat/World
 Bank data, EU law, regulators) to show that RAG beats the same LLM without retrieval.
 
-> **Status:** Stages 0 (scaffold) and 1 (data pipeline) done. Later stages (index, evaluation, app,
-> docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
+> **Status:** Stages 0 (scaffold), 1 (data pipeline) and 2 (chunking, index) done. Later stages
+> (evaluation, app, docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
 > The project is self-contained: it does not import from the churn-prediction project.
 
 ## Architecture
@@ -107,8 +107,55 @@ Privacy: `RowNumber`, `CustomerId` and `Surname` are dropped before any document
 After every run a scoped check scans `data/processed/` (no CustomerId anywhere, no surname in
 documents derived from the dataset; surnames in external text are logged as collisions).
 
-## Build the index, run the evaluation and the app
-*Stages 2 to 4.*
+## Build the index
+
+```bash
+uv run python -m rag.index --rebuild                       # drop the collection and index everything
+uv run python -m rag.index                                 # incremental: only new or changed documents
+uv run python -m rag.index --query "churn rate in Germany" -k 5   # try a retrieval
+```
+
+The first build downloads `intfloat/multilingual-e5-small` (about 470 MB) and embeds about 6,300
+chunks on CPU (about 5 minutes). The index is a persistent Chroma collection in `chroma_db/`
+(git-ignored). Each chunk carries the full document metadata (source, type, language, geography,
+topic, dataset columns, license, header path) so it can be filtered; a fingerprint of text,
+metadata, chunking settings and embedding model makes re-runs incremental and idempotent.
+
+**Chunking** (`config.yaml` -> `chunking`, code in `rag/chunking.py`), chosen per document type:
+
+| Document type | Strategy |
+|---|---|
+| segment cards, data dictionary, ECB / Eurostat / World Bank notes (`dataset_stats`, `macro_data`) | not split: one document = one chunk, so a number is never separated from its label |
+| Wikipedia, EU law, regulator pages, papers, press | split on Markdown headers (the header path is kept as metadata), then recursively by paragraph, line, sentence and word with an overlap |
+
+Each chunk is embedded together with the document title and its header path, so a clause of a law
+or a section of a guide keeps its context.
+
+### Chunk-size experiment
+
+```bash
+uv run python -m eval.chunking_experiment --with-fixed   # about 20 min on CPU: re-embeds the corpus per size
+```
+
+Writes `eval/chunking_results.csv`, `eval/chunking_detail.csv` (per question) and
+`eval/chunking_results.png`. Retrieval only, 10 questions with gold sources (`eval/questions.json`),
+scored at chunk level (hit@k, MRR):
+
+| Variant | Chunks | Avg chars | hit@1 | hit@3 | hit@5 | MRR | Context (top 5, chars) |
+|---|---|---|---|---|---|---|---|
+| 300 / 45 overlap | 13,466 | 197 | 0.80 | 1.00 | 1.00 | 0.883 | 2,154 |
+| **600 / 90 overlap** | 6,309 | 415 | 0.90 | 1.00 | 1.00 | 0.933 | 2,795 |
+| 1000 / 150 overlap | 3,873 | 681 | 0.90 | 1.00 | 1.00 | 0.933 | 3,341 |
+| fixed 600 (no headers) | 6,000 | 438 | 0.90 | 1.00 | 1.00 | 0.933 | 2,735 |
+
+Reading: 300 characters is worse (one more question misses rank 1) and doubles the number of
+chunks; 600 and 1000 tie. 600 gives the same retrieval quality with about 16 % less context
+passed to the LLM. With 10 questions one question is 0.1, and the documents that are never split
+(dataset cards, macro notes) are unaffected by the size, so the experiment separates sizes only
+weakly. The header-aware and size-only strategies tie on this question set.
+
+## Run the evaluation and the app
+*Stages 3 and 4.*
 
 ## Tests and quality
 ```bash
@@ -133,8 +180,9 @@ From the repo root: `uv run --project rag_project pre-commit install -c rag_proj
 ```
 rag_project/
 ├── config.yaml, pyproject.toml, uv.lock, .python-version, .env.example
-├── core/            settings (pydantic-settings), logging, exceptions, domain models
-├── rag/             llm.py (LLM adapters + fallback), embeddings.py (e5 adapter)
+├── core/            settings (pydantic-settings), logging, exceptions, domain models, corpus loader
+├── rag/             llm.py (LLM adapters + fallback), embeddings.py (e5 adapter),
+│                    chunking.py (strategies), vectorstore.py (Chroma repository), index.py (CLI)
 ├── factory.py       composition root: wires components from settings
 ├── data_pipeline/
 │   ├── fetchers/    one module per source + base.py (template, registry)
@@ -142,7 +190,8 @@ rag_project/
 │   ├── clean.py, build_docs.py            cleaning steps; pandas -> churn documents + stats
 │   ├── writer.py, pii_check.py            output files, SOURCES.md; privacy scan
 │   └── run_all.py   orchestrator + run report
-├── eval/, app/, docs/   later stages
+├── eval/            questions.json + loader, retrieval_metrics.py, chunking_experiment.py (results CSV/PNG)
+├── app/, docs/      later stages
 ├── data/            raw/ (git-ignored cache), processed/ (committed documents)
 └── tests/           unit/ (offline), integration/ (marked), fixtures/
 ```
@@ -155,6 +204,9 @@ Design patterns in use so far:
   once; subclasses implement `_items`, `_download`, `_parse`; `@register_fetcher("a4")` registers them.
 - Chain of fallbacks: EUR-Lex HTML, then Cellar XHTML, then Cellar PDF.
 - Pipeline of small pure functions: the cleaning steps and the statistics in `build_docs.py`.
+- Strategy: `Chunker` (passthrough, markdown+recursive, fixed-size) behind `build_chunker`, with a
+  routing chunker that picks the strategy by document type.
+- Repository: `VectorStoreRepository` wraps Chroma (`add / query / delete / rebuild`); nothing else imports chromadb.
 - Dependency injection with a composition root (`factory.py`); typed settings and domain models.
 
 ## Troubleshooting
@@ -170,7 +222,9 @@ Design patterns in use so far:
   arXiv honours its 15 s crawl delay, so the first run takes several minutes; later runs use the cache.
 - *A source is empty in the report:* see `logs/pipeline.log` and the `errors` of that source in
   `logs/run_report.json`; re-run it alone with `--sources`.
-- Empty index, Space cold start: *added with their stages.*
+- *Empty index / "No documents" error:* run the pipeline first, then `uv run python -m rag.index --rebuild`.
+- *Slow first index:* the e5 model downloads once and embedding runs on CPU; later runs are incremental.
+- Space cold start: *added with Stage 4.*
 
 ## Data attribution and licenses
 Sources and licenses are listed in `data/SOURCES.md` (generated by the pipeline, *Stage 1*).

@@ -72,3 +72,26 @@ Open issues / for the team:
 - **Caveat:** the Gemini 3.5 models ignore `temperature` (langchain-google-genai warns "uses fixed sampling defaults"). The plan's `temperature=0` for a fair, reproducible comparison cannot be enforced for Gemini; mitigation: cache evaluation answers (key includes provider and model) and score the cached answers.
 - Groq `llama-3.3-70b-versatile` is still a production model in the Groq docs; DeepSeek docs now list `deepseek-flash` and `deepseek-v4-pro` and no longer mention `deepseek-chat`, so the default is `deepseek-flash`. Both checked against the docs only (no keys), not called.
 - Smoke tests: Gemini passes live; Groq and DeepSeek are skipped (no keys). The smoke test now skips providers whose key is empty.
+
+## Stage 2: chunking, embeddings, vector DB (branch `stage-2-chunking-index`, based on `stage-0-scaffold` = Stage 1)
+Done:
+- `rag/chunking.py`: Strategy (`PassthroughChunker`, `MarkdownRecursiveChunker`, `FixedSizeChunker`) + `RoutingChunker` + `build_chunker`; atomic types (`dataset_stats`, `macro_data`) are never split.
+- `rag/vectorstore.py` (Repository over Chroma, cosine, metadata filters), `rag/index.py` (incremental by fingerprint, `--rebuild`, `--query`), `core/corpus.py`, `factory.py` wiring.
+- `eval/questions.json` (12 questions: 5 D, 2 L, 3 R, 2 U, with gold source ids and `stats.json` keys for gold numbers), `eval/retrieval_metrics.py`, `eval/chunking_experiment.py`.
+- Index built: 178 documents, 6,309 chunks at 600/90; cold build 292 s on CPU; re-sync of unchanged corpus about 1 s.
+
+Verified:
+- "churn rate in Germany": `kaggle_summary_geography` rank 1, `kaggle_segment_geography_germany` rank 2 (top 3 as required). Spanish and German queries return the BdE complaints page and the SCHUFA page; the geography filter works (`tests/integration/test_index_acceptance.py`, 5 passed).
+- Chunk-size experiment (`eval/chunking_results.csv`, `.png`, per question `chunking_detail.csv`): hit@3 = hit@5 = 1.00 for every variant; hit@1 0.80 (300), 0.90 (600, 1000, fixed 600); MRR 0.883, 0.933, 0.933, 0.933. Average top-5 context 2,154 / 2,795 / 3,341 chars. D1 is rank 3 in all variants (the geography summary is outranked by two similar cards); R2 is rank 2 only at 300.
+- The 600-character variant took 55 min wall clock but its own timer shows 304 s of embedding: the laptop was suspended; my first explanation (CPU throttling) was wrong.
+
+Stage 1 bug fixed here: single numeric segments were labelled "4.0" (pandas upcast), giving `kaggle_segment_num_of_products_4.0` and `num_of_products.4.0.*` keys in `stats.json`; labels are now plain text ("4"), docs and stats regenerated.
+
+[DECISION] chunk size: 600 characters / 90 overlap, **confirmed by the user on 2026-11-20** (best quality at the smallest context, tied with 1000).
+
+Open issues / limits:
+- The experiment separates sizes weakly: 10 questions (one = 0.1), and the atomic documents are not affected by size. Stage 3's larger evaluation and the ablation in Stage 5 will give more signal.
+- Header-aware chunking ties with fixed-size chunking on retrieval metrics here; its benefit is the header path kept as citation context.
+- Semantic chunking (optional) not implemented.
+- The two literature gold answers in `eval/questions.json` are drafts: a human must verify them against the PDFs (Stage 3).
+- Chroma index is not committed (`chroma_db/` is git-ignored); Stage 4 decides between a prebuilt index and building on first start.

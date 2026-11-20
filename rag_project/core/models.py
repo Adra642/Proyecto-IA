@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -48,3 +48,34 @@ class Document(BaseModel):
     def doc_id(self) -> str:
         """Shortcut for ``metadata.doc_id``."""
         return self.metadata.doc_id
+
+
+class Chunk(BaseModel):
+    """A retrievable piece of a document, with the document's metadata."""
+
+    chunk_id: str
+    index: int
+    text: str
+    header_path: str = ""  # e.g. "CHAPTER I > Article 1"
+    metadata: DocumentMetadata
+
+    @property
+    def doc_id(self) -> str:
+        """Id of the document this chunk comes from."""
+        return self.metadata.doc_id
+
+    @property
+    def embedding_text(self) -> str:
+        """Text that is embedded: title and header path give each chunk its context."""
+        context = " > ".join(p for p in (self.metadata.title, self.header_path) if p)
+        return f"{context}\n{self.text}"
+
+
+class RetrievedChunk(BaseModel):
+    """A chunk returned by a retriever, with its score."""
+
+    chunk_id: str
+    doc_id: str
+    text: str
+    score: float
+    metadata: dict[str, Any]
