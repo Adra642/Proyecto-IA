@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from core.settings import Settings
+from rag.chain import RagChain
 from rag.chunking import Chunker, build_chunker
 from rag.embeddings import Embedder, build_embedder
 from rag.llm import LLMClient, build_llm
+from rag.retrievers import Retriever, VectorRetriever
 from rag.vectorstore import VectorStoreRepository, open_persistent_client
 
 
@@ -36,4 +38,19 @@ class Container:
         client = open_persistent_client(self.settings.resolve(self.settings.paths.chroma_dir))
         return VectorStoreRepository(
             client, self.settings.index.collection, self.embedder(), self.settings.index.batch_size
+        )
+
+    def retriever(self) -> Retriever:
+        """Return the retriever used by the RAG chain."""
+        return VectorRetriever(self.vector_store())
+
+    def model_id(self) -> str:
+        """``provider:model`` of the primary LLM (used in logs and cache keys)."""
+        provider = self.settings.llm.provider
+        return f"{provider}:{self.settings.llm.models[provider]}"
+
+    def chain(self) -> RagChain:
+        """Return the chain (LLM + retriever) used by the evaluation and the app."""
+        return RagChain(
+            self.llm(), self.retriever(), self.settings.retrieval.top_k, self.model_id()
         )
