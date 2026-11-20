@@ -1,0 +1,22 @@
+{
+  "key_parts": {
+    "mode": "no_rag",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": null,
+    "chunking": null,
+    "embedding": null,
+    "corpus": null
+  },
+  "answer": {
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "mode": "no_rag",
+    "answer": "I do not know the answer, as I cannot verify the specific arXiv paper being referred to without a title, ID, or link.",
+    "chunks": [],
+    "cited_ids": [],
+    "latency_s": 0.9478834120018291,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

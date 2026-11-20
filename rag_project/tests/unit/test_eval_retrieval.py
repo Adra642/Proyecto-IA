@@ -36,11 +36,11 @@ def test_gold_may_be_any_of_several_documents() -> None:
 
 def test_question_file_is_valid() -> None:
     qs = load_questions()
-    assert Counter(q.category for q in qs) == {"D": 5, "L": 2, "R": 3, "U": 2}
-    assert len({q.id for q in qs}) == 12
+    assert Counter(q.category for q in qs) == {"D": 5, "L": 2, "R": 4, "U": 2}
+    assert len({q.id for q in qs}) == 13
     assert all(q.behavior == "answer" for q in qs if q.category != "U")
     assert [q.id for q in qs if not q.gold_source_ids] == ["U1", "U2"]
-    assert len(retrieval_questions(qs)) == 10
+    assert len(retrieval_questions(qs)) == 11
 
 
 def test_gold_sources_exist_in_the_committed_corpus() -> None:

@@ -18,6 +18,16 @@ class TextGold(BaseModel):
     pattern: str
 
 
+class BestSpec(BaseModel):
+    """Pick the segment with the highest ``metric``.
+
+    Looks at the ``stats.json`` keys ``<segmentation>.<label>.<metric>``.
+    """
+
+    segmentation: str
+    metric: str
+
+
 class GoldNumber(BaseModel):
     """A gold number as generated from ``stats.json`` or a document (never typed by hand)."""
 
@@ -44,6 +54,7 @@ class Question(BaseModel):
     gold_answer_template: str | None = None
     gold_numbers_from: dict[str, str] = Field(default_factory=dict)
     gold_numbers_from_text: dict[str, TextGold] = Field(default_factory=dict)
+    gold_best_from: dict[str, BestSpec] = Field(default_factory=dict)
     gold_numbers: dict[str, GoldNumber] = Field(default_factory=dict)
     gold_facts: dict[str, str] = Field(default_factory=dict)
 

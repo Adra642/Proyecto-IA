@@ -101,10 +101,30 @@ def test_missing_stats_key_fails_clearly(tmp_path: Path) -> None:
 def test_generated_questions_in_the_repo_are_consistent(settings: Settings, tmp_path: Path) -> None:
     qs = {q.id: q for q in load_questions()}
     assert qs["D1"].gold_numbers["germany"].value == pytest.approx(32.4)
-    assert qs["R1"].gold_numbers["coverage_eur"].value == 100000.0
-    assert qs["R2"].gold_numbers["debit_cap_pct"].value == 0.2
+    assert qs["R1"].gold_numbers["fixed_fee_eur"].value == 0.05
+    assert qs["R1"].gold_answer == "EUR 0.05 per transaction (Article 3(2)(b))."
+    assert qs["R4"].gold_numbers["debit_cap_pct"].value == 0.2
+    assert qs["R2"].gold_facts["latest_year"].isdigit()
     assert "2.50" in qs["R3"].gold_answer or "2.5" in qs["R3"].gold_answer
+    assert qs["D4"].gold_facts["top_churn_card"] in {"DIAMOND", "GOLD", "PLATINUM", "SILVER"}
+    assert qs["D5"].gold_facts["top_age_band"] == "50-59"
     copy = tmp_path / "q.json"
     copy.write_text(json.dumps([q.model_dump() for q in qs.values()]), encoding="utf-8")
     again = generate(settings, copy)
     assert [q.gold_answer for q in again] == [q.gold_answer for q in qs.values()]
+
+
+def test_best_segment_picks_the_highest_metric() -> None:
+    from eval.generate_gold import best_segment
+    from eval.questions import BestSpec
+
+    stats = {
+        "card_type.GOLD.churn_rate": 0.19, "card_type.DIAMOND.churn_rate": 0.22,
+        "card_type.GOLD.mean_points": 610.0, "age_band.<30.churn_rate": 0.07,
+    }  # fmt: skip
+    assert best_segment(stats, BestSpec(segmentation="card_type", metric="churn_rate")) == (
+        "DIAMOND",
+        "card_type.DIAMOND.churn_rate",
+    )
+    with pytest.raises(ConfigError, match="no stats keys"):
+        best_segment(stats, BestSpec(segmentation="gender", metric="churn_rate"))

@@ -21,9 +21,10 @@ from core.exceptions import ConfigError
 from core.logging_setup import get_logger, setup_logging
 from core.settings import Settings, load_settings
 from eval.numbers import extract_numbers
-from eval.questions import QUESTIONS_PATH, GoldNumber, Question, load_questions
+from eval.questions import QUESTIONS_PATH, BestSpec, GoldNumber, Question, load_questions
 
 log = get_logger(__name__)
+DECIMAL_COMMA = re.compile(r"\d+,\d{1,2}")
 
 
 def is_rate(key: str) -> bool:
@@ -58,6 +59,16 @@ def read_text_gold(processed_dir: Path, doc_id: str, pattern: str) -> str:
     return match.group(1)
 
 
+def best_segment(stats: dict[str, float], spec: BestSpec) -> tuple[str, str]:
+    """Label and stats key of the segment with the highest metric (e.g. highest churn rate)."""
+    pattern = re.compile(rf"^{re.escape(spec.segmentation)}\.(.+)\.{re.escape(spec.metric)}$")
+    candidates = {m.group(1): k for k in stats if (m := pattern.match(k)) and stats[k] is not None}
+    if not candidates:
+        raise ConfigError(f"no stats keys for {spec.segmentation}.*.{spec.metric}")
+    label = max(candidates, key=lambda lab: stats[candidates[lab]])
+    return label, candidates[label]
+
+
 def fill_question(q: Question, stats: dict[str, float], processed_dir: Path) -> Question:
     """Return ``q`` with ``gold_numbers``, ``gold_facts`` and ``gold_answer`` generated."""
     numbers: dict[str, GoldNumber] = {}
@@ -66,15 +77,22 @@ def fill_question(q: Question, stats: dict[str, float], processed_dir: Path) -> 
         if key not in stats or stats[key] is None:
             raise ConfigError(f"{q.id}: stats key not found: {key}")
         numbers[name] = number_from_stat(key, stats[key])
+    for name, best in q.gold_best_from.items():
+        label, key = best_segment(stats, best)
+        facts[name] = label
+        numbers[f"{name}_value"] = number_from_stat(key, stats[key])
     for name, spec in q.gold_numbers_from_text.items():
         raw = read_text_gold(processed_dir, spec.doc_id, spec.pattern)
         parsed = extract_numbers(raw)
-        if parsed and re.fullmatch(r"[\d., ]+", raw):
+        is_year = re.fullmatch(r"(19|20)\d{2}", raw) is not None  # years are facts, not figures
+        if parsed and not is_year and re.fullmatch(r"[\d., ]+", raw):
             percent_style = "%" in spec.pattern
             numbers[name] = GoldNumber(
                 value=parsed[0],
-                tolerance=0.05 if parsed[0] < 100 else 0.5,
-                display=raw.replace(",", ".") if percent_style else raw,
+                tolerance=max(abs(parsed[0]) * 0.005, 0.0005),
+                display=raw.replace(",", ".")
+                if percent_style or DECIMAL_COMMA.fullmatch(raw)
+                else raw,
                 percent=percent_style,
             )
         else:

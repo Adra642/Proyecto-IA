@@ -1,0 +1,22 @@
+{
+  "key_parts": {
+    "mode": "no_rag",
+    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": null,
+    "chunking": null,
+    "embedding": null,
+    "corpus": null
+  },
+  "answer": {
+    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "mode": "no_rag",
+    "answer": "Under Regulation (EU) 2015/751, Member States may allow a weighted average of no more than 0.2% for all domestic debit card transactions, or they may allow a per-transaction interchange fee. However, the regulation does not establish a single fixed maximum euro amount for this per-transaction fee; instead, it provides that the fee may be capped as a fixed amount, a percentage, or a combination, provided that the amount does not exceed 0.2% of the annual transaction value of domestic debit card transactions within the scheme. \n\nTherefore, I cannot verify a specific fixed maximum euro amount, as the regulation caps the fee based on a percentage equivalent (0.2%) rather than a static euro value.",
+    "chunks": [],
+    "cited_ids": [],
+    "latency_s": 1.0933414780010935,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "64ded62d7bfad3b1"
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
+    "mode": "rag",
+    "answer": "In the Kaggle Bank Customer Churn dataset, the age band with the highest churn rate is 50-59, with a churn rate of 56.0% [kaggle_summary_age_band, kaggle_segment_age_band_50-59].",
+    "chunks": [
+      {
+        "chunk_id": "kaggle_summary_age_band#0000",
+        "doc_id": "kaggle_summary_age_band",
+        "text": "# Churn rate by Age band\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 30-39 | 4,346 | 473 | 10.9% | 75,071.80 | 607.2 |\n| 40-49 | 2,618 | 807 | 30.8% | 78,479.24 | 603.9 |\n| 50-59 | 869 | 487 | 56.0% | 83,632.94 | 603.8 |\n| 60+ | 526 | 147 | 27.9% | 75,136.10 | 614.4 |\n| <30 | 1,641 | 124 | 7.6% | 73,698.72 | 607.9 |\n\nIn plain language: by age band, the highest churn rate is 56.0% (50-59) and the lowest is 7.6% (<30).",
+        "score": 0.8870882987976074,
+        "metadata": {
+          "geography": "EU",
+          "retrieved_at": "2026-11-19",
+          "date": "",
+          "title": "Churn rate by Age band",
+          "columns": "Age,Exited",
+          "language": "en",
+          "header_path": "",
+          "topic": "churn",
+          "doc_id": "kaggle_summary_age_band",
+          "source_type": "dataset_stats",
+          "format": "generated",
+          "source": "kaggle_derived",
+          "doc_hash": "82512632f54dcc5614b43a3df25cf80b09d866ea8c945f8a41537f697f7f0e3c",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "chunk_index": 0,
+          "license": "See Kaggle dataset page (license not verified)"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_age_band_60plus#0000",
+        "doc_id": "kaggle_segment_age_band_60plus",
+        "text": "# Churn segment card: AgeBand = 60+\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Age band. Segment: AgeBand = 60+.\n\n- Customers in segment: 526 (5.3% of 10,000 customers)\n- Churned customers (Exited = 1): 147\n- Churn rate: 27.9% (overall churn rate: 20.4%)\n- Mean balance: 75,136.10\n- Mean estimated salary: 97,562.14\n- Mean credit score: 653.5\n- Mean age: 66.6\n- Mean loyalty points earned: 614.4\n\nIn plain language: customers with AgeBand = 60+ left the bank at a rate of 27.9%, which is 1.37 times the overall churn rate (higher).",
+        "score": 0.8763514757156372,
+        "metadata": {
+          "topic": "churn",
+          "columns": "Age,Exited",
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "chunk_index": 0,
+          "date": "",
+          "source": "kaggle_derived",
+          "title": "Churn segment: AgeBand = 60+",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "license": "See Kaggle dataset page (license not verified)",
+          "doc_hash": "49e02017da2ee2cf120da02f93a942505a1d3665881d494ec8bd1c474218e997",
+          "header_path": "",
+          "doc_id": "kaggle_segment_age_band_60plus",
+          "geography": "EU",
+          "format": "generated",
+          "source_type": "dataset_stats"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_age_band_lt30#0000",
+        "doc_id": "kaggle_segment_age_band_lt30",
+        "text": "# Churn segment card: AgeBand = <30\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Age band. Segment: AgeBand = <30.\n\n- Customers in segment: 1,641 (16.4% of 10,000 customers)\n- Churned customers (Exited = 1): 124\n- Churn rate: 7.6% (overall churn rate: 20.4%)\n- Mean balance: 73,698.72\n- Mean estimated salary: 100,855.25\n- Mean credit score: 651.1\n- Mean age: 25.9\n- Mean loyalty points earned: 607.9\n\nIn plain language: customers with AgeBand = <30 left the bank at a rate of 7.6%, which is 0.37 times the overall churn rate (lower).",
+        "score": 0.8748400807380676,
+        "metadata": {
+          "retrieved_at": "2026-11-19",
+          "columns": "Age,Exited",
+          "title": "Churn segment: AgeBand = <30",
+          "source_type": "dataset_stats",
+          "topic": "churn",
+          "chunk_index": 0,
+          "doc_id": "kaggle_segment_age_band_lt30",
+          "language": "en",
+          "date": "",
+          "header_path": "",
+          "geography": "EU",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "doc_hash": "21e0bc5c6a8121fdc1250421a08b46e20721667690d90bf919bc17c63672b44f",
+          "source": "kaggle_derived",
+          "license": "See Kaggle dataset page (license not verified)",
+          "format": "generated"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_age_band_50-59#0000",
+        "doc_id": "kaggle_segment_age_band_50-59",
+        "text": "# Churn segment card: AgeBand = 50-59\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Age band. Segment: AgeBand = 50-59.\n\n- Customers in segment: 869 (8.7% of 10,000 customers)\n- Churned customers (Exited = 1): 487\n- Churn rate: 56.0% (overall churn rate: 20.4%)\n- Mean balance: 83,632.94\n- Mean estimated salary: 97,144.93\n- Mean credit score: 646.4\n- Mean age: 53.8\n- Mean loyalty points earned: 603.8\n\nIn plain language: customers with AgeBand = 50-59 left the bank at a rate of 56.0%, which is 2.75 times the overall churn rate (higher).",
+        "score": 0.872917652130127,
+        "metadata": {
+          "title": "Churn segment: AgeBand = 50-59",
+          "retrieved_at": "2026-11-19",
+          "chunk_index": 0,
+          "source_type": "dataset_stats",
+          "header_path": "",
+          "geography": "EU",
+          "columns": "Age,Exited",
+          "source": "kaggle_derived",
+          "doc_id": "kaggle_segment_age_band_50-59",
+          "doc_hash": "42a3f2e9e4018378279d34f74349204fe715ec614ac0d076e6417bdc72282e45",
+          "language": "en",
+          "date": "",
+          "topic": "churn",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "format": "generated",
+          "license": "See Kaggle dataset page (license not verified)"
+        }
+      }
+    ],
+    "cited_ids": [],
+    "latency_s": 2.842270725999697,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

@@ -16,6 +16,7 @@
       "spain": "geography.Spain.churn_rate"
     },
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {
       "germany": {
         "value": 32.4,
@@ -54,6 +55,7 @@
       "two_products": "num_of_products.2.churn_rate"
     },
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {
       "four_products": {
         "value": 100.0,
@@ -74,7 +76,7 @@
     "id": "D3",
     "category": "D",
     "behavior": "answer",
-    "question": "In the Kaggle Bank Customer Churn dataset, how does the Complain column relate to Exited, and what does that imply for building a churn model?",
+    "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
     "gold_answer": "99.8% of churned customers had complained (churn rate 99.5% among complainers versus 0.1% among the rest), so Complain mirrors Exited and is very likely target leakage; it should not be used as a predictor.",
     "gold_source_ids": [
       "kaggle_findings"
@@ -86,6 +88,7 @@
       "churn_rate_not_complained": "leakage.churn_rate_not_complained"
     },
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {
       "share_churners_complained": {
         "value": 99.8,
@@ -113,125 +116,71 @@
     "category": "D",
     "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "gold_answer": "Churn rate by card type: DIAMOND 21.8%, GOLD 19.3%, PLATINUM 20.4%, SILVER 20.1%. Mean loyalty points: DIAMOND 606.0, GOLD 607.2, PLATINUM 608.8, SILVER 604.0.",
+    "gold_answer": "Highest churn rate: DIAMOND (21.8%). Highest average loyalty points earned: PLATINUM (608.8 points).",
     "gold_source_ids": [
       "kaggle_summary_card_type"
     ],
-    "gold_answer_template": "Churn rate by card type: DIAMOND {diamond_churn}%, GOLD {gold_churn}%, PLATINUM {platinum_churn}%, SILVER {silver_churn}%. Mean loyalty points: DIAMOND {diamond_points}, GOLD {gold_points}, PLATINUM {platinum_points}, SILVER {silver_points}.",
-    "gold_numbers_from": {
-      "diamond_churn": "card_type.DIAMOND.churn_rate",
-      "gold_churn": "card_type.GOLD.churn_rate",
-      "platinum_churn": "card_type.PLATINUM.churn_rate",
-      "silver_churn": "card_type.SILVER.churn_rate",
-      "diamond_points": "card_type.DIAMOND.mean_points",
-      "gold_points": "card_type.GOLD.mean_points",
-      "platinum_points": "card_type.PLATINUM.mean_points",
-      "silver_points": "card_type.SILVER.mean_points"
-    },
+    "gold_answer_template": "Highest churn rate: {top_churn_card} ({top_churn_card_value}%). Highest average loyalty points earned: {top_points_card} ({top_points_card_value} points).",
+    "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {
+      "top_churn_card": {
+        "segmentation": "card_type",
+        "metric": "churn_rate"
+      },
+      "top_points_card": {
+        "segmentation": "card_type",
+        "metric": "mean_points"
+      }
+    },
     "gold_numbers": {
-      "diamond_churn": {
+      "top_churn_card_value": {
         "value": 21.8,
         "tolerance": 0.05,
         "display": "21.8",
         "percent": true
       },
-      "gold_churn": {
-        "value": 19.3,
-        "tolerance": 0.05,
-        "display": "19.3",
-        "percent": true
-      },
-      "platinum_churn": {
-        "value": 20.4,
-        "tolerance": 0.05,
-        "display": "20.4",
-        "percent": true
-      },
-      "silver_churn": {
-        "value": 20.1,
-        "tolerance": 0.05,
-        "display": "20.1",
-        "percent": true
-      },
-      "diamond_points": {
-        "value": 606.0,
-        "tolerance": 0.05,
-        "display": "606.0",
-        "percent": false
-      },
-      "gold_points": {
-        "value": 607.2,
-        "tolerance": 0.05,
-        "display": "607.2",
-        "percent": false
-      },
-      "platinum_points": {
+      "top_points_card_value": {
         "value": 608.8,
         "tolerance": 0.05,
         "display": "608.8",
         "percent": false
-      },
-      "silver_points": {
-        "value": 604.0,
-        "tolerance": 0.05,
-        "display": "604.0",
-        "percent": false
       }
     },
-    "gold_facts": {}
+    "gold_facts": {
+      "top_churn_card": "DIAMOND",
+      "top_points_card": "PLATINUM"
+    }
   },
   {
     "id": "D5",
     "category": "D",
     "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "gold_answer": "Churn rate by age band: <30 7.6%, 30-39 10.9%, 40-49 30.8%, 50-59 56.0%, 60+ 27.9%.",
+    "gold_answer": "The 50-59 age band has the highest churn rate (56.0%).",
     "gold_source_ids": [
       "kaggle_summary_age_band"
     ],
-    "gold_answer_template": "Churn rate by age band: <30 {lt30}%, 30-39 {30_39}%, 40-49 {40_49}%, 50-59 {50_59}%, 60+ {60plus}%.",
-    "gold_numbers_from": {
-      "lt30": "age_band.<30.churn_rate",
-      "30_39": "age_band.30-39.churn_rate",
-      "40_49": "age_band.40-49.churn_rate",
-      "50_59": "age_band.50-59.churn_rate",
-      "60plus": "age_band.60+.churn_rate"
-    },
+    "gold_answer_template": "The {top_age_band} age band has the highest churn rate ({top_age_band_value}%).",
+    "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {
+      "top_age_band": {
+        "segmentation": "age_band",
+        "metric": "churn_rate"
+      }
+    },
     "gold_numbers": {
-      "lt30": {
-        "value": 7.6,
-        "tolerance": 0.05,
-        "display": "7.6",
-        "percent": true
-      },
-      "30_39": {
-        "value": 10.9,
-        "tolerance": 0.05,
-        "display": "10.9",
-        "percent": true
-      },
-      "40_49": {
-        "value": 30.8,
-        "tolerance": 0.05,
-        "display": "30.8",
-        "percent": true
-      },
-      "50_59": {
+      "top_age_band_value": {
         "value": 56.0,
         "tolerance": 0.05,
         "display": "56.0",
         "percent": true
-      },
-      "60plus": {
-        "value": 27.9,
-        "tolerance": 0.05,
-        "display": "27.9",
-        "percent": true
       }
     },
-    "gold_facts": {}
+    "gold_facts": {
+      "top_age_band": "50-59"
+    }
   },
   {
     "id": "L1",
@@ -245,6 +194,7 @@
     "gold_answer_template": null,
     "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {},
     "gold_facts": {}
   },
@@ -260,6 +210,7 @@
     "gold_answer_template": null,
     "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {},
     "gold_facts": {}
   },
@@ -267,24 +218,25 @@
     "id": "R1",
     "category": "R",
     "behavior": "answer",
-    "question": "What harmonised coverage level per depositor does Directive 2014/49/EU on deposit guarantee schemes set?",
-    "gold_answer": "A harmonised coverage level of EUR 100 000 per depositor per credit institution.",
+    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "gold_answer": "EUR 0.05 per transaction (Article 3(2)(b)).",
     "gold_source_ids": [
-      "eurlex_32014l0049"
+      "eurlex_32015r0751"
     ],
-    "gold_answer_template": "A harmonised coverage level of EUR {coverage_eur} per depositor per credit institution.",
+    "gold_answer_template": "EUR {fixed_fee_eur} per transaction (Article 3(2)(b)).",
     "gold_numbers_from": {},
     "gold_numbers_from_text": {
-      "coverage_eur": {
-        "doc_id": "eurlex_32014l0049",
-        "pattern": "fixed coverage level of EUR (\\d{1,3}(?: \\d{3})*)"
+      "fixed_fee_eur": {
+        "doc_id": "eurlex_32015r0751",
+        "pattern": "no more than EUR (\\d,\\d{2}), or, in the Member States whose currency"
       }
     },
+    "gold_best_from": {},
     "gold_numbers": {
-      "coverage_eur": {
-        "value": 100000.0,
-        "tolerance": 0.5,
-        "display": "100 000",
+      "fixed_fee_eur": {
+        "value": 0.05,
+        "tolerance": 0.0005,
+        "display": "0.05",
         "percent": false
       }
     },
@@ -294,38 +246,45 @@
     "id": "R2",
     "category": "R",
     "behavior": "answer",
-    "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "gold_answer": "0.2% of the transaction value for debit card transactions and 0.3% for credit card transactions.",
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "gold_answer": "In 2025, 70.71% of individuals in Germany used internet banking, up from 66.92% the year before.",
     "gold_source_ids": [
-      "eurlex_32015r0751"
+      "eurostat_isoc_ci_ac_i_de"
     ],
-    "gold_answer_template": "{debit_cap_pct}% of the transaction value for debit card transactions and {credit_cap_pct}% for credit card transactions.",
+    "gold_answer_template": "In {latest_year}, {de_latest}% of individuals in Germany used internet banking, up from {de_prev}% the year before.",
     "gold_numbers_from": {},
     "gold_numbers_from_text": {
-      "debit_cap_pct": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "more than (\\d,\\d) % of the value of the transaction for any debit card"
+      "latest_year": {
+        "doc_id": "eurostat_isoc_ci_ac_i_de",
+        "pattern": "internet banking in Germany, for (\\d{4}), is"
       },
-      "credit_cap_pct": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "more than (\\d,\\d) % of the value of the transaction for any credit card"
+      "de_latest": {
+        "doc_id": "eurostat_isoc_ci_ac_i_de",
+        "pattern": "internet banking in Germany, for \\d{4}, is (\\d+\\.\\d+)%"
+      },
+      "de_prev": {
+        "doc_id": "eurostat_isoc_ci_ac_i_de",
+        "pattern": "Recent observations:\\n- \\d{4}: [\\d.]+%\\n- \\d{4}: (\\d+\\.\\d+)%"
       }
     },
+    "gold_best_from": {},
     "gold_numbers": {
-      "debit_cap_pct": {
-        "value": 0.2,
-        "tolerance": 0.05,
-        "display": "0.2",
+      "de_latest": {
+        "value": 70.71,
+        "tolerance": 0.35355,
+        "display": "70.71",
         "percent": true
       },
-      "credit_cap_pct": {
-        "value": 0.3,
-        "tolerance": 0.05,
-        "display": "0.3",
+      "de_prev": {
+        "value": 66.92,
+        "tolerance": 0.3346,
+        "display": "66.92",
         "percent": true
       }
     },
-    "gold_facts": {}
+    "gold_facts": {
+      "latest_year": "2025"
+    }
   },
   {
     "id": "R3",
@@ -348,10 +307,11 @@
         "pattern": "in effect since (\\d{4}-\\d{2}-\\d{2})"
       }
     },
+    "gold_best_from": {},
     "gold_numbers": {
       "rate_pct": {
         "value": 2.5,
-        "tolerance": 0.05,
+        "tolerance": 0.0125,
         "display": "2.50",
         "percent": true
       }
@@ -359,6 +319,44 @@
     "gold_facts": {
       "since": "2026-09-16"
     }
+  },
+  {
+    "id": "R4",
+    "category": "R",
+    "behavior": "answer",
+    "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
+    "gold_answer": "0.2% of the transaction value for debit card transactions and 0.3% for credit card transactions.",
+    "gold_source_ids": [
+      "eurlex_32015r0751"
+    ],
+    "gold_answer_template": "{debit_cap_pct}% of the transaction value for debit card transactions and {credit_cap_pct}% for credit card transactions.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "debit_cap_pct": {
+        "doc_id": "eurlex_32015r0751",
+        "pattern": "more than (\\d,\\d) % of the value of the transaction for any debit card"
+      },
+      "credit_cap_pct": {
+        "doc_id": "eurlex_32015r0751",
+        "pattern": "more than (\\d,\\d) % of the value of the transaction for any credit card"
+      }
+    },
+    "gold_best_from": {},
+    "gold_numbers": {
+      "debit_cap_pct": {
+        "value": 0.2,
+        "tolerance": 0.001,
+        "display": "0.2",
+        "percent": true
+      },
+      "credit_cap_pct": {
+        "value": 0.3,
+        "tolerance": 0.0015,
+        "display": "0.3",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
     "id": "U1",
@@ -370,6 +368,7 @@
     "gold_answer_template": null,
     "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {},
     "gold_facts": {}
   },
@@ -383,6 +382,7 @@
     "gold_answer_template": null,
     "gold_numbers_from": {},
     "gold_numbers_from_text": {},
+    "gold_best_from": {},
     "gold_numbers": {},
     "gold_facts": {}
   }

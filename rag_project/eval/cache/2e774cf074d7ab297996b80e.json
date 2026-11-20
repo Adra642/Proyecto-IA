@@ -1,0 +1,127 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "64ded62d7bfad3b1"
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "mode": "rag",
+    "answer": "Je ne sais pas car le contexte est insuffisant pour répondre. Le contexte ne mentionne pas le Portugal (les pays couverts sont la France, l'Allemagne et l'Espagne) [kaggle_overview, kaggle_summary_geography_x_is_active_member].",
+    "chunks": [
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "doc_id": "kaggle_overview",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain.",
+        "score": 0.8922024965286255,
+        "metadata": {
+          "doc_hash": "18657ef2cf4ac63bf0467deb9cf04af1714e3c46cabf35b4ef7a2b08d43e3492",
+          "header_path": "",
+          "retrieved_at": "2026-11-19",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "license": "See Kaggle dataset page (license not verified)",
+          "source_type": "dataset_stats",
+          "columns": "Exited",
+          "format": "generated",
+          "language": "en",
+          "geography": "EU",
+          "chunk_index": 0,
+          "date": "",
+          "source": "kaggle_derived",
+          "title": "Overview of the Bank Customer Churn dataset",
+          "topic": "churn",
+          "doc_id": "kaggle_overview"
+        }
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "doc_id": "kaggle_summary_geography_x_is_active_member",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1).",
+        "score": 0.8787389993667603,
+        "metadata": {
+          "chunk_index": 0,
+          "license": "See Kaggle dataset page (license not verified)",
+          "doc_hash": "4cbbc0231ea5417b8f09972f51a2a0dc6fb4cc4d359b848c261ce69718c21fc4",
+          "format": "generated",
+          "title": "Churn rate by Geography x active member",
+          "doc_id": "kaggle_summary_geography_x_is_active_member",
+          "source_type": "dataset_stats",
+          "header_path": "",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "language": "en",
+          "source": "kaggle_derived",
+          "geography": "EU",
+          "retrieved_at": "2026-11-19",
+          "topic": "churn",
+          "date": "",
+          "columns": "Exited,Geography,IsActiveMember"
+        }
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "doc_id": "kaggle_summary_num_of_products",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2).",
+        "score": 0.8784309029579163,
+        "metadata": {
+          "language": "en",
+          "header_path": "",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "format": "generated",
+          "retrieved_at": "2026-11-19",
+          "source_type": "dataset_stats",
+          "topic": "churn",
+          "chunk_index": 0,
+          "geography": "EU",
+          "doc_id": "kaggle_summary_num_of_products",
+          "doc_hash": "0ee957b1c18c89f54cd473245c7663c173021ce094092bf5274686365b7a3d18",
+          "license": "See Kaggle dataset page (license not verified)",
+          "source": "kaggle_derived",
+          "date": "",
+          "columns": "Exited,NumOfProducts",
+          "title": "Churn rate by Number of products"
+        }
+      },
+      {
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "doc_id": "kaggle_summary_satisfaction_score",
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3).",
+        "score": 0.8751545548439026,
+        "metadata": {
+          "source": "kaggle_derived",
+          "doc_id": "kaggle_summary_satisfaction_score",
+          "chunk_index": 0,
+          "source_type": "dataset_stats",
+          "geography": "EU",
+          "retrieved_at": "2026-11-19",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "license": "See Kaggle dataset page (license not verified)",
+          "topic": "churn",
+          "date": "",
+          "title": "Churn rate by Satisfaction score",
+          "columns": "Exited,Satisfaction Score",
+          "header_path": "",
+          "format": "generated",
+          "language": "en",
+          "doc_hash": "bde00f772679315755982209b55cd4d4dbbacdfc2eeef3947df2bb44f380dbe6"
+        }
+      }
+    ],
+    "cited_ids": [],
+    "latency_s": 1.0857989579999412,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}
