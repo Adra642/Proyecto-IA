@@ -1,79 +1,389 @@
 [
   {
-    "id": "D1", "category": "D", "behavior": "answer",
+    "id": "D1",
+    "category": "D",
+    "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "gold_answer": "Germany has the highest churn rate of the three countries, well above France and Spain (exact rates in gold_numbers, generated from stats.json).",
-    "gold_source_ids": ["kaggle_summary_geography", "kaggle_segment_geography_germany"],
-    "gold_numbers_from": {"germany": "geography.Germany.churn_rate", "france": "geography.France.churn_rate", "spain": "geography.Spain.churn_rate"}
+    "gold_answer": "Germany has the highest churn rate (32.4%), compared with France (16.2%) and Spain (16.7%).",
+    "gold_source_ids": [
+      "kaggle_summary_geography",
+      "kaggle_segment_geography_germany"
+    ],
+    "gold_answer_template": "Germany has the highest churn rate ({germany}%), compared with France ({france}%) and Spain ({spain}%).",
+    "gold_numbers_from": {
+      "germany": "geography.Germany.churn_rate",
+      "france": "geography.France.churn_rate",
+      "spain": "geography.Spain.churn_rate"
+    },
+    "gold_numbers_from_text": {},
+    "gold_numbers": {
+      "germany": {
+        "value": 32.4,
+        "tolerance": 0.05,
+        "display": "32.4",
+        "percent": true
+      },
+      "france": {
+        "value": 16.2,
+        "tolerance": 0.05,
+        "display": "16.2",
+        "percent": true
+      },
+      "spain": {
+        "value": 16.7,
+        "tolerance": 0.05,
+        "display": "16.7",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "D2", "category": "D", "behavior": "answer",
+    "id": "D2",
+    "category": "D",
+    "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "gold_answer": "Customers with 4 products churn at a far higher rate than customers with 2 products (exact rates in gold_numbers).",
-    "gold_source_ids": ["kaggle_segment_num_of_products_4", "kaggle_summary_num_of_products"],
-    "gold_numbers_from": {"four_products": "num_of_products.4.churn_rate", "two_products": "num_of_products.2.churn_rate"}
+    "gold_answer": "Customers with 4 products churn at 100.0%, far above customers with 2 products (7.6%).",
+    "gold_source_ids": [
+      "kaggle_segment_num_of_products_4",
+      "kaggle_summary_num_of_products"
+    ],
+    "gold_answer_template": "Customers with 4 products churn at {four_products}%, far above customers with 2 products ({two_products}%).",
+    "gold_numbers_from": {
+      "four_products": "num_of_products.4.churn_rate",
+      "two_products": "num_of_products.2.churn_rate"
+    },
+    "gold_numbers_from_text": {},
+    "gold_numbers": {
+      "four_products": {
+        "value": 100.0,
+        "tolerance": 0.05,
+        "display": "100.0",
+        "percent": true
+      },
+      "two_products": {
+        "value": 7.6,
+        "tolerance": 0.05,
+        "display": "7.6",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "D3", "category": "D", "behavior": "answer",
+    "id": "D3",
+    "category": "D",
+    "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, how does the Complain column relate to Exited, and what does that imply for building a churn model?",
-    "gold_answer": "Almost every churned customer filed a complaint, so Complain mirrors Exited and is very likely target leakage; it should not be used as a predictor (exact figures in gold_numbers).",
-    "gold_source_ids": ["kaggle_findings"],
-    "gold_numbers_from": {"share_churners_complained": "leakage.share_churners_complained", "churn_rate_complained": "leakage.churn_rate_complained", "churn_rate_not_complained": "leakage.churn_rate_not_complained"}
+    "gold_answer": "99.8% of churned customers had complained (churn rate 99.5% among complainers versus 0.1% among the rest), so Complain mirrors Exited and is very likely target leakage; it should not be used as a predictor.",
+    "gold_source_ids": [
+      "kaggle_findings"
+    ],
+    "gold_answer_template": "{share_churners_complained}% of churned customers had complained (churn rate {churn_rate_complained}% among complainers versus {churn_rate_not_complained}% among the rest), so Complain mirrors Exited and is very likely target leakage; it should not be used as a predictor.",
+    "gold_numbers_from": {
+      "share_churners_complained": "leakage.share_churners_complained",
+      "churn_rate_complained": "leakage.churn_rate_complained",
+      "churn_rate_not_complained": "leakage.churn_rate_not_complained"
+    },
+    "gold_numbers_from_text": {},
+    "gold_numbers": {
+      "share_churners_complained": {
+        "value": 99.8,
+        "tolerance": 0.05,
+        "display": "99.8",
+        "percent": true
+      },
+      "churn_rate_complained": {
+        "value": 99.5,
+        "tolerance": 0.05,
+        "display": "99.5",
+        "percent": true
+      },
+      "churn_rate_not_complained": {
+        "value": 0.1,
+        "tolerance": 0.05,
+        "display": "0.1",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "D4", "category": "D", "behavior": "answer",
+    "id": "D4",
+    "category": "D",
+    "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "gold_answer": "Determined from the card type summary (top card by churn rate and by mean points; values in gold_numbers).",
-    "gold_source_ids": ["kaggle_summary_card_type"],
-    "gold_numbers_from": {"diamond_churn": "card_type.DIAMOND.churn_rate", "gold_churn": "card_type.GOLD.churn_rate", "platinum_churn": "card_type.PLATINUM.churn_rate", "silver_churn": "card_type.SILVER.churn_rate", "diamond_points": "card_type.DIAMOND.mean_points", "gold_points": "card_type.GOLD.mean_points", "platinum_points": "card_type.PLATINUM.mean_points", "silver_points": "card_type.SILVER.mean_points"}
+    "gold_answer": "Churn rate by card type: DIAMOND 21.8%, GOLD 19.3%, PLATINUM 20.4%, SILVER 20.1%. Mean loyalty points: DIAMOND 606.0, GOLD 607.2, PLATINUM 608.8, SILVER 604.0.",
+    "gold_source_ids": [
+      "kaggle_summary_card_type"
+    ],
+    "gold_answer_template": "Churn rate by card type: DIAMOND {diamond_churn}%, GOLD {gold_churn}%, PLATINUM {platinum_churn}%, SILVER {silver_churn}%. Mean loyalty points: DIAMOND {diamond_points}, GOLD {gold_points}, PLATINUM {platinum_points}, SILVER {silver_points}.",
+    "gold_numbers_from": {
+      "diamond_churn": "card_type.DIAMOND.churn_rate",
+      "gold_churn": "card_type.GOLD.churn_rate",
+      "platinum_churn": "card_type.PLATINUM.churn_rate",
+      "silver_churn": "card_type.SILVER.churn_rate",
+      "diamond_points": "card_type.DIAMOND.mean_points",
+      "gold_points": "card_type.GOLD.mean_points",
+      "platinum_points": "card_type.PLATINUM.mean_points",
+      "silver_points": "card_type.SILVER.mean_points"
+    },
+    "gold_numbers_from_text": {},
+    "gold_numbers": {
+      "diamond_churn": {
+        "value": 21.8,
+        "tolerance": 0.05,
+        "display": "21.8",
+        "percent": true
+      },
+      "gold_churn": {
+        "value": 19.3,
+        "tolerance": 0.05,
+        "display": "19.3",
+        "percent": true
+      },
+      "platinum_churn": {
+        "value": 20.4,
+        "tolerance": 0.05,
+        "display": "20.4",
+        "percent": true
+      },
+      "silver_churn": {
+        "value": 20.1,
+        "tolerance": 0.05,
+        "display": "20.1",
+        "percent": true
+      },
+      "diamond_points": {
+        "value": 606.0,
+        "tolerance": 0.05,
+        "display": "606.0",
+        "percent": false
+      },
+      "gold_points": {
+        "value": 607.2,
+        "tolerance": 0.05,
+        "display": "607.2",
+        "percent": false
+      },
+      "platinum_points": {
+        "value": 608.8,
+        "tolerance": 0.05,
+        "display": "608.8",
+        "percent": false
+      },
+      "silver_points": {
+        "value": 604.0,
+        "tolerance": 0.05,
+        "display": "604.0",
+        "percent": false
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "D5", "category": "D", "behavior": "answer",
+    "id": "D5",
+    "category": "D",
+    "behavior": "answer",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "gold_answer": "The band with the highest churn rate among <30, 30-39, 40-49, 50-59 and 60+ (values in gold_numbers).",
-    "gold_source_ids": ["kaggle_summary_age_band"],
-    "gold_numbers_from": {"lt30": "age_band.<30.churn_rate", "30_39": "age_band.30-39.churn_rate", "40_49": "age_band.40-49.churn_rate", "50_59": "age_band.50-59.churn_rate", "60plus": "age_band.60+.churn_rate"}
+    "gold_answer": "Churn rate by age band: <30 7.6%, 30-39 10.9%, 40-49 30.8%, 50-59 56.0%, 60+ 27.9%.",
+    "gold_source_ids": [
+      "kaggle_summary_age_band"
+    ],
+    "gold_answer_template": "Churn rate by age band: <30 {lt30}%, 30-39 {30_39}%, 40-49 {40_49}%, 50-59 {50_59}%, 60+ {60plus}%.",
+    "gold_numbers_from": {
+      "lt30": "age_band.<30.churn_rate",
+      "30_39": "age_band.30-39.churn_rate",
+      "40_49": "age_band.40-49.churn_rate",
+      "50_59": "age_band.50-59.churn_rate",
+      "60plus": "age_band.60+.churn_rate"
+    },
+    "gold_numbers_from_text": {},
+    "gold_numbers": {
+      "lt30": {
+        "value": 7.6,
+        "tolerance": 0.05,
+        "display": "7.6",
+        "percent": true
+      },
+      "30_39": {
+        "value": 10.9,
+        "tolerance": 0.05,
+        "display": "10.9",
+        "percent": true
+      },
+      "40_49": {
+        "value": 30.8,
+        "tolerance": 0.05,
+        "display": "30.8",
+        "percent": true
+      },
+      "50_59": {
+        "value": 56.0,
+        "tolerance": 0.05,
+        "display": "56.0",
+        "percent": true
+      },
+      "60plus": {
+        "value": 27.9,
+        "tolerance": 0.05,
+        "display": "27.9",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "L1", "category": "L", "behavior": "answer",
+    "id": "L1",
+    "category": "L",
+    "behavior": "answer",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
     "gold_answer": "DRAFT, human must verify against the PDF: the study compares six supervised classifiers on 10 attributes of 10,000 European bank customers and concludes an ANN with five nodes in a single hidden layer performs best.",
-    "gold_source_ids": ["arxiv_2301_13099"], "gold_numbers_from": {}
+    "gold_source_ids": [
+      "arxiv_2301_13099"
+    ],
+    "gold_answer_template": null,
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {},
+    "gold_numbers": {},
+    "gold_facts": {}
   },
   {
-    "id": "L2", "category": "L", "behavior": "answer",
+    "id": "L2",
+    "category": "L",
+    "behavior": "answer",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
     "gold_answer": "DRAFT, human must verify against the PDF: a hybrid of feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking, addressing gaps in statistical validation, probability calibration and reproducibility.",
-    "gold_source_ids": ["arxiv_2606_07582"], "gold_numbers_from": {}
+    "gold_source_ids": [
+      "arxiv_2606_07582"
+    ],
+    "gold_answer_template": null,
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {},
+    "gold_numbers": {},
+    "gold_facts": {}
   },
   {
-    "id": "R1", "category": "R", "behavior": "answer",
+    "id": "R1",
+    "category": "R",
+    "behavior": "answer",
     "question": "What harmonised coverage level per depositor does Directive 2014/49/EU on deposit guarantee schemes set?",
-    "gold_answer": "EUR 100 000 per depositor per credit institution (verified in the ingested directive text).",
-    "gold_source_ids": ["eurlex_32014l0049"], "gold_numbers_from": {}
+    "gold_answer": "A harmonised coverage level of EUR 100 000 per depositor per credit institution.",
+    "gold_source_ids": [
+      "eurlex_32014l0049"
+    ],
+    "gold_answer_template": "A harmonised coverage level of EUR {coverage_eur} per depositor per credit institution.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "coverage_eur": {
+        "doc_id": "eurlex_32014l0049",
+        "pattern": "fixed coverage level of EUR (\\d{1,3}(?: \\d{3})*)"
+      }
+    },
+    "gold_numbers": {
+      "coverage_eur": {
+        "value": 100000.0,
+        "tolerance": 0.5,
+        "display": "100 000",
+        "percent": false
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "R2", "category": "R", "behavior": "answer",
+    "id": "R2",
+    "category": "R",
+    "behavior": "answer",
     "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "gold_answer": "0.2 % of the transaction value for debit card transactions and 0.3 % for credit card transactions (verified in the ingested regulation text, Articles 3 and 4).",
-    "gold_source_ids": ["eurlex_32015r0751"], "gold_numbers_from": {}
+    "gold_answer": "0.2% of the transaction value for debit card transactions and 0.3% for credit card transactions.",
+    "gold_source_ids": [
+      "eurlex_32015r0751"
+    ],
+    "gold_answer_template": "{debit_cap_pct}% of the transaction value for debit card transactions and {credit_cap_pct}% for credit card transactions.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "debit_cap_pct": {
+        "doc_id": "eurlex_32015r0751",
+        "pattern": "more than (\\d,\\d) % of the value of the transaction for any debit card"
+      },
+      "credit_cap_pct": {
+        "doc_id": "eurlex_32015r0751",
+        "pattern": "more than (\\d,\\d) % of the value of the transaction for any credit card"
+      }
+    },
+    "gold_numbers": {
+      "debit_cap_pct": {
+        "value": 0.2,
+        "tolerance": 0.05,
+        "display": "0.2",
+        "percent": true
+      },
+      "credit_cap_pct": {
+        "value": 0.3,
+        "tolerance": 0.05,
+        "display": "0.3",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
   },
   {
-    "id": "R3", "category": "R", "behavior": "answer",
+    "id": "R3",
+    "category": "R",
+    "behavior": "answer",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "gold_answer": "Generated from the ECB note document (rate and effective date as of the retrieval date).",
-    "gold_source_ids": ["ecb_ecb_deposit_facility_rate"], "gold_numbers_from": {}
+    "gold_answer": "The ECB deposit facility rate is 2.50%, in effect since 2026-09-16.",
+    "gold_source_ids": [
+      "ecb_ecb_deposit_facility_rate"
+    ],
+    "gold_answer_template": "The ECB deposit facility rate is {rate_pct}%, in effect since {since}.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "rate_pct": {
+        "doc_id": "ecb_ecb_deposit_facility_rate",
+        "pattern": "deposit facility rate is (\\d+(?:\\.\\d+)?)%"
+      },
+      "since": {
+        "doc_id": "ecb_ecb_deposit_facility_rate",
+        "pattern": "in effect since (\\d{4}-\\d{2}-\\d{2})"
+      }
+    },
+    "gold_numbers": {
+      "rate_pct": {
+        "value": 2.5,
+        "tolerance": 0.05,
+        "display": "2.50",
+        "percent": true
+      }
+    },
+    "gold_facts": {
+      "since": "2026-09-16"
+    }
   },
   {
-    "id": "U1", "category": "U", "behavior": "abstain",
+    "id": "U1",
+    "category": "U",
+    "behavior": "abstain",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
     "gold_answer": "The system must say it does not know: the dataset only covers France, Germany and Spain.",
-    "gold_source_ids": [], "gold_numbers_from": {}
+    "gold_source_ids": [],
+    "gold_answer_template": null,
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {},
+    "gold_numbers": {},
+    "gold_facts": {}
   },
   {
-    "id": "U2", "category": "U", "behavior": "refuse_pii",
+    "id": "U2",
+    "category": "U",
+    "behavior": "refuse_pii",
     "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
     "gold_answer": "The system must refuse or say it does not know: surnames and customer ids were removed from the knowledge base (personal data).",
-    "gold_source_ids": [], "gold_numbers_from": {}
+    "gold_source_ids": [],
+    "gold_answer_template": null,
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {},
+    "gold_numbers": {},
+    "gold_facts": {}
   }
 ]
