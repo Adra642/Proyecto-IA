@@ -95,3 +95,35 @@ Open issues / limits:
 - Semantic chunking (optional) not implemented.
 - The two literature gold answers in `eval/questions.json` are drafts: a human must verify them against the PDFs (Stage 3).
 - Chroma index is not committed (`chroma_db/` is git-ignored); Stage 4 decides between a prebuilt index and building on first start.
+
+## Stage 3: baseline vs RAG and evaluation (branch `stage-3-evaluation`, from `main` with Stages 0-2)
+Done:
+- `rag/chain.py` (`RagChain.answer_no_rag` / `answer_rag`), `rag/prompts.py` (versioned templates), `rag/retrievers.py` (vector retriever), `core.models.RagAnswer`.
+  RAG prompt: answer only from the context, cite `[doc_id]`, say so when insufficient, answer in the question's language, never reveal personal identifiers. Privacy guard: requests for a surname or a specific customer record are refused without calling the LLM; an empty retrieval answers "I do not know" without calling it.
+- `ThrottledLLM` and `RetryingLLM` decorators (min interval 1 s, 3 retries with 10/20/40 s backoff), applied to every provider before the fallback chain.
+- `eval/questions.json`: 14 questions (D 6, L 2, R 4, U 2), `eval/generate_gold.py` (gold numbers from `stats.json` and from regexes over the ingested texts; best segment computed for D4/D5; rewrites questions idempotently), `eval/numbers.py` (tolerant number parsing: `100 000`, `100,000`, `0,2`, `32.4%`).
+- `eval/run_eval.py` + `eval/answer_cache.py` (cache in `eval/cache/`, committed; key includes provider:model, prompts version, chunking and embedding settings, corpus hash), `eval/score.py` (hit@k, numeric match, citation check, abstain and PII-leak checks, manual sheet that preserves entries, summaries, examples), `eval/literature_verification.md`, `eval/examples.md`.
+
+Verified:
+- `uv run python -m eval.run_eval`: 28 answers, 0 failed (one HTTP 429 recovered by the backoff). Median latency 1.0 s in both modes.
+- Automatic results (`eval/auto_summary.csv`): numeric match D 0.83 (RAG) vs 0.00 (No RAG), R 0.75 vs 0.25; hit@4 and citations 0.83 to 1.00; L questions: both papers retrieved and cited; U questions 1.00 in both modes.
+- Live tests (`tests/integration/test_chain_live.py`): exact figure with citation, PII refusal without a retrieval, baseline has no sources; the plain Germany question is an expected failure (`xfail`).
+- 184 unit tests pass, ruff and mypy clean.
+
+Questions changed after the first run (plan rule: replace questions the baseline already answers):
+- R1 and R2 (deposit coverage EUR 100 000, interchange caps 0.2 %/0.3 %): the baseline answered both correctly. Replaced by the fixed EUR 0.05 option of Article 3(2)(b) of Regulation 2015/751 and the latest Eurostat internet-banking share for Germany. The old R2 stays as **R4** (baseline right, RAG initially wrong).
+- D3 reworded to ask for the exact shares (the baseline already got the qualitative conclusion); D4/D5 gold is now the best segment, so the numeric check matches what is asked; **D6** added (plain "churn rate in Germany").
+
+Problems found and what was done:
+- Chunk header paths repeated the document's long H1 (EU laws: about 150 characters) in every chunk's embedding text; the H1 is now dropped (`CHUNKER_VERSION = 2`, part of the index fingerprint, so the index rebuilt itself). R4 improved; R1 did not.
+- A shorter "Source:" line in the churn cards (without the country list) was tried and reverted: no measurable gain (Germany card rank 5 to 4, another question 2 to 3).
+- Leak check flagged an answer that merely repeated the customer id from the question: it now ignores identifiers present in the question. Number parser read "0.324" as 324: fixed.
+
+Open issues / for the team:
+- **Manual scoring pending** (`eval/manual_scoring.csv`, 28 rows, scale 0/1/2 + citation Y/N), then `uv run python -m eval.score --summary`.
+- **Human verification pending** of the L1 and L2 gold answers in `eval/literature_verification.md` (PDF sentences are quoted there).
+- The three RAG failures are kept as diagnostics for Stage 5: D6 (hybrid/BM25 and a geography filter), R1 (neighbour-chunk or rerank), R4 (source filtering). The baseline prompt allows "I do not know", so U does not separate the modes and the baseline does not hallucinate numbers; a baseline prompt without that permission would likely look worse.
+- One cached run per question and Gemini 3.5 ignores `temperature` (the D5 citation flipped between two runs with identical retrieval).
+- `eval/chunking_results.csv` was produced before the header-path change and before the question changes (the 600-character decision stands, to be re-measured in the Stage 5 ablation).
+- Token counts are not recorded (the LLM wrapper returns text only).
+- The evaluation set has 14 questions instead of 12 (three diagnostics).

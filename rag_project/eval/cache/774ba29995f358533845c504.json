@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a"
+  },
+  "answer": {
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "mode": "rag",
+    "answer": "As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].",
+    "chunks": [
+      {
+        "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
+        "doc_id": "ecb_ecb_deposit_facility_rate",
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%",
+        "score": 0.9098420143127441,
+        "metadata": {
+          "url": "https://data.ecb.europa.eu/data/datasets/FM",
+          "source_type": "macro_data",
+          "retrieved_at": "2026-11-19",
+          "title": "ECB deposit facility rate",
+          "chunk_index": 0,
+          "topic": "deposits_rates",
+          "geography": "EU",
+          "header_path": "",
+          "doc_hash": "b162ced41024a16d8c4ee80e72a5687bf1ef990c052ee55c83e4f2a5a6f13b3b",
+          "source": "ecb_api",
+          "format": "csv",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement",
+          "language": "en",
+          "date": "2026-09-16",
+          "doc_id": "ecb_ecb_deposit_facility_rate",
+          "columns": "Balance"
+        }
+      },
+      {
+        "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
+        "doc_id": "ecb_ecb_marginal_lending_facility_rate",
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%",
+        "score": 0.8871840834617615,
+        "metadata": {
+          "date": "2026-09-16",
+          "retrieved_at": "2026-11-19",
+          "doc_hash": "d68c1485aab4af5ce96213b58d3171950a3991a4ef646145389e1a18a70e5275",
+          "title": "ECB marginal lending facility rate",
+          "language": "en",
+          "chunk_index": 0,
+          "topic": "deposits_rates",
+          "doc_id": "ecb_ecb_marginal_lending_facility_rate",
+          "source_type": "macro_data",
+          "geography": "EU",
+          "columns": "Balance",
+          "header_path": "",
+          "url": "https://data.ecb.europa.eu/data/datasets/FM",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement",
+          "source": "ecb_api",
+          "format": "csv"
+        }
+      },
+      {
+        "chunk_id": "ecb_press_ecb_pr261106#0001",
+        "doc_id": "ecb_press_ecb_pr261106",
+        "text": "* EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%",
+        "score": 0.8678624033927917,
+        "metadata": {
+          "source": "ecb_press",
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "doc_hash": "da89f60318c9e25a4745ceaae2291822d887050a6021ed4703ea8601970e7836",
+          "format": "html",
+          "title": "ECB publishes consolidated banking data for end-June 2026",
+          "geography": "EU",
+          "source_type": "press",
+          "url": "https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr261106~356f2fc73a.en.html",
+          "chunk_index": 1,
+          "date": "2026-11-06",
+          "doc_id": "ecb_press_ecb_pr261106",
+          "columns": "Balance",
+          "header_path": "",
+          "license": "ECB publications: reuse allowed with source acknowledgement",
+          "topic": "macro"
+        }
+      },
+      {
+        "chunk_id": "ecb_press_ecb_pr261106#0000",
+        "doc_id": "ecb_press_ecb_pr261106",
+        "text": "# ECB publishes consolidated banking data for end-June 2026  \n* PRESS RELEASE  \n# ECB publishes consolidated banking data for end-June 2026  \n6 November 2026  \n* The aggregate of total assets of EU-headquartered credit institutions increased by 5.18%, from €33.27 trillion in June 2025 to €34.99 trillion in June 2026\n* During the same period, EU credit institutions’ aggregate non-performing loans ratio[1] increased by 0.03 percentage points year on year to stand at 1.99% in June 2026",
+        "score": 0.8588088154792786,
+        "metadata": {
+          "geography": "EU",
+          "header_path": "",
+          "columns": "Balance",
+          "date": "2026-11-06",
+          "chunk_index": 0,
+          "retrieved_at": "2026-11-19",
+          "license": "ECB publications: reuse allowed with source acknowledgement",
+          "topic": "macro",
+          "doc_hash": "da89f60318c9e25a4745ceaae2291822d887050a6021ed4703ea8601970e7836",
+          "source": "ecb_press",
+          "url": "https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr261106~356f2fc73a.en.html",
+          "doc_id": "ecb_press_ecb_pr261106",
+          "format": "html",
+          "language": "en",
+          "title": "ECB publishes consolidated banking data for end-June 2026",
+          "source_type": "press"
+        }
+      }
+    ],
+    "cited_ids": [
+      "ecb_ecb_deposit_facility_rate"
+    ],
+    "latency_s": 0.9158752750008716,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

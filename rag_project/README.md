@@ -5,8 +5,8 @@ French, German and Spanish retail banking. It turns the Kaggle *Bank Customer Ch
 computed text documents and combines them with public sources (papers, Wikipedia, ECB/Eurostat/World
 Bank data, EU law, regulators) to show that RAG beats the same LLM without retrieval.
 
-> **Status:** Stages 0 (scaffold), 1 (data pipeline) and 2 (chunking, index) done. Later stages
-> (evaluation, app, docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
+> **Status:** Stages 0 (scaffold), 1 (data pipeline), 2 (chunking, index) and 3 (evaluation) done.
+> Later stages (app, advanced RAG, docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
 > The project is self-contained: it does not import from the churn-prediction project.
 
 ## Architecture
@@ -154,8 +154,58 @@ passed to the LLM. With 10 questions one question is 0.1, and the documents that
 (dataset cards, macro notes) are unaffected by the size, so the experiment separates sizes only
 weakly. The header-aware and size-only strategies tie on this question set.
 
-## Run the evaluation and the app
-*Stages 3 and 4.*
+## Run the evaluation
+
+Fourteen questions (`eval/questions.json`) are answered in two modes with the **same LLM**
+(`config.yaml` -> `llm`): **No RAG** (the plain model, told to say so when it does not know) and
+**RAG** (top-4 chunks from the index, answer only from the context, cite `[doc_id]`).
+
+```bash
+uv run python -m eval.generate_gold   # fills gold numbers/answers from stats.json and the ingested texts
+uv run python -m eval.run_eval        # answers every question in both modes -> eval/results.csv/.json
+uv run python -m eval.score           # automatic scores + eval/manual_scoring.csv for the team
+uv run python -m eval.score --summary # after scoring by hand: mean score per category and mode
+uv run python -m eval.score --examples --example-ids D1,R3   # before/after examples for the memoir
+```
+
+- Questions: 6 about the dataset (D), 2 from the literature (L), 4 regulatory or current (R) and 2
+  behavioural (U: an answer that is not in the corpus, and a request for a surname that must be
+  refused). No gold number is typed by hand: dataset values come from `stats.json`, regulatory and
+  ECB/Eurostat values are read from the ingested texts with regexes stored in the question file.
+- Answers are cached in `eval/cache/` (key: provider and model, prompts version, chunking and
+  embedding settings, hash of the indexed corpus, question), so a re-run is free and reproducible;
+  `--refresh` ignores the cache. Client-side throttling and retry with backoff handle rate limits.
+- Manual scoring (`score_0_1_2` in `eval/manual_scoring.csv`): 0 = wrong or hallucinated, 1 = partly
+  right or vague, 2 = correct and specific; plus `citation_correct_Y_N` for RAG. Re-exporting keeps
+  what you already filled in.
+- `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
+  (drafted from abstracts): a human must tick them.
+
+Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one cached run):
+
+| Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
+|---|---|---|---|---|---|
+| D dataset (6) | No RAG | 0.00 | | | |
+| D dataset (6) | RAG | 0.83 | 0.83 | 0.83 | |
+| L literature (2) | No RAG | n/a | | | |
+| L literature (2) | RAG | n/a | 1.00 | 1.00 | |
+| R regulatory/current (4) | No RAG | 0.25 | | | |
+| R regulatory/current (4) | RAG | 0.75 | 1.00 | 0.50 | |
+| U behavioural (2) | No RAG | | | | 1.00 |
+| U behavioural (2) | RAG | | | | 1.00 |
+
+How to read it: RAG answers the dataset, literature and current-data questions with exact, cited
+figures; the plain model says "I do not know" (its prompt allows it, so it does not hallucinate
+numbers, and the behavioural questions do not separate the two modes). Failures are kept on purpose
+as diagnostics for the advanced techniques: **D6** (the plain question "churn rate in Germany":
+the phrase "Kaggle Bank Customer Churn dataset" matches every card, so the Germany card ranks 4th),
+**R1** (the answer sits in the chunk after the one retrieved) and **R4** (the model already knows
+the caps; RAG answered from Wikipedia instead of the regulation). Scores come from a single run per
+question and Gemini 3.5 ignores `temperature`, so small differences (for example a citation) can
+change between runs.
+
+## Run the app
+*Stage 4.*
 
 ## Tests and quality
 ```bash
@@ -181,8 +231,9 @@ From the repo root: `uv run --project rag_project pre-commit install -c rag_proj
 rag_project/
 ├── config.yaml, pyproject.toml, uv.lock, .python-version, .env.example
 ├── core/            settings (pydantic-settings), logging, exceptions, domain models, corpus loader
-├── rag/             llm.py (LLM adapters + fallback), embeddings.py (e5 adapter),
-│                    chunking.py (strategies), vectorstore.py (Chroma repository), index.py (CLI)
+├── rag/             llm.py (adapters, fallback, throttle/retry), embeddings.py, chunking.py,
+│                    vectorstore.py (Chroma repository), index.py (CLI), retrievers.py, prompts.py,
+│                    chain.py (No-RAG and RAG modes, privacy guard)
 ├── factory.py       composition root: wires components from settings
 ├── data_pipeline/
 │   ├── fetchers/    one module per source + base.py (template, registry)
@@ -190,7 +241,8 @@ rag_project/
 │   ├── clean.py, build_docs.py            cleaning steps; pandas -> churn documents + stats
 │   ├── writer.py, pii_check.py            output files, SOURCES.md; privacy scan
 │   └── run_all.py   orchestrator + run report
-├── eval/            questions.json + loader, retrieval_metrics.py, chunking_experiment.py (results CSV/PNG)
+├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py, answer cache,
+│                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
 ├── app/, docs/      later stages
 ├── data/            raw/ (git-ignored cache), processed/ (committed documents)
 └── tests/           unit/ (offline), integration/ (marked), fixtures/
@@ -207,6 +259,7 @@ Design patterns in use so far:
 - Strategy: `Chunker` (passthrough, markdown+recursive, fixed-size) behind `build_chunker`, with a
   routing chunker that picks the strategy by document type.
 - Repository: `VectorStoreRepository` wraps Chroma (`add / query / delete / rebuild`); nothing else imports chromadb.
+- Decorator also wraps the LLM clients: `ThrottledLLM` (min interval) and `RetryingLLM` (backoff on 429).
 - Dependency injection with a composition root (`factory.py`); typed settings and domain models.
 
 ## Troubleshooting
@@ -214,6 +267,7 @@ Design patterns in use so far:
 - *Rate limits:* set `llm.fallback_order` or switch `LLM_PROVIDER`.
 - *Model not found (404):* provider models get retired; list what your key can use and update `llm.models` in `config.yaml` (Gemini 2.5 models are retired; the default is `gemini-3.5-flash-lite`).
 - *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary between runs; the evaluation caches answers.
+- *HTTP 429 during the evaluation:* the client waits and retries (10 s, 20 s, 40 s); raise `llm.min_interval_seconds` if it keeps happening.
 - *Kaggle:* the public dataset downloads anonymously with `kagglehub`. If it ever needs auth, set
   `KAGGLE_USERNAME` / `KAGGLE_KEY`, or put a raw CSV URL in `sources.a1.fallback_url`.
 - *EUR-Lex blocking:* EUR-Lex answers bots with an empty challenge page; the fetcher detects it

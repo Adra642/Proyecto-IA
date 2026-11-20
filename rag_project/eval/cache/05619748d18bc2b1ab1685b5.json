@@ -1,0 +1,127 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a"
+  },
+  "answer": {
+    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "mode": "rag",
+    "answer": "I do not know because the context is insufficient to provide the exact fixed maximum per-transaction interchange fee in euro.",
+    "chunks": [
+      {
+        "chunk_id": "eurlex_32015r0751#0041",
+        "doc_id": "eurlex_32015r0751",
+        "text": ". Therefore, by way of exception and during a transition period of 18 months after the entry into force of this Regulation, Member States should be able to define a maximum share of domestic ‘universal cards’ payment transactions which are considered as being equivalent to credit card transactions. For example, the credit card cap could be applied to the defined share of the total value of the transactions for merchants or acquirers",
+        "score": 0.9126532673835754,
+        "metadata": {
+          "language": "en",
+          "format": "html",
+          "columns": "HasCrCard,Card Type",
+          "doc_hash": "49844b82fd5540b3a52cdb881784baa9242573a5e3ab346e472b6b752ef3c907",
+          "title": "Interchange Fee Regulation 2015/751",
+          "header_path": "",
+          "chunk_index": 41,
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "doc_id": "eurlex_32015r0751",
+          "source": "eurlex",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0751",
+          "source_type": "regulation",
+          "topic": "cards",
+          "date": "",
+          "retrieved_at": "2026-11-19",
+          "geography": "EU"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32015r0751#0104",
+        "doc_id": "eurlex_32015r0751",
+        "text": "## CHAPTER II - INTERCHANGE FEES  \n### Article 3 - Interchange fees for consumer debit card transactions  \n1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transaction for any debit card transaction.  \n2. For domestic debit card transactions Member States may either:  \n(a) define a per transaction percentage interchange fee cap lower than the one provided for in paragraph 1 and may impose a fixed maximum fee amount as a limit on the fee amount resulting from the applicable percentage rate; or",
+        "score": 0.9113619327545166,
+        "metadata": {
+          "source_type": "regulation",
+          "doc_id": "eurlex_32015r0751",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "title": "Interchange Fee Regulation 2015/751",
+          "retrieved_at": "2026-11-19",
+          "format": "html",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0751",
+          "date": "",
+          "language": "en",
+          "chunk_index": 104,
+          "source": "eurlex",
+          "geography": "EU",
+          "topic": "cards",
+          "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
+          "columns": "HasCrCard,Card Type",
+          "doc_hash": "49844b82fd5540b3a52cdb881784baa9242573a5e3ab346e472b6b752ef3c907"
+        }
+      },
+      {
+        "chunk_id": "wiki_interchange_fee#0041",
+        "doc_id": "wiki_interchange_fee",
+        "text": "In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to personal cards where there is an intermediary, not to cards issued to businesses or to cards issued by American Express.\nThat same year, the Revised Payment Services Directive banned merchant surcharges, although it did not enter into force until 2018.",
+        "score": 0.9077125787734985,
+        "metadata": {
+          "source": "wikipedia",
+          "format": "json",
+          "language": "en",
+          "header_path": "By region > European Union",
+          "retrieved_at": "2026-11-19",
+          "title": "Interchange fee",
+          "chunk_index": 41,
+          "geography": "global",
+          "date": "",
+          "doc_hash": "d6368afb2e9a5c831669316185e77d792a5f7e536fdd6262b4cb8ee47b15c033",
+          "topic": "cards",
+          "columns": "Card Type",
+          "source_type": "encyclopedia",
+          "url": "https://en.wikipedia.org/wiki/Interchange_fee",
+          "doc_id": "wiki_interchange_fee",
+          "license": "CC BY-SA 4.0"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32015r0751#0032",
+        "doc_id": "eurlex_32015r0751",
+        "text": ". It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level within each payment card scheme. Furthermore it should be possible to define a lower per transaction percentage interchange fee cap, and to impose a fixed maximum fee amount as a limit to the fee amount resulting from the applicable per transaction percentage rate.",
+        "score": 0.9028241634368896,
+        "metadata": {
+          "doc_id": "eurlex_32015r0751",
+          "date": "",
+          "language": "en",
+          "geography": "EU",
+          "topic": "cards",
+          "chunk_index": 32,
+          "format": "html",
+          "source": "eurlex",
+          "retrieved_at": "2026-11-19",
+          "columns": "HasCrCard,Card Type",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "header_path": "",
+          "title": "Interchange Fee Regulation 2015/751",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0751",
+          "source_type": "regulation",
+          "doc_hash": "49844b82fd5540b3a52cdb881784baa9242573a5e3ab346e472b6b752ef3c907"
+        }
+      }
+    ],
+    "cited_ids": [],
+    "latency_s": 0.9092086359996756,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

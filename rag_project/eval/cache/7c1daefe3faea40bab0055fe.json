@@ -1,0 +1,129 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a"
+  },
+  "answer": {
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "mode": "rag",
+    "answer": "According to Eurostat, the share of individuals using internet banking in Germany in the latest available year (2025) was 70.71%, and in the year before (2024) it was 66.92% [eurostat_isoc_ci_ac_i_de].",
+    "chunks": [
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_de#0000",
+        "doc_id": "eurostat_isoc_ci_ac_i_de",
+        "text": "# Share of individuals using internet banking in Germany (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Germany, for 2025, is 70.71%.\n\nRecent observations:\n- 2025: 70.71%\n- 2024: 66.92%\n- 2023: 57.22%\n- 2022: 48.58%",
+        "score": 0.9251153469085693,
+        "metadata": {
+          "source": "eurostat",
+          "source_type": "macro_data",
+          "columns": "IsActiveMember,Age",
+          "format": "json",
+          "title": "Share of individuals using internet banking in Germany (Eurostat)",
+          "geography": "DE",
+          "doc_id": "eurostat_isoc_ci_ac_i_de",
+          "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table",
+          "license": "Eurostat: CC BY 4.0 (reuse with source acknowledgement)",
+          "header_path": "",
+          "chunk_index": 0,
+          "retrieved_at": "2026-11-19",
+          "topic": "digital_banking",
+          "language": "en",
+          "doc_hash": "768bb3bcf8be827e9f53aa7d110c1e8949beefcd83139479128415861eae6bdc",
+          "date": "2025-01-01"
+        }
+      },
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_fr#0000",
+        "doc_id": "eurostat_isoc_ci_ac_i_fr",
+        "text": "# Share of individuals using internet banking in France (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in France, for 2025, is 78.33%.\n\nRecent observations:\n- 2025: 78.33%\n- 2024: 71.88%\n- 2023: 72.41%\n- 2022: 67.86%",
+        "score": 0.8889209032058716,
+        "metadata": {
+          "geography": "FR",
+          "license": "Eurostat: CC BY 4.0 (reuse with source acknowledgement)",
+          "source": "eurostat",
+          "doc_hash": "7914963ac4bc429375ef7bcc010143c43024931dfe86b593a393b8db544106db",
+          "chunk_index": 0,
+          "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table",
+          "source_type": "macro_data",
+          "format": "json",
+          "title": "Share of individuals using internet banking in France (Eurostat)",
+          "header_path": "",
+          "retrieved_at": "2026-11-19",
+          "date": "2025-01-01",
+          "doc_id": "eurostat_isoc_ci_ac_i_fr",
+          "topic": "digital_banking",
+          "columns": "IsActiveMember,Age",
+          "language": "en"
+        }
+      },
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_es#0000",
+        "doc_id": "eurostat_isoc_ci_ac_i_es",
+        "text": "# Share of individuals using internet banking in Spain (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Spain, for 2025, is 74.77%.\n\nRecent observations:\n- 2025: 74.77%\n- 2024: 74.96%\n- 2023: 71.45%\n- 2022: 69.60%",
+        "score": 0.8850024938583374,
+        "metadata": {
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "date": "2025-01-01",
+          "title": "Share of individuals using internet banking in Spain (Eurostat)",
+          "source_type": "macro_data",
+          "format": "json",
+          "geography": "ES",
+          "columns": "IsActiveMember,Age",
+          "header_path": "",
+          "chunk_index": 0,
+          "doc_id": "eurostat_isoc_ci_ac_i_es",
+          "topic": "digital_banking",
+          "license": "Eurostat: CC BY 4.0 (reuse with source acknowledgement)",
+          "doc_hash": "e9e9244114013756f02b0cf244507321e8dabddff1d1f708330d2d2baf390e85",
+          "source": "eurostat",
+          "url": "https://ec.europa.eu/eurostat/databrowser/view/isoc_ci_ac_i/default/table"
+        }
+      },
+      {
+        "chunk_id": "eurostat_earn_nt_net_de#0000",
+        "doc_id": "eurostat_earn_nt_net_de",
+        "text": "# Annual net earnings of a single person at average earnings in Germany (Eurostat)\n\nSource: Eurostat dataset earn_nt_net (Annual net earnings).\n\nThe latest available value of annual net earnings of a single person at average earnings in Germany, for 2025, is 36,535 EUR.\n\nRecent observations:\n- 2025: 36,535 EUR\n- 2024: 35,483 EUR\n- 2023: 37,908 EUR",
+        "score": 0.8433665037155151,
+        "metadata": {
+          "retrieved_at": "2026-11-19",
+          "date": "2025-01-01",
+          "source": "eurostat",
+          "url": "https://ec.europa.eu/eurostat/databrowser/view/earn_nt_net/default/table",
+          "doc_id": "eurostat_earn_nt_net_de",
+          "license": "Eurostat: CC BY 4.0 (reuse with source acknowledgement)",
+          "title": "Annual net earnings of a single person at average earnings in Germany (Eurostat)",
+          "format": "json",
+          "geography": "DE",
+          "source_type": "macro_data",
+          "topic": "macro",
+          "header_path": "",
+          "columns": "EstimatedSalary",
+          "chunk_index": 0,
+          "language": "en",
+          "doc_hash": "7049c9f6e18b7688dabdcbd999d6d1c14670affca0106fdff8aa27e256223d34"
+        }
+      }
+    ],
+    "cited_ids": [
+      "eurostat_isoc_ci_ac_i_de"
+    ],
+    "latency_s": 0.9878755099998671,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

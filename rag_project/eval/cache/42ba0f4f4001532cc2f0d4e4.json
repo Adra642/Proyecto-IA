@@ -1,0 +1,22 @@
+{
+  "key_parts": {
+    "mode": "no_rag",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": null,
+    "chunking": null,
+    "embedding": null,
+    "corpus": null
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "mode": "no_rag",
+    "answer": "I do not know the exact churn rate for customers in Germany in the Kaggle Bank Customer Churn dataset, as the exact percentage is not part of my standard training data without querying the specific dataset.",
+    "chunks": [],
+    "cited_ids": [],
+    "latency_s": 0.8266322790004779,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

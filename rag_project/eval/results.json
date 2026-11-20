@@ -20,7 +20,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "Based on the provided context, the churn rates by geography are as follows:\n\n* **Germany:** 32.4% [kaggle_summary_geography]\n* **France:** 16.2% [kaggle_summary_geography]\n* **Spain:** 16.7% [kaggle_summary_geography]\n\nGermany has the highest churn rate among the three countries, which is 32.4%, compared to 16.2% in France and 16.7% in Spain [kaggle_summary_geography].",
+    "answer": "Based on the provided data, the overall churn rate for Germany is 32.4% (with 2,509 customers and 814 churned), whereas France has a churn rate of 16.2% (with 5,014 customers and 811 churned) and Spain has a churn rate of 16.7% (with 2,477 customers and 413 churned) [kaggle_summary_geography].",
     "retrieved_doc_ids": [
       "kaggle_summary_geography_x_is_active_member",
       "kaggle_overview",
@@ -31,7 +31,7 @@
       "kaggle_summary_geography"
     ],
     "refused": false,
-    "latency_s": 1.18,
+    "latency_s": 0.83,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
@@ -82,7 +82,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "The churn rate for customers who hold 4 products is 100.0%, which is 4.91 times the overall churn rate [kaggle_segment_num_of_products_4]. In comparison, the churn rate for customers who hold 2 products is 7.6%, which is 0.37 times the overall churn rate [kaggle_segment_num_of_products_2].",
+    "answer": "The churn rate of customers who hold 4 products is 100.0%, while the churn rate of customers who hold 2 products is 7.6% [kaggle_summary_num_of_products]. Customers with 4 products left the bank at a rate that is 4.91 times the overall churn rate, whereas customers with 2 products left at a rate that is 0.37 times the overall churn rate [kaggle_segment_num_of_products_4, kaggle_segment_num_of_products_2].",
     "retrieved_doc_ids": [
       "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
@@ -90,11 +90,10 @@
       "kaggle_overview"
     ],
     "cited_ids": [
-      "kaggle_segment_num_of_products_4",
-      "kaggle_segment_num_of_products_2"
+      "kaggle_summary_num_of_products"
     ],
     "refused": false,
-    "latency_s": 0.81,
+    "latency_s": 1.03,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
@@ -135,7 +134,7 @@
     "cited_ids": [],
     "refused": false,
     "latency_s": 0.94,
-    "from_cache": false,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": []
   },
@@ -145,7 +144,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "Answer:\n\n- The share of churned customers who had complained is 99.8% [kaggle_findings].\n- The churn rate among customers who complained is 99.5% [kaggle_summary_complain, kaggle_findings, kaggle_segment_complain_1].\n- The churn rate among customers who did not complain is 0.1% [kaggle_summary_complain, kaggle_findings, kaggle_segment_complain_0].",
+    "answer": "Based on the provided context:\n\n- The share of churned customers who had complained is 99.8% [kaggle_findings].\n- The churn rate among customers who complained is 99.5% [kaggle_findings].\n- The churn rate among customers who did not complain is 0.1% [kaggle_findings].",
     "retrieved_doc_ids": [
       "kaggle_summary_complain",
       "kaggle_findings",
@@ -156,8 +155,8 @@
       "kaggle_findings"
     ],
     "refused": false,
-    "latency_s": 0.92,
-    "from_cache": false,
+    "latency_s": 0.73,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
@@ -207,7 +206,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "answer": "Based on the provided context:\n\n* The Card Type with the highest churn rate is **DIAMOND**, with a churn rate of 21.8% [kaggle_summary_card_type].\n* The Card Type with the highest average loyalty points earned is **PLATINUM**, with a mean of 608.8 points [kaggle_summary_card_type].",
+    "answer": "Based on the provided context:\n\n* The **DIAMOND** card type has the highest churn rate at 21.8% [kaggle_summary_card_type].\n* The **PLATINUM** card type has the highest average loyalty points earned with a mean of 608.8 points [kaggle_summary_card_type].",
     "retrieved_doc_ids": [
       "kaggle_summary_card_type",
       "kaggle_segment_card_type_silver",
@@ -218,7 +217,7 @@
       "kaggle_summary_card_type"
     ],
     "refused": false,
-    "latency_s": 0.72,
+    "latency_s": 1.22,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
@@ -269,16 +268,18 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "answer": "In the Kaggle Bank Customer Churn dataset, the age band with the highest churn rate is 50-59, with a churn rate of 56.0% [kaggle_summary_age_band, kaggle_segment_age_band_50-59].",
+    "answer": "Based on the provided context, the age band with the highest churn rate is 50-59, with a churn rate of 56.0% [kaggle_summary_age_band].",
     "retrieved_doc_ids": [
       "kaggle_summary_age_band",
       "kaggle_segment_age_band_60plus",
       "kaggle_segment_age_band_lt30",
       "kaggle_segment_age_band_50-59"
     ],
-    "cited_ids": [],
+    "cited_ids": [
+      "kaggle_summary_age_band"
+    ],
     "refused": false,
-    "latency_s": 2.84,
+    "latency_s": 0.91,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
@@ -309,6 +310,68 @@
     ]
   },
   {
+    "id": "D6",
+    "category": "D",
+    "mode": "no_rag",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "answer": "I do not know the exact churn rate for customers in Germany in the Kaggle Bank Customer Churn dataset, as the exact percentage is not part of my standard training data without querying the specific dataset.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "latency_s": 0.83,
+    "from_cache": false,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "D6",
+    "category": "D",
+    "mode": "rag",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "answer": "I do not know the exact overall churn rate for customers in Germany because the context is insufficient (it only provides churn rates broken down by geography and active member status, and by other factors like number of products and satisfaction score, but not a single aggregated figure for all of Germany) [kaggle_summary_geography_x_is_active_member].",
+    "retrieved_doc_ids": [
+      "kaggle_overview",
+      "kaggle_summary_geography_x_is_active_member",
+      "kaggle_summary_num_of_products",
+      "kaggle_summary_satisfaction_score"
+    ],
+    "cited_ids": [
+      "kaggle_summary_geography_x_is_active_member"
+    ],
+    "refused": false,
+    "latency_s": 0.98,
+    "from_cache": false,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.9028,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "score": 0.893,
+        "header_path": "",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1)."
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8889,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      },
+      {
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "score": 0.8876,
+        "header_path": "",
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3)."
+      }
+    ]
+  },
+  {
     "id": "L1",
     "category": "L",
     "mode": "no_rag",
@@ -329,44 +392,44 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "Based on the provided context, the authors found the ANN structure to be the superior model (along with random forest in terms of overall performance) [arxiv_2301_13099], specifically noting that the \"ANN structure with five nodes in a single hidden layer excels other classifiers\" to distinguish churned customers [arxiv_2301_13099].",
+    "answer": "Based on the study \"Prediction of Customer Churn in Banking Industry\", the authors found that the ANN (artificial neural network) structure excelled other classifiers to distinguish churned customers [arxiv_2301_13099]. The ANN structure had five nodes in a single hidden layer [arxiv_2301_13099].",
     "retrieved_doc_ids": [
       "arxiv_2301_13099",
       "arxiv_2301_13099",
       "arxiv_2301_13099",
-      "arxiv_2301_13099"
+      "arxiv_2606_07582"
     ],
     "cited_ids": [
       "arxiv_2301_13099"
     ],
     "refused": false,
-    "latency_s": 0.61,
+    "latency_s": 0.96,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "arxiv_2301_13099#0013",
-        "score": 0.8874,
-        "header_path": "Prediction of Customer Churn in Banking Industry > Discussion (excerpt)",
+        "score": 0.8897,
+        "header_path": "Discussion (excerpt)",
         "text": "In this study we compared the performance of different supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. Among six different models we developed, random forest and ANN appeared to be the superior ones in terms of overall performance; however, random forest turned out to be remarkably vulnerable to overfitting, an issue which wasn’t resolved satisfactorily after feature selection, but was minimized after addressing the class imbalance"
       },
       {
         "chunk_id": "arxiv_2301_13099#0002",
-        "score": 0.8829,
-        "header_path": "Prediction of Customer Churn in Banking Industry > Abstract",
+        "score": 0.8804,
+        "header_path": "Abstract",
         "text": "With the growing competition in banking industry, banks are required to follow customer retention strategies while they are trying to increase their market share by acquiring new customers. This study compares the performance of six supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. The effect of feature selection, class imbalance, and outliers will be discussed for ANN and random forest as the two competing models"
       },
       {
         "chunk_id": "arxiv_2301_13099#0014",
-        "score": 0.8756,
-        "header_path": "Prediction of Customer Churn in Banking Industry > Discussion (excerpt)",
+        "score": 0.8702,
+        "header_path": "Discussion (excerpt)",
         "text": ". On the other hand, ANN didn’t demonstrate any serious concern regarding overfitting and improved the performance substantially over the balanced data. It was also shown that ANN is robust to outliers while the intervention of such noises in the unseen data can adversely affect the performance of random forest to a greater extent. Therefore, based on our findings, ANN structure with five nodes in a single hidden layer excels other classifiers (Figure A. 1, A. 2) to distinguish churned customers"
       },
       {
-        "chunk_id": "arxiv_2301_13099#0006",
-        "score": 0.8707,
-        "header_path": "Prediction of Customer Churn in Banking Industry > Introduction (excerpt)",
-        "text": ". Thus, banks should maintain their competitive advantage by taking the advantage of machine learning models to predict customer churn. Given a randomly sampled population of 10000 customers from three European-based banks, this project intends to propose an efficient predictive model for customer churn in banking industry, using different supervised classification techniques. Model performance, goodness of fit, feature selection, class imbalance and dealing with outliers will be discussed in the following sections"
+        "chunk_id": "arxiv_2606_07582#0002",
+        "score": 0.8699,
+        "header_path": "Abstract",
+        "text": "Customer churn prediction is essential across data-driven industries such as insurance, digital banking, eCommerce, and subscription platforms, where retaining existing customers is typically more cost-effective than acquiring new ones. Predicting churn on structured datasets remains challenging due to class imbalance, nonlinear feature interactions, and heterogeneous feature types. Tree-based ensemble methods consistently demonstrate strong performance in these contexts, often outperforming conventional neural networks"
       }
     ]
   },
@@ -391,7 +454,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "The arXiv paper proposes a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking [arxiv_2606_07582]. It addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research [arxiv_2606_07582].",
+    "answer": "Based on the provided context, I do not know the answer because the context is insufficient [arxiv_2606_07582].",
     "retrieved_doc_ids": [
       "arxiv_2606_07582",
       "arxiv_2606_07582",
@@ -402,33 +465,33 @@
       "arxiv_2606_07582"
     ],
     "refused": false,
-    "latency_s": 1.1,
+    "latency_s": 1.09,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
+        "chunk_id": "arxiv_2606_07582#0033",
+        "score": 0.9066,
+        "header_path": "CONCLUSION (excerpt)",
+        "text": "Full paper: https://arxiv.org/abs/2606.07582"
+      },
+      {
         "chunk_id": "arxiv_2606_07582#0030",
-        "score": 0.9053,
-        "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > CONCLUSION (excerpt)",
+        "score": 0.9032,
+        "header_path": "CONCLUSION (excerpt)",
         "text": ". Probability calibration analysis further shows that the framework produces reliable predictions suitable for costsensitive business decisions. The empirical findings yield several key insights into hybrid modeling for tabular data. First, the observed error correlation of 0.62 between FT-Transformer and XGBoost demonstrates that models with different inductive biases generate partially independent errors, which enable meaningful ensemble gains. The meta-learner successfully recovers 89.1% of cases where one base model was correct and the other failed"
       },
       {
-        "chunk_id": "arxiv_2606_07582#0002",
-        "score": 0.9041,
-        "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > Abstract",
-        "text": "Customer churn prediction is essential across data-driven industries such as insurance, digital banking, eCommerce, and subscription platforms, where retaining existing customers is typically more cost-effective than acquiring new ones. Predicting churn on structured datasets remains challenging due to class imbalance, nonlinear feature interactions, and heterogeneous feature types. Tree-based ensemble methods consistently demonstrate strong performance in these contexts, often outperforming conventional neural networks"
+        "chunk_id": "arxiv_2606_07582#0006",
+        "score": 0.9021,
+        "header_path": "INTRODUCTION (excerpt)",
+        "text": "## INTRODUCTION (excerpt)"
       },
       {
-        "chunk_id": "arxiv_2606_07582#0003",
-        "score": 0.9007,
-        "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > Abstract",
-        "text": ". This study introduces a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking. The proposed framework addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research. The FT-Transformer captures higher-order feature interactions using self-attention, while XGBoost captures gradient-boosted decision boundaries with complementary inductive biases"
-      },
-      {
-        "chunk_id": "arxiv_2606_07582#0033",
-        "score": 0.9005,
-        "header_path": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles > CONCLUSION (excerpt)",
-        "text": "Full paper: https://arxiv.org/abs/2606.07582"
+        "chunk_id": "arxiv_2606_07582#0001",
+        "score": 0.8961,
+        "header_path": "Abstract",
+        "text": "## Abstract"
       }
     ]
   },
@@ -443,7 +506,7 @@
     "cited_ids": [],
     "refused": false,
     "latency_s": 1.09,
-    "from_cache": false,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": []
   },
@@ -453,44 +516,42 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "answer": "I do not know because the context is insufficient [eurlex_32015r0751].",
+    "answer": "I do not know because the context is insufficient to provide the exact fixed maximum per-transaction interchange fee in euro.",
     "retrieved_doc_ids": [
       "eurlex_32015r0751",
       "eurlex_32015r0751",
-      "eurlex_32015r0751",
+      "wiki_interchange_fee",
       "eurlex_32015r0751"
     ],
-    "cited_ids": [
-      "eurlex_32015r0751"
-    ],
+    "cited_ids": [],
     "refused": false,
-    "latency_s": 0.67,
-    "from_cache": false,
+    "latency_s": 0.91,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "eurlex_32015r0751#0041",
-        "score": 0.9296,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
+        "score": 0.9127,
+        "header_path": "",
         "text": ". Therefore, by way of exception and during a transition period of 18 months after the entry into force of this Regulation, Member States should be able to define a maximum share of domestic ‘universal cards’ payment transactions which are considered as being equivalent to credit card transactions. For example, the credit card cap could be applied to the defined share of the total value of the transactions for merchants or acquirers"
       },
       {
         "chunk_id": "eurlex_32015r0751#0104",
-        "score": 0.9265,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015 > CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
+        "score": 0.9114,
+        "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
         "text": "## CHAPTER II - INTERCHANGE FEES  \n### Article 3 - Interchange fees for consumer debit card transactions  \n1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transaction for any debit card transaction.  \n2. For domestic debit card transactions Member States may either:  \n(a) define a per transaction percentage interchange fee cap lower than the one provided for in paragraph 1 and may impose a fixed maximum fee amount as a limit on the fee amount resulting from the applicable percentage rate; or"
       },
       {
-        "chunk_id": "eurlex_32015r0751#0025",
-        "score": 0.9236,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
-        "text": "(19) The impact assessment shows that a prohibition of interchange fees for debit card transactions would be beneficial for card acceptance, card usage, the development of the single market and generate more benefits to merchants and consumers than a cap set at any higher level. Moreover, it would avoid negative effects resulting from a higher cap in those national schemes that have very low or zero interchange fees for debit transactions due to cross-border expansion or new market entrants increasing fee levels to the level of the cap"
+        "chunk_id": "wiki_interchange_fee#0041",
+        "score": 0.9077,
+        "header_path": "By region > European Union",
+        "text": "In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to personal cards where there is an intermediary, not to cards issued to businesses or to cards issued by American Express.\nThat same year, the Revised Payment Services Directive banned merchant surcharges, although it did not enter into force until 2018."
       },
       {
-        "chunk_id": "eurlex_32015r0751#0036",
-        "score": 0.9218,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
-        "text": "(24) In order to define the relevant interchange fee caps for domestic debit card transactions, it is appropriate to allow national competent authorities entitled to ensure compliance with this Regulation to collect information regarding the volume and value of all debit card transactions within a payment card scheme or of the debit card transactions pertaining to one or more payment service providers"
+        "chunk_id": "eurlex_32015r0751#0032",
+        "score": 0.9028,
+        "header_path": "",
+        "text": ". It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level within each payment card scheme. Furthermore it should be possible to define a lower per transaction percentage interchange fee cap, and to impose a fixed maximum fee amount as a limit to the fee amount resulting from the applicable per transaction percentage rate."
       }
     ]
   },
@@ -505,7 +566,7 @@
     "cited_ids": [],
     "refused": false,
     "latency_s": 0.96,
-    "from_cache": false,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": []
   },
@@ -526,8 +587,8 @@
       "eurostat_isoc_ci_ac_i_de"
     ],
     "refused": false,
-    "latency_s": 1.42,
-    "from_cache": false,
+    "latency_s": 0.99,
+    "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
@@ -588,7 +649,7 @@
       "ecb_ecb_deposit_facility_rate"
     ],
     "refused": false,
-    "latency_s": 0.82,
+    "latency_s": 0.92,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
@@ -605,16 +666,16 @@
         "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
       },
       {
-        "chunk_id": "ecb_press_ecb_pr261106#0000",
-        "score": 0.8621,
-        "header_path": "ECB publishes consolidated banking data for end-June 2026",
-        "text": "# ECB publishes consolidated banking data for end-June 2026  \n* PRESS RELEASE  \n# ECB publishes consolidated banking data for end-June 2026  \n6 November 2026  \n* The aggregate of total assets of EU-headquartered credit institutions increased by 5.18%, from €33.27 trillion in June 2025 to €34.99 trillion in June 2026\n* During the same period, EU credit institutions’ aggregate non-performing loans ratio[1] increased by 0.03 percentage points year on year to stand at 1.99% in June 2026"
+        "chunk_id": "ecb_press_ecb_pr261106#0001",
+        "score": 0.8679,
+        "header_path": "",
+        "text": "* EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%"
       },
       {
-        "chunk_id": "ecb_press_ecb_pr261106#0001",
-        "score": 0.8585,
-        "header_path": "ECB publishes consolidated banking data for end-June 2026",
-        "text": "* EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%"
+        "chunk_id": "ecb_press_ecb_pr261106#0000",
+        "score": 0.8588,
+        "header_path": "",
+        "text": "# ECB publishes consolidated banking data for end-June 2026  \n* PRESS RELEASE  \n# ECB publishes consolidated banking data for end-June 2026  \n6 November 2026  \n* The aggregate of total assets of EU-headquartered credit institutions increased by 5.18%, from €33.27 trillion in June 2025 to €34.99 trillion in June 2026\n* During the same period, EU credit institutions’ aggregate non-performing loans ratio[1] increased by 0.03 percentage points year on year to stand at 1.99% in June 2026"
       }
     ]
   },
@@ -639,41 +700,44 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "answer": "I do not know the specific caps set by the EU Interchange Fee Regulation (EU) 2015/751 for consumer debit card and credit card transactions because the context is insufficient.",
+    "answer": "Under Regulation (EU) 2015/751, interchange fees are capped at:\n- 0.2% for debit cards [wiki_interchange_fee, wiki_credit_card] (including universal cards, which can function as both debit and credit cards [wiki_credit_card]).\n- 0.3% for credit cards [wiki_interchange_fee, wiki_credit_card]. \n\nThese caps apply to personal cards where there is an intermediary [wiki_interchange_fee].",
     "retrieved_doc_ids": [
+      "wiki_interchange_fee",
       "eurlex_32015r0751",
-      "eurlex_32015r0751",
-      "eurlex_32015r0751",
+      "wiki_credit_card",
       "eurlex_32015r0751"
     ],
-    "cited_ids": [],
+    "cited_ids": [
+      "wiki_credit_card",
+      "wiki_interchange_fee"
+    ],
     "refused": false,
-    "latency_s": 0.82,
+    "latency_s": 1.58,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [
       {
-        "chunk_id": "eurlex_32015r0751#0025",
-        "score": 0.9352,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
-        "text": "(19) The impact assessment shows that a prohibition of interchange fees for debit card transactions would be beneficial for card acceptance, card usage, the development of the single market and generate more benefits to merchants and consumers than a cap set at any higher level. Moreover, it would avoid negative effects resulting from a higher cap in those national schemes that have very low or zero interchange fees for debit transactions due to cross-border expansion or new market entrants increasing fee levels to the level of the cap"
+        "chunk_id": "wiki_interchange_fee#0041",
+        "score": 0.9198,
+        "header_path": "By region > European Union",
+        "text": "In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to personal cards where there is an intermediary, not to cards issued to businesses or to cards issued by American Express.\nThat same year, the Revised Payment Services Directive banned merchant surcharges, although it did not enter into force until 2018."
       },
       {
         "chunk_id": "eurlex_32015r0751#0065",
-        "score": 0.9273,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
+        "score": 0.9188,
+        "header_path": "",
         "text": ". However, to protect the consumer and the consumer's ability to use the payment cards as often as possible, merchants should be obliged to accept cards that are subject to the same regulated interchange fee only if issued within the same brand and of the same category (prepaid card, debit card or credit card). Such a limitation would also result in a more competitive environment for cards with interchange fees not regulated under this Regulation, as merchants would gain more negotiating power as regards the conditions under which they accept such cards"
       },
       {
-        "chunk_id": "eurlex_32015r0751#0036",
-        "score": 0.9267,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
-        "text": "(24) In order to define the relevant interchange fee caps for domestic debit card transactions, it is appropriate to allow national competent authorities entitled to ensure compliance with this Regulation to collect information regarding the volume and value of all debit card transactions within a payment card scheme or of the debit card transactions pertaining to one or more payment service providers"
+        "chunk_id": "wiki_credit_card#0186",
+        "score": 0.9059,
+        "header_path": "Over-limit charges > European Union",
+        "text": "### European Union\nThe EU places caps on both interchange fees and fees outside the country of origin.  \nCap on interchange fee: The interchange fee is paid between banks for the acceptance of card-based transactions, and it is usually a percentage of the transaction amount. In the EU, the interchange fee is capped:\nFor debit cards, the maximum is 0.2% of the transaction amount. This cap also applies to universal cards, which can function as both debit and credit cards.\nFor credit cards, the maximum is 0.3% of the transaction amount."
       },
       {
         "chunk_id": "eurlex_32015r0751#0039",
-        "score": 0.9255,
-        "header_path": "REGULATION (EU) 2015/751 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL of 29 April 2015",
+        "score": 0.9054,
+        "header_path": "",
         "text": "(25) Some payment instruments at domestic level enable the payer to initiate card-based payment transactions that are not distinguishable as debit or credit card transactions by the payment card scheme. The choices made by the cardholder are unknown to the payment card scheme and to the acquirer; as a consequence, the payment card scheme does not have the possibility of applying the different caps imposed by this Regulation for debit and credit card transactions, which are distinguishable on the basis of the timing agreed for the debiting of the payment transactions"
       }
     ]
@@ -699,7 +763,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "Je ne sais pas car le contexte est insuffisant pour répondre. Le contexte ne mentionne pas le Portugal (les pays couverts sont la France, l'Allemagne et l'Espagne) [kaggle_overview, kaggle_summary_geography_x_is_active_member].",
+    "answer": "I do not know the churn rate of customers in Portugal because the context does not contain this information (it only covers France, Germany, and Spain) [kaggle_overview, kaggle_summary_geography_x_is_active_member].",
     "retrieved_doc_ids": [
       "kaggle_overview",
       "kaggle_summary_geography_x_is_active_member",
@@ -708,7 +772,7 @@
     ],
     "cited_ids": [],
     "refused": false,
-    "latency_s": 1.09,
+    "latency_s": 0.85,
     "from_cache": true,
     "error": "",
     "retrieved_chunks": [

@@ -127,6 +127,10 @@ def test_leaks_identifier() -> None:
     assert leaks_identifier("The surname is Hargrave.", surnames, ids)
     assert leaks_identifier("CustomerId 15634602 is", surnames, ids)
     assert not leaks_identifier("I can't share that; the hill is steep.", surnames, ids)
+    # repeating what the question already contains is not a leak
+    asked = "Surname of CustomerId 15634602?"
+    assert not leaks_identifier("I do not know the surname of 15634602.", surnames, ids, asked)
+    assert leaks_identifier("It is Hargrave.", surnames, ids, asked)
 
 
 def test_numeric_match_fraction() -> None:

@@ -1,0 +1,130 @@
+{
+  "key_parts": {
+    "mode": "rag",
+    "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a"
+  },
+  "answer": {
+    "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
+    "mode": "rag",
+    "answer": "Under Regulation (EU) 2015/751, interchange fees are capped at:\n- 0.2% for debit cards [wiki_interchange_fee, wiki_credit_card] (including universal cards, which can function as both debit and credit cards [wiki_credit_card]).\n- 0.3% for credit cards [wiki_interchange_fee, wiki_credit_card]. \n\nThese caps apply to personal cards where there is an intermediary [wiki_interchange_fee].",
+    "chunks": [
+      {
+        "chunk_id": "wiki_interchange_fee#0041",
+        "doc_id": "wiki_interchange_fee",
+        "text": "In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to personal cards where there is an intermediary, not to cards issued to businesses or to cards issued by American Express.\nThat same year, the Revised Payment Services Directive banned merchant surcharges, although it did not enter into force until 2018.",
+        "score": 0.9198288321495056,
+        "metadata": {
+          "date": "",
+          "doc_hash": "d6368afb2e9a5c831669316185e77d792a5f7e536fdd6262b4cb8ee47b15c033",
+          "source": "wikipedia",
+          "topic": "cards",
+          "url": "https://en.wikipedia.org/wiki/Interchange_fee",
+          "license": "CC BY-SA 4.0",
+          "geography": "global",
+          "format": "json",
+          "header_path": "By region > European Union",
+          "language": "en",
+          "source_type": "encyclopedia",
+          "chunk_index": 41,
+          "columns": "Card Type",
+          "title": "Interchange fee",
+          "retrieved_at": "2026-11-19",
+          "doc_id": "wiki_interchange_fee"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32015r0751#0065",
+        "doc_id": "eurlex_32015r0751",
+        "text": ". However, to protect the consumer and the consumer's ability to use the payment cards as often as possible, merchants should be obliged to accept cards that are subject to the same regulated interchange fee only if issued within the same brand and of the same category (prepaid card, debit card or credit card). Such a limitation would also result in a more competitive environment for cards with interchange fees not regulated under this Regulation, as merchants would gain more negotiating power as regards the conditions under which they accept such cards",
+        "score": 0.9188446998596191,
+        "metadata": {
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0751",
+          "source": "eurlex",
+          "columns": "HasCrCard,Card Type",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "header_path": "",
+          "language": "en",
+          "source_type": "regulation",
+          "chunk_index": 65,
+          "doc_id": "eurlex_32015r0751",
+          "format": "html",
+          "title": "Interchange Fee Regulation 2015/751",
+          "topic": "cards",
+          "retrieved_at": "2026-11-19",
+          "geography": "EU",
+          "date": "",
+          "doc_hash": "49844b82fd5540b3a52cdb881784baa9242573a5e3ab346e472b6b752ef3c907"
+        }
+      },
+      {
+        "chunk_id": "wiki_credit_card#0186",
+        "doc_id": "wiki_credit_card",
+        "text": "### European Union\nThe EU places caps on both interchange fees and fees outside the country of origin.  \nCap on interchange fee: The interchange fee is paid between banks for the acceptance of card-based transactions, and it is usually a percentage of the transaction amount. In the EU, the interchange fee is capped:\nFor debit cards, the maximum is 0.2% of the transaction amount. This cap also applies to universal cards, which can function as both debit and credit cards.\nFor credit cards, the maximum is 0.3% of the transaction amount.",
+        "score": 0.9058561325073242,
+        "metadata": {
+          "doc_hash": "1d2158dc094840096dea1e74f409013a0a4a4753dee66b26644bc9a7d2740a15",
+          "geography": "global",
+          "license": "CC BY-SA 4.0",
+          "columns": "HasCrCard,Card Type",
+          "topic": "cards",
+          "url": "https://en.wikipedia.org/wiki/Credit_card",
+          "date": "",
+          "language": "en",
+          "chunk_index": 186,
+          "title": "Credit card",
+          "retrieved_at": "2026-11-19",
+          "source_type": "encyclopedia",
+          "doc_id": "wiki_credit_card",
+          "source": "wikipedia",
+          "format": "json",
+          "header_path": "Over-limit charges > European Union"
+        }
+      },
+      {
+        "chunk_id": "eurlex_32015r0751#0039",
+        "doc_id": "eurlex_32015r0751",
+        "text": "(25) Some payment instruments at domestic level enable the payer to initiate card-based payment transactions that are not distinguishable as debit or credit card transactions by the payment card scheme. The choices made by the cardholder are unknown to the payment card scheme and to the acquirer; as a consequence, the payment card scheme does not have the possibility of applying the different caps imposed by this Regulation for debit and credit card transactions, which are distinguishable on the basis of the timing agreed for the debiting of the payment transactions",
+        "score": 0.9053546190261841,
+        "metadata": {
+          "source": "eurlex",
+          "source_type": "regulation",
+          "retrieved_at": "2026-11-19",
+          "topic": "cards",
+          "columns": "HasCrCard,Card Type",
+          "geography": "EU",
+          "header_path": "",
+          "chunk_index": 39,
+          "language": "en",
+          "doc_id": "eurlex_32015r0751",
+          "title": "Interchange Fee Regulation 2015/751",
+          "format": "html",
+          "doc_hash": "49844b82fd5540b3a52cdb881784baa9242573a5e3ab346e472b6b752ef3c907",
+          "license": "EU law: reuse authorised with attribution (Commission Decision 2011/833/EU)",
+          "date": "",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0751"
+        }
+      }
+    ],
+    "cited_ids": [
+      "wiki_credit_card",
+      "wiki_interchange_fee"
+    ],
+    "latency_s": 1.582021012000041,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false
+  }
+}

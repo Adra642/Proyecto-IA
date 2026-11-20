@@ -9,7 +9,12 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from core.models import Chunk, Document
 from core.settings import ChunkingSettings
 
+# Bump when chunk boundaries or header paths change, so the index is rebuilt (see rag.index).
+CHUNKER_VERSION = 2
 HEADERS = [("#", "h1"), ("##", "h2"), ("###", "h3"), ("####", "h4")]
+# h1 is the document title, which the metadata already carries; repeating it (EU laws have a
+# 150-character official title) in every chunk's context would drown the distinguishing part.
+PATH_LEVELS = ["h2", "h3", "h4"]
 SEPARATORS = ["\n\n", "\n", ". ", " ", ""]  # paragraph, line, sentence, word, character
 
 
@@ -62,7 +67,9 @@ class MarkdownRecursiveChunker:
         """Split ``doc`` by headers, then by size."""
         chunks: list[Chunk] = []
         for section in self._headers.split_text(doc.text):
-            path = " > ".join(str(section.metadata[h]) for _, h in HEADERS if h in section.metadata)
+            path = " > ".join(
+                str(section.metadata[h]) for h in PATH_LEVELS if h in section.metadata
+            )
             for piece in self._sizer.split_text(section.page_content):
                 if piece.strip():
                     chunks.append(_make(doc, len(chunks), piece, path))

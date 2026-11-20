@@ -183,6 +183,32 @@
     }
   },
   {
+    "id": "D6",
+    "category": "D",
+    "behavior": "answer",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "gold_answer": "The churn rate of customers in Germany is 32.4%.",
+    "gold_source_ids": [
+      "kaggle_segment_geography_germany",
+      "kaggle_summary_geography"
+    ],
+    "gold_answer_template": "The churn rate of customers in Germany is {germany}%.",
+    "gold_numbers_from": {
+      "germany": "geography.Germany.churn_rate"
+    },
+    "gold_numbers_from_text": {},
+    "gold_best_from": {},
+    "gold_numbers": {
+      "germany": {
+        "value": 32.4,
+        "tolerance": 0.05,
+        "display": "32.4",
+        "percent": true
+      }
+    },
+    "gold_facts": {}
+  },
+  {
     "id": "L1",
     "category": "L",
     "behavior": "answer",

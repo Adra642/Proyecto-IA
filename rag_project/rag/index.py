@@ -19,7 +19,7 @@ from core.logging_setup import get_logger, setup_logging
 from core.models import Document
 from core.settings import ChunkingSettings, load_settings
 from factory import Container
-from rag.chunking import Chunker
+from rag.chunking import CHUNKER_VERSION, Chunker
 from rag.vectorstore import VectorStoreRepository
 
 log = get_logger(__name__)
@@ -44,6 +44,7 @@ def fingerprint(doc: Document, cfg: ChunkingSettings, embedding_model: str) -> s
             doc.metadata.model_dump_json(),
             cfg.model_dump_json(),
             embedding_model,
+            str(CHUNKER_VERSION),
         ]
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()

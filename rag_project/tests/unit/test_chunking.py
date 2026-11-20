@@ -52,8 +52,8 @@ def test_chunks_respect_size_and_overlap() -> None:
 def test_header_path_is_kept_per_chunk() -> None:
     chunks = MarkdownRecursiveChunker(200, 40).chunk(doc(LAW))
     paths = {c.header_path for c in chunks}
-    assert "Directive > CHAPTER I > Article 1 - Scope" in paths
-    assert "Directive > CHAPTER I > Article 2 - Definitions" in paths
+    assert "CHAPTER I > Article 1 - Scope" in paths  # the h1 (document title) is not repeated
+    assert "CHAPTER I > Article 2 - Definitions" in paths
     assert all("Definition sentence" not in c.text for c in chunks if "Article 1" in c.header_path)
 
 
@@ -66,7 +66,8 @@ def test_chunk_ids_are_stable_and_ordered() -> None:
 
 def test_embedding_text_adds_title_and_header() -> None:
     chunk = MarkdownRecursiveChunker(200, 40).chunk(doc(LAW, title="DGS Directive"))[0]
-    assert chunk.embedding_text.startswith("DGS Directive > Directive")
+    # title, then the header path without the h1 (the document title is not repeated)
+    assert chunk.embedding_text.startswith("DGS Directive > CHAPTER I > Article 1 - Scope\n")
     assert chunk.embedding_text.endswith(chunk.text)
 
 
