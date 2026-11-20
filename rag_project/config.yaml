@@ -18,7 +18,10 @@ llm:
   provider: gemini              # gemini | groq | deepseek
   fallback_order: []            # e.g. [gemini, groq, deepseek]
   temperature: 0.0
-  max_retries: 2
+  max_retries: 2                # provider-level retries (LangChain)
+  min_interval_seconds: 1.0     # client-side throttling between calls
+  rate_limit_retries: 3         # extra attempts on HTTP 429, with exponential backoff
+  backoff_seconds: 10.0
   models:                       # verify current names in each provider's docs
     gemini: gemini-3.5-flash-lite   # verified live with a key on 2026-11-19; 2.5-* are retired (404)
     groq: llama-3.3-70b-versatile   # listed as production model in Groq docs (not called: no key)
@@ -38,6 +41,9 @@ chunking:
 index:
   collection: rag_churn
   batch_size: 32
+
+retrieval:
+  top_k: 4                       # chunks passed to the LLM
 
 # Per-source options (ids follow RAG_PROJECT_PLAN.md Section 4).
 sources:

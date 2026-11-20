@@ -50,6 +50,9 @@ class LLMSettings(BaseModel):
     fallback_order: list[Provider] = Field(default_factory=list)
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     max_retries: int = Field(default=2, ge=0)
+    min_interval_seconds: float = Field(default=1.0, ge=0.0)  # client-side throttling
+    rate_limit_retries: int = Field(default=3, ge=0)
+    backoff_seconds: float = Field(default=10.0, ge=0.0)
     models: dict[Provider, str]
 
 
@@ -87,6 +90,12 @@ class IndexSettings(BaseModel):
     batch_size: int = Field(default=32, ge=1)
 
 
+class RetrievalSettings(BaseModel):
+    """How many chunks are passed to the LLM."""
+
+    top_k: int = Field(default=4, ge=1)
+
+
 class Settings(BaseSettings):
     """All project settings.
 
@@ -108,6 +117,7 @@ class Settings(BaseSettings):
     embeddings: EmbeddingSettings = EmbeddingSettings()
     chunking: ChunkingSettings = ChunkingSettings()
     index: IndexSettings = IndexSettings()
+    retrieval: RetrievalSettings = RetrievalSettings()
     sources: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     # Shortcut env var (LLM_PROVIDER) that overrides ``llm.provider``.

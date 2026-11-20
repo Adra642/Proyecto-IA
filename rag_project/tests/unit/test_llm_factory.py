@@ -4,7 +4,7 @@ import pytest
 
 from core.exceptions import MissingCredentialError, ProviderError, RateLimitError
 from rag import llm
-from rag.llm import FallbackLLM, build_llm
+from rag.llm import FallbackLLM, RetryingLLM, ThrottledLLM, build_llm
 
 
 class FakeLLM:
@@ -53,7 +53,8 @@ def test_builds_right_adapter(
     clean_env.setenv(env_var, "k")
     clean_env.setattr(target, FakeChat)
     client = build_llm(load_settings())
-    assert isinstance(client, adapter)
+    assert isinstance(client, RetryingLLM) and isinstance(client._inner, ThrottledLLM)
+    assert isinstance(client._inner._inner, adapter)
     assert client.name == provider
 
 
@@ -98,3 +99,45 @@ def test_build_llm_uses_fallback_order_and_skips_missing_keys(
     client = build_llm(load_settings())
     assert isinstance(client, FallbackLLM)
     assert client.name == "gemini+groq"
+
+
+def test_throttle_waits_between_calls() -> None:
+    now = {"t": 0.0}
+    sleeps: list[float] = []
+
+    def sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+        now["t"] += seconds
+
+    llm = ThrottledLLM(FakeLLM("a", answer="x"), 2.0, clock=lambda: now["t"], sleep=sleep)
+    llm.invoke("1")
+    now["t"] += 0.5
+    llm.invoke("2")
+    now["t"] += 5.0
+    llm.invoke("3")
+    assert sleeps == [1.5]
+
+
+def test_retry_backs_off_exponentially_then_succeeds() -> None:
+    class Flaky(FakeLLM):
+        def invoke(self, prompt: str) -> str:
+            self.calls += 1
+            if self.calls < 3:
+                raise RateLimitError("429")
+            return "ok"
+
+    sleeps: list[float] = []
+    inner = Flaky("a")
+    assert RetryingLLM(inner, retries=3, backoff=10, sleep=sleeps.append).invoke("q") == "ok"
+    assert sleeps == [10, 20] and inner.calls == 3
+
+
+def test_retry_gives_up_and_other_errors_pass_through() -> None:
+    rate = FakeLLM("a", error=RateLimitError("429"))
+    with pytest.raises(RateLimitError):
+        RetryingLLM(rate, retries=2, backoff=1, sleep=lambda s: None).invoke("q")
+    assert rate.calls == 3
+    broken = FakeLLM("b", error=ProviderError("boom"))
+    with pytest.raises(ProviderError):
+        RetryingLLM(broken, retries=2, backoff=1, sleep=lambda s: None).invoke("q")
+    assert broken.calls == 1

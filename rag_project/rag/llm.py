@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable, Sequence
 from typing import Any, Protocol
 
@@ -157,6 +158,75 @@ class FallbackLLM:
         raise ProviderError("All LLM providers failed: " + " | ".join(errors))
 
 
+class ThrottledLLM:
+    """Decorator: at least ``min_interval`` seconds between two calls."""
+
+    def __init__(
+        self,
+        inner: LLMClient,
+        min_interval: float,
+        clock: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        """Args: inner: wrapped client; min_interval: seconds; clock/sleep: injectable."""
+        self._inner = inner
+        self._min_interval = min_interval
+        self._clock = clock
+        self._sleep = sleep
+        self._last: float | None = None
+        self.name = inner.name
+
+    def invoke(self, prompt: str) -> str:
+        """Wait if the previous call was too recent, then call the wrapped client."""
+        if self._last is not None:
+            wait = self._min_interval - (self._clock() - self._last)
+            if wait > 0:
+                self._sleep(wait)
+        self._last = self._clock()
+        return self._inner.invoke(prompt)
+
+
+class RetryingLLM:
+    """Decorator: retry on rate limits with exponential backoff (other errors pass through)."""
+
+    def __init__(
+        self,
+        inner: LLMClient,
+        retries: int,
+        backoff: float,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        """Args: inner: wrapped client; retries: extra attempts; backoff: base seconds."""
+        self._inner = inner
+        self._retries = retries
+        self._backoff = backoff
+        self._sleep = sleep
+        self.name = inner.name
+
+    def invoke(self, prompt: str) -> str:
+        """Call the wrapped client, sleeping ``backoff * 2**attempt`` after each rate limit.
+
+        Raises:
+            RateLimitError: If every attempt was rate-limited.
+        """
+        for attempt in range(self._retries + 1):
+            try:
+                return self._inner.invoke(prompt)
+            except RateLimitError as exc:
+                if attempt == self._retries:
+                    raise
+                delay = self._backoff * 2**attempt
+                log.warning("%s rate-limited (%s); retrying in %.0fs", self.name, exc, delay)
+                self._sleep(delay)
+        raise AssertionError("unreachable")  # pragma: no cover
+
+
+def _resilient(client: LLMClient, settings: Settings) -> LLMClient:
+    cfg = settings.llm
+    throttled = ThrottledLLM(client, cfg.min_interval_seconds)
+    return RetryingLLM(throttled, cfg.rate_limit_retries, cfg.backoff_seconds)
+
+
 def build_llm(settings: Settings) -> LLMClient:
     """Build the configured LLM (with fallbacks when ``fallback_order`` is set).
 
@@ -167,12 +237,12 @@ def build_llm(settings: Settings) -> LLMClient:
         MissingCredentialError: If the selected provider's key is missing.
     """
     primary = settings.llm.provider
-    clients: list[LLMClient] = [ADAPTERS[primary](settings)]
+    clients: list[LLMClient] = [_resilient(ADAPTERS[primary](settings), settings)]
     for provider in settings.llm.fallback_order:
         if provider == primary:
             continue
         try:
-            clients.append(ADAPTERS[provider](settings))
+            clients.append(_resilient(ADAPTERS[provider](settings), settings))
         except MissingCredentialError as exc:
             log.warning("Skipping fallback provider '%s': %s", provider, exc)
     return clients[0] if len(clients) == 1 else FallbackLLM(clients)
