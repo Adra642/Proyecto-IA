@@ -6,6 +6,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "beautifulsoup4>=4.15.0",
     "chromadb>=1.5.9",
+    "gradio>=6.32.0",
     "httpx>=0.28.1",
     "kagglehub>=1.0.3",
     "langchain>=1.5.2",
@@ -98,7 +99,7 @@ omit = ["*/__main__.py"]
 pipeline = "python -m data_pipeline.run_all"
 index = "python -m rag.index --rebuild"
 eval = "python -m eval.run_eval"
-app = "python app/app.py"
+app = "python -m app.app"
 test = "pytest"
 test-integration = "pytest -m integration --no-cov"
 lint = ["_ruff-check", "_ruff-format"]
