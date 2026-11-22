@@ -68,7 +68,7 @@ LLM provider's key is needed.
 | `GROQ_API_KEY` | Groq | <https://console.groq.com/keys> |
 | `DEEPSEEK_API_KEY` | DeepSeek (pay-as-you-go) | <https://platform.deepseek.com> |
 | `KAGGLE_USERNAME`, `KAGGLE_KEY` | Kaggle dataset download, only if anonymous access fails | Kaggle account settings, API token |
-| `HF_TOKEN` | Hugging Face Space deployment (*Stage 4*) | <https://huggingface.co/settings/tokens> |
+| `HF_TOKEN` | optional: higher Hugging Face Hub rate limits when downloading the e5 model | <https://huggingface.co/settings/tokens> |
 
 `llm.fallback_order` (e.g. `[gemini, groq, deepseek]`) makes the app try the next provider when
 the active one is rate-limited. Nested values can be overridden with `__`, e.g.
@@ -205,7 +205,16 @@ question and Gemini 3.5 ignores `temperature`, so small differences (for example
 change between runs.
 
 ## Run the app
-*Stage 4.*
+```bash
+uv run python -m app.app          # or: uv run poe app   -> http://localhost:8080 (set PORT to change)
+```
+It needs `GOOGLE_API_KEY` (or the key of the provider chosen in `.env`). On start it syncs the Chroma
+index with `data/processed/` (a no-op when current; a cold build takes about 5 minutes on CPU).
+The interface is in Spanish: a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
+accordion with title, link, source, similarity and the retrieved text), a **Comparar** tab (same
+question, No RAG | RAG side by side), example buttons (the evaluation questions) and an **Acerca de**
+tab. Rate-limited calls are retried once, then a friendly message is shown. *RAG avanzado* and the
+metadata filters arrive in Stage 5.
 
 ## Tests and quality
 ```bash
@@ -220,11 +229,35 @@ The hooks live in `.pre-commit-config.yaml` (ruff only; mypy runs through `poe t
 From the repo root: `uv run --project rag_project pre-commit install -c rag_project/.pre-commit-config.yaml`.
 
 ## Task shortcuts (identical on Linux and Windows)
-`uv run poe pipeline | test | test-integration | lint | typecheck | export-reqs`; `index`, `eval`,
-`app` and `docs` are defined but their modules arrive in later stages.
+`uv run poe pipeline | index | eval | app | test | test-integration | lint | typecheck`; `docs` arrives in Stage 6.
 
-## Deployment, Quarto docs
-*Stages 4 and 6.*
+## Deployment (Google Cloud Run)
+Hugging Face Spaces was the original plan, but its docs now require a paid plan for Gradio and
+Docker Spaces, so the app is deployed as a container on **Cloud Run** (decision of 2026-11-22).
+
+```bash
+podman build -f deploy/Dockerfile -t rag-churn .      # or docker build; run from rag_project/
+podman run --rm -p 8080:8080 -e GOOGLE_API_KEY=... rag-churn
+```
+The image bakes in the e5 model and the Chroma index (Cloud Run's disk is ephemeral), so a cold
+start only loads them. **No local `gcloud` is needed**: use Cloud Shell (<https://shell.cloud.google.com>)
+or the Cloud Console.
+
+1. In the Console: enable Cloud Run, Cloud Build, Artifact Registry and Secret Manager.
+2. Secret Manager: create `google-api-key` with your Gemini key. Give the Cloud Run service account
+   the *Secret Manager Secret Accessor* role.
+3. Cloud Run, *Create service*, *Continuously deploy from a repository*: connect the GitHub repo,
+   build type **Dockerfile** `rag_project/deploy/Dockerfile`, source directory `rag_project`
+   (or use `deploy/cloudbuild.yaml`, which sets a 30-minute build timeout).
+4. Settings: region `europe-west1`, **2 GiB memory, 2 CPU**, min instances 0 (1 for the live demo),
+   max instances 2, allow unauthenticated invocations, and the secret as env var `GOOGLE_API_KEY`.
+5. Create a **budget alert** (Billing, Budgets & alerts) before the first deployment.
+
+Cloud Shell alternative: `gcloud run deploy rag-churn --source rag_project --dockerfile deploy/Dockerfile
+--region europe-west1 --memory 2Gi --cpu 2 --allow-unauthenticated --set-secrets GOOGLE_API_KEY=google-api-key:latest`
+(check `gcloud run deploy --help` for the flags your version accepts).
+
+*Quarto docs: Stage 6.*
 
 ## Project structure
 ```
@@ -243,7 +276,9 @@ rag_project/
 │   └── run_all.py   orchestrator + run report
 ├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py, answer cache,
 │                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
-├── app/, docs/      later stages
+├── app/             Gradio app: handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
+├── deploy/          Dockerfile (Cloud Run image), cloudbuild.yaml
+├── docs/            Stage 6
 ├── data/            raw/ (git-ignored cache), processed/ (committed documents)
 └── tests/           unit/ (offline), integration/ (marked), fixtures/
 ```
