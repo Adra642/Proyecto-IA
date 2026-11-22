@@ -24,6 +24,8 @@ from rag.vectorstore import VectorStoreRepository
 
 log = get_logger(__name__)
 
+SNIPPET_CHARS = 80  # characters of chunk text shown per hit in the --query output
+
 
 @dataclass
 class IndexReport:
@@ -121,7 +123,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     if args.query:
         for rank, hit in enumerate(repo.query(args.query, args.k), 1):
-            log.info("%d. %.3f %s | %s", rank, hit.score, hit.chunk_id, hit.metadata["header_path"])
+            title = hit.metadata.get("title", "")
+            snippet = " ".join(hit.text.split())[:SNIPPET_CHARS]
+            log.info("%d. %.3f %s | %s | %s", rank, hit.score, hit.chunk_id, title, snippet)
     return 0
 
 

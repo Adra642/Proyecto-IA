@@ -11,6 +11,8 @@
 - `core/` shared package added to the layout; `DocumentMetadata` has an extra `format` field
   (csv/json/html/pdf/generated) so the run report can count formats.
 
+- 2026-11-22: **[DECISION] app hosting moved from Hugging Face Spaces to Google Cloud Run** (user decision). The HF Spaces docs say Gradio and Docker Spaces need a paid plan, except 2 ZeroGPU Spaces; I had wrongly said CPU Basic was free. Plan sections 5.1 and Stage 4 updated.
+
 ## Stage 0: scaffold and environment (branch `stage-0-scaffold`)
 Done:
 - uv project, Python 3.12 pin, CPU-only torch, `uv.lock`, dev/docs groups.
@@ -127,3 +129,17 @@ Open issues / for the team:
 - `eval/chunking_results.csv` was produced before the header-path change and before the question changes (the 600-character decision stands, to be re-measured in the Stage 5 ablation).
 - Token counts are not recorded (the LLM wrapper returns text only).
 - The evaluation set has 14 questions instead of 12 (three diagnostics).
+
+## Stage 4: web app and Cloud Run deployment (branch `stage-4-app-cloudrun`, from `main` with Stages 0-3)
+Done:
+- `app/handlers.py` (`AppService`: modes, one retry on rate limit, friendly Spanish errors for missing key, rate limit and provider failure, question length guard; source and status formatting), `app/ui.py` (Gradio Blocks: Chat, Comparar, Acerca de; examples from `eval/questions.json`), `app/app.py` (composition, index sync at start, `PORT`).
+- `deploy/Dockerfile` (uv, CPU torch, e5 model and Chroma index baked in), `.dockerignore`, `deploy/cloudbuild.yaml` (30 min timeout).
+- Plan and reference updated for Cloud Run; README sections "Run the app" and "Deployment".
+- Gradio 6.32 added with `uv add`.
+
+Verified: see the PR (unit tests, local run through `gradio_client`: RAG gives 32.4% for Germany with citations and sources; No RAG says it does not know; image build with Podman).
+
+Open / pending (needs the team):
+- **Cloud Run deployment itself needs your Google Cloud project, billing account, secret and budget alert**; the public-URL acceptance (another device, private window) is checked after the first deploy.
+- `deploy/cloudbuild.yaml` and the Cloud Shell command are untested against a real project.
+- *RAG avanzado* and the filter controls are Stage 5.
