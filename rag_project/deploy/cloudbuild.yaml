@@ -1,0 +1,32 @@
+# Cloud Build config for the Cloud Run service (used by a trigger on the repo root).
+# Longer timeout than the 10-minute default: the image build embeds the corpus (about 5 minutes).
+# Not exercised end to end by the team yet: check the first build log.
+substitutions:
+  _REGION: europe-west1
+  _SERVICE: rag-churn
+  _REPO: rag
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 1800s
+steps:
+  - name: gcr.io/cloud-builders/docker
+    dir: rag_project
+    args: [build, -f, deploy/Dockerfile, -t, "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}", .]
+  - name: gcr.io/cloud-builders/docker
+    args: [push, "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}"]
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --memory=2Gi
+      - --cpu=2
+      - --min-instances=0
+      - --max-instances=2
+      - --allow-unauthenticated
+      - --set-secrets=GOOGLE_API_KEY=google-api-key:latest
+images:
+  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}"
