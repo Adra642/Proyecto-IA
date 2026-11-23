@@ -1,0 +1,67 @@
+---
+title: "Aplicación y despliegue"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from _helpers import show_file
+```
+
+## La aplicación
+
+**Enlace público: <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>** (Gradio, desplegada en Google Cloud Run).
+Las etiquetas están en español; las respuestas siguen el idioma de la pregunta.
+
+![Pestaña *Chat*: selector de modo, filtros, conversación, fuentes y preguntas de ejemplo.](img/app_inicio.png){fig-alt="Interfaz de la aplicación"}
+
+- **Chat**: tres modos (*Sin RAG*, *RAG*, *RAG avanzado*), tiempo de respuesta, la ruta que eligió el enrutador y un
+  acordeón **Fuentes** con el título, enlace, origen, puntuación y texto de cada fragmento recuperado.
+- **Filtros** (solo en RAG avanzado): tipo de fuente, geografía e idioma.
+- **Comparar**: la misma pregunta en los tres modos, en columnas. Es la mejor demostración en directo de la
+  tesis del proyecto.
+- **Acerca de**: qué datos hay y la advertencia de que las respuestas se basan solo en los documentos recuperados.
+- Botones con las preguntas de evaluación, mensajes claros si el modelo está saturado (se reintenta una vez) y rechazo
+  de las preguntas que piden datos personales.
+
+## Despliegue en Google Cloud Run
+
+La opción inicial era *Hugging Face Spaces*, pero su documentación actual exige un plan de pago para crear Spaces
+de Gradio o Docker (salvo dos de ZeroGPU), así que se decidió desplegar un **contenedor en Cloud Run**, que escala
+a cero y tiene una cuota gratuita mensual.
+
+1. **Imagen**: un `Dockerfile` instala las dependencias de ejecución, y **hornea el modelo de embeddings y el
+   índice de Chroma** en la imagen (el disco de Cloud Run es efímero; construirlos al arrancar repetiría 200 s
+   en cada arranque en frío).
+2. **Secretos**: la clave de Gemini está en *Secret Manager* y se monta como variable de entorno. No está en el
+   repositorio ni en la imagen.
+3. **Construcción y despliegue**: `gcloud builds submit` con `cloudbuild.yaml` (construye, publica en Artifact
+   Registry y despliega con 2 GiB, 2 CPU, de 0 a 2 instancias).
+4. **Coste**: alerta de presupuesto en la cuenta de facturación y un máximo de 2 instancias.
+
+```{python}
+#| echo: false
+show_file("deploy/Dockerfile", max_lines=45)
+```
+
+### Reducir el tamaño y el tiempo de construcción
+
+Medido con `podman build`: la imagen pasó de **4,67 GB a 2,76 GB**. El mayor ahorro (1,74 GB) era la caché de
+ruedas de `uv`, que se quedaba dentro de la capa (`--no-cache`). Además, los paquetes que solo usa el pipeline de
+datos (pymupdf, kagglehub, bs4, lxml, markdownify) van en un grupo de dependencias que la imagen no instala, y las
+capas están ordenadas de menos a más cambiantes (dependencias, modelo e índice, aplicación): un cambio solo en la
+interfaz reutiliza el índice (1 s frente a unos 208 s). `cloudbuild.yaml` usa la imagen anterior como caché.
+
+::: {.callout-note}
+## Limitaciones
+El modelo de embeddings (470 MB) y torch (805 MB) siguen en la imagen. Cambiarlos modificaría los vectores y los
+resultados. Tras un periodo sin tráfico, el primer arranque en frío tarda unos segundos más (con `--min-instances 1`
+se evita para una demostración).
+:::
+
+## Documentación
+
+Este sitio se genera con **Quarto** y se publica con **GitHub Pages** mediante un flujo de GitHub Actions
+(`.github/workflows/rag_project-docs.yml`) que solo se activa con cambios en `rag_project/`. Las tablas y gráficos
+leen los resultados guardados en `eval/`, de modo que lo que se ve aquí es lo medido.

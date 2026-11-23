@@ -13,3 +13,4 @@ docs/_site/
 docs/.quarto/
 logs/
 .flashrank_cache/
+docs/_freeze/

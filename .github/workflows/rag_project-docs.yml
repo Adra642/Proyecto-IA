@@ -1,0 +1,68 @@
+# Builds the Quarto site of rag_project/ and publishes it to GitHub Pages.
+# Path-filtered to rag_project/** (the project is self-contained; this workflow only builds its docs).
+# One-time setup in the repo: Settings > Pages > Source = "GitHub Actions".
+name: rag_project-docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rag_project/**"
+      - ".github/workflows/rag_project-docs.yml"
+  pull_request:
+    paths:
+      - "rag_project/docs/**"
+      - "rag_project/eval/**"
+      - ".github/workflows/rag_project-docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: rag_project-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rag_project
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: rag_project/uv.lock
+
+      - name: Install the docs environment (locked)
+        run: uv sync --frozen --group docs
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.10.19
+
+      # The pages read the committed results in eval/ and the generated documents in data/,
+      # so nothing is downloaded or called here (no API keys needed).
+      - name: Render the site
+        run: uv run quarto render docs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: rag_project/docs/_site
+
+  deploy:
+    # Pull requests only check that the site renders.
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

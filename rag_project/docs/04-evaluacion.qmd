@@ -1,0 +1,125 @@
+---
+title: "Evaluación: sin RAG frente a con RAG"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from IPython.display import Markdown, display
+from _helpers import ROOT, read_csv, read_json, md_table, show_source
+questions = read_json("eval/questions.json")
+results = {(r["id"], r["mode"]): r for r in read_json("eval/results.json")}
+```
+
+## Cómo se evalúa
+
+Se parte de **14 preguntas de nicho** que un LLM genérico no debería poder contestar con precisión. Cada una
+se contesta con **el mismo modelo** (Gemini 3.5 Flash-Lite, mismo *prompt* base) en tres modos, y se compara con una respuesta de
+referencia **generada por código** a partir de `stats.json` o del texto de los documentos. Las respuestas
+se guardan en una caché en disco (la clave incluye modelo, *prompts*, índice y configuración), de modo que los
+resultados que se muestran son reproducibles.
+
+| Categoría | Qué mide | Preguntas |
+|---|---|---|
+| **D** | cifras del dataset propio | 6 |
+| **L** | literatura (artículos de arXiv) | 2 |
+| **R** | regulación y datos macro | 4 |
+| **U** | comportamiento: no inventar (portugués, no está en el dataset) y no revelar datos personales | 2 |
+
+```{python}
+#| echo: false
+md_table(
+    [{"ID": q["id"], "Pregunta": q["question"], "Comportamiento esperado": {
+        "answer": "responder", "abstain": "decir que no lo sabe", "refuse_pii": "rechazar (PII)"}[q["behavior"]]}
+     for q in questions]
+)
+```
+
+: Preguntas de evaluación (`eval/questions.json`). Las preguntas que el modelo ya contestaba bien sin ayuda se reemplazaron por otras más específicas.
+
+El *prompt* del modo RAG obliga a **responder solo con el contexto recuperado, citar `[doc_id]`, decir que no lo sabe
+si el contexto no basta y no revelar identificadores personales**:
+
+```{python}
+#| echo: false
+show_source("rag/chain.py", "RagChain.answer_rag")
+```
+
+## Resultados automáticos
+
+```{python}
+#| echo: false
+names = {"no_rag": "Sin RAG", "rag": "RAG", "rag_advanced": "RAG avanzado"}
+rows = read_csv("eval/auto_summary.csv")
+md_table([
+    {
+        "Cat.": r["category"], "Modo": names[r["mode"]], "Preguntas": r["questions"],
+        "Acierto numérico": r["numeric_match"] or "—", "hit@4 (recuperación)": r["hit@4"] or "—",
+        "Cita correcta": r["citation_ok"] or "—", "Conducta correcta": r["behavior_ok"] or "—",
+    }
+    for r in rows
+])
+```
+
+: Métricas automáticas por categoría y modo (`eval/auto_summary.csv`). *Acierto numérico*: la respuesta contiene la cifra de referencia (con tolerancia). *hit@4*: algún *chunk* de los 4 recuperados pertenece a un documento de referencia.
+
+Lo que muestran:
+
+- **Sin RAG** no acierta ninguna cifra del dataset (0,00) y solo un 25 % de las de regulación y macro (las cifras que ya conocía).
+  Es un modelo honesto: ante lo que no sabe, **lo dice** en lugar de inventar.
+- **Con RAG** sube al 83 % en datos propios y al 75 % en regulación y macro, y cita el documento de origen.
+- **Las preguntas de conducta (U)** las resuelven bien los tres modos: no inventan un dato de Portugal y se niegan a revelar el apellido.
+
+## Ejemplos antes y después
+
+```{python}
+#| echo: false
+def esc(text):
+    """Escape dollar signs so Quarto does not read ``$and`` and similar as LaTeX math."""
+    return str(text).replace("$", "\\$")
+
+
+for qid in ("D6", "R3", "U2"):
+    q = next(x for x in questions if x["id"] == qid)
+    display(Markdown(f"### {qid}: {q['question']}"))
+    display(Markdown(f"**Referencia:** {esc(q['gold_answer'])}"))
+    for mode in ("no_rag", "rag", "rag_advanced"):
+        r = results.get((qid, mode))
+        if not r:
+            continue
+        extra = f" (ruta: `{r['route']}`)" if r.get("route") else ""
+        sources = ", ".join(f"`{c}`" for c in r["cited_ids"]) or "—"
+        display(Markdown(f"**{names[mode]}**{extra}: {esc(r['answer'])}  \n_Fuentes citadas: {sources}_"))
+```
+
+## Puntuación manual
+
+```{python}
+#| echo: false
+manual = read_csv("eval/manual_scoring.csv")
+scored = [r for r in manual if r.get("score_0_1_2", "").strip() != ""]
+if scored:
+    groups = {}
+    for r in scored:
+        groups.setdefault((r["category"], r["mode"]), []).append(int(r["score_0_1_2"]))
+    md_table([
+        {"Cat.": c, "Modo": names[m], "Puntuadas": len(v), "Media (0 a 2)": f"{sum(v) / len(v):.2f}"}
+        for (c, m), v in sorted(groups.items())
+    ])
+else:
+    display(Markdown(
+        "> **Pendiente.** El equipo puntúa a mano cada respuesta (0 = errónea o inventada, 1 = parcial o vaga, "
+        "2 = correcta y concreta, más si la cita es correcta). Esta tabla se rellena sola a partir de "
+        "`eval/manual_scoring.csv` cuando hay puntuaciones."))
+```
+
+## Límites y casos que siguen fallando
+
+::: {.callout-warning}
+## Lectura honesta de los resultados
+- **Una sola ejecución por pregunta**, y los modelos Gemini 3.5 ignoran `temperature`: una cita puede cambiar entre dos ejecuciones con la misma recuperación. Las diferencias pequeñas son ruido.
+- **El modelo base puede decir "no lo sé"**, lo que le favorece frente a uno que inventa; un *prompt* sin esa opción probablemente lo dejaría peor parado.
+- **R1** (importe fijo de la tasa de intercambio) sigue fallando: la respuesta está en el *chunk* siguiente al recuperado. **R4** a veces responde con Wikipedia en lugar del reglamento.
+- Son **14 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
+:::

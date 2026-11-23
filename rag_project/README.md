@@ -25,7 +25,7 @@ flowchart LR
 
 ## Links
 - App (Google Cloud Run): <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>
-- Quarto site: *Stage 6*
+- Quarto site (GitHub Pages): <https://adra642.github.io/Proyecto-IA/> (live after the first deployment of the workflow)
 - Repository: <https://github.com/Adra642/Proyecto-IA> (folder `rag_project/`)
 
 ## Prerequisites
@@ -309,7 +309,27 @@ and builds with `--cache-from`, so a build after a UI-only change reuses the dep
 A first build, or one after a `uv.lock` change, still takes about 10 minutes (the index embeds the
 corpus: about 200 s on CPU). Measured sizes and times are in `PROGRESS.md` (Stage 5).
 
-*Quarto docs: Stage 6.*
+## Quarto documentation site
+The memoir lives in `docs/` (Spanish): home, data and sources, pipeline, chunking and vector DB, evaluation,
+advanced RAG, app and deployment, team and references. Tables and plots are Python cells that read the saved
+results in `eval/` and `data/`, and the code excerpts are cut from the source files, so the site shows what
+was measured and what is in the repository.
+
+```bash
+uv sync --group docs               # adds jupyter and matplotlib (docs group)
+uv run quarto preview docs         # live preview (needs Quarto >= 1.4: https://quarto.org/docs/get-started/)
+uv run quarto render docs          # or: uv run poe docs   -> docs/_site/
+```
+
+**Publishing (GitHub Pages, team decision):** `.github/workflows/rag_project-docs.yml` (repo root, filtered to
+`rag_project/**`) renders the site on every push to `main` and deploys it; on pull requests it only checks that
+the site renders. One-time setup: *Settings, Pages, Source = GitHub Actions*. The workflow needs no secrets.
+`docs/_freeze/` is git-ignored on purpose: CI always re-executes the cells against the committed results.
+Cloudflare Pages is also possible (root directory `rag_project/docs`, build command `quarto render`, output
+`_site`) but is not set up.
+
+Before the presentation: fill in the team table in `docs/07-equipo-referencias.qmd`, paste the Loop URL in
+`docs/index.qmd`, and post the site URL in Loop.
 
 ## Project structure
 ```
@@ -331,7 +351,7 @@ rag_project/
 │                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
 ├── app/             Gradio app (3 modes, filters): handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
 ├── deploy/          Dockerfile (Cloud Run image), cloudbuild.yaml
-├── docs/            Stage 6
+├── docs/            Quarto site (_quarto.yml, 8 .qmd pages, _helpers.py, img/)
 ├── data/            raw/ (git-ignored cache), processed/ (committed documents)
 └── tests/           unit/ (offline), integration/ (marked), fixtures/
 ```

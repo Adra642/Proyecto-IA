@@ -1,0 +1,102 @@
+---
+title: "Motivación y datos"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from pathlib import Path
+from IPython.display import Markdown, display
+from _helpers import ROOT, read_json, md_table
+stats = read_json("data/processed/stats.json")
+```
+
+## Por qué este tema
+
+La captación de un cliente bancario cuesta bastante más que retener a uno existente, de modo que entender
+**por qué se van los clientes** es una pregunta de negocio central. En el
+[proyecto 1](https://github.com/Adra642/Proyecto-IA/tree/main/bank-churn-prediction) entrenamos modelos
+que *predicen* el abandono a partir del dataset *Bank Customer Churn*. Aquí hacemos algo distinto: no
+predecimos nada, sino que construimos una **base de conocimiento** para *responder preguntas* sobre ese
+dominio, algo que un LLM genérico no puede hacer con precisión:
+
+- ¿Qué tasa de abandono tiene Alemania **en este dataset**? Es un dato concreto, no conocimiento general.
+- ¿Qué fija exactamente el Reglamento (UE) 2015/751 para las tasas de intercambio?
+- ¿Cuál es hoy el tipo de la facilidad de depósito del BCE y desde cuándo rige?
+
+El subtema elegido es **retención y *churn* en la banca minorista de Francia, Alemania y España**: los
+impulsores del abandono, lo que muestran los datos del banco y el contexto regulatorio y de mercado.
+
+## Decisión clave: convertir el CSV en conocimiento
+
+Un RAG no puede responder preguntas agregadas ("¿tasa de *churn* en Alemania?") a partir de 10 000 filas
+sueltas convertidas en *chunks*. El pipeline **calcula estadísticas con pandas y las escribe como documentos
+de texto** (fichas de segmento, resúmenes, diccionario de datos, hallazgos). Esos documentos son el
+conocimiento especializado que el LLM base no tiene. Cada cifra la calcula código, así que la **verdad de
+referencia de la evaluación también se genera**, no se escribe a mano.
+
+## El dataset
+
+```{python}
+#| echo: false
+from _helpers import ROOT
+text = (ROOT / "data/processed/kaggle_derived/kaggle_data_dictionary.md").read_text(encoding="utf-8")
+table = "\n".join(l for l in text.splitlines() if l.startswith("|"))
+display(Markdown(table))
+```
+
+: Diccionario de datos generado por el pipeline (columnas del dataset Kaggle *Bank Customer Churn*, 10 000 clientes).
+
+```{python}
+#| echo: false
+rows = []
+for country in ("France", "Germany", "Spain"):
+    rows.append({
+        "País": country,
+        "Clientes": f'{stats[f"geography.{country}.customers"]:,.0f}',
+        "Abandonaron": f'{stats[f"geography.{country}.churned"]:,.0f}',
+        "Tasa de churn": f'{stats[f"geography.{country}.churn_rate"] * 100:.1f} %',
+    })
+md_table(rows)
+```
+
+: Tasa de abandono por país, calculada por el pipeline (`data/processed/stats.json`). Alemania duplica a Francia y España.
+
+## Catálogo de fuentes
+
+Todas las fuentes son públicas y se descargan por código. Cada documento conserva metadatos
+(origen, URL, idioma, geografía, tema, licencia) que permiten filtrar y citar.
+
+```{python}
+#| echo: false
+text = (ROOT / "data/SOURCES.md").read_text(encoding="utf-8")
+cols = ("Plan ID", "Fuente", "Documentos", "Formatos", "Idiomas", "Licencia")
+rows = []
+for line in text.splitlines():
+    if line.startswith("|") and not line.startswith("|---") and "Plan ID" not in line:
+        c = [x.strip() for x in line.strip().strip("|").split("|")]
+        rows.append(dict(zip(cols, (c[0], c[1], c[2], c[3], c[4], c[6]))))
+md_table(rows)
+total = sum(int(r["Documentos"]) for r in rows)
+display(Markdown(f"**Total: {total} documentos** (CSV, JSON, HTML y PDF; inglés, español, francés y alemán)."))
+```
+
+::: {.callout-warning}
+## Licencias por verificar
+La licencia del dataset de Kaggle y las condiciones de reutilización de algunas páginas de organismos públicos
+(Banco de España, Banque de France, BaFin, Bundesbank) **no están verificadas**. Se usan como extractos de
+investigación con cita y enlace, y así consta en `data/SOURCES.md`.
+:::
+
+## Notas éticas y de calidad de datos
+
+- **Privacidad.** `Surname`, `CustomerId` y `RowNumber` son identificadores personales (aunque el dataset sea
+  sintético). Se **eliminan antes de crear ningún documento** y nunca se indexan. El sistema **rechaza** las
+  preguntas que piden un apellido o un cliente concreto, sin llamar al modelo. Un escaneo automático
+  comprueba que no hay identificadores en el corpus.
+- **Datos sintéticos.** El dataset de Kaggle es un conjunto de datos de ejemplo, no clientes reales, de modo que
+  sus cifras ilustran el método y no deben leerse como estadísticas de un banco.
+- **Fuga de información con `Complain`.** El 99,8 % de los clientes que abandonaron había presentado una queja
+  (correlación de 0,996 con `Exited`): la variable casi **es** el objetivo. Los documentos de hallazgos lo
+  advierten expresamente, y también que la puntuación de satisfacción es casi plana frente al abandono.
