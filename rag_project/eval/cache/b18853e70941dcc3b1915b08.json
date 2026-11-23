@@ -1,0 +1,142 @@
+{
+  "key_parts": {
+    "mode": "rag_advanced",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a",
+    "advanced": {
+      "top_k": 4,
+      "candidates": 20,
+      "vector_weight": 0.5,
+      "bm25_weight": 0.5,
+      "rrf_k": 60,
+      "rerank_enabled": false,
+      "rerank_model": "ms-marco-TinyBERT-L-2-v2",
+      "rerank_cache_dir": ".flashrank_cache",
+      "router": "a9c4dc5aca1c"
+    }
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
+    "mode": "rag_advanced",
+    "answer": "Customers who hold 4 products have a churn rate of 100.0%, which is 4.91 times the overall churn rate [kaggle_segment_num_of_products_4]. In contrast, customers who hold 2 products have a churn rate of 7.6%, which is 0.37 times the overall churn rate [kaggle_segment_num_of_products_2].",
+    "chunks": [
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "doc_id": "kaggle_summary_num_of_products",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2).",
+        "score": 0.01639344262295082,
+        "metadata": {
+          "license": "See Kaggle dataset page (license not verified)",
+          "geography": "EU",
+          "source": "kaggle_derived",
+          "source_type": "dataset_stats",
+          "format": "generated",
+          "retrieved_at": "2026-11-19",
+          "header_path": "",
+          "chunk_index": 0,
+          "columns": "Exited,NumOfProducts",
+          "doc_hash": "5f432c881edb175bf1ab5c1ff080cfe8f26a4bdd3183712376ca9340ba825afc",
+          "title": "Churn rate by Number of products",
+          "doc_id": "kaggle_summary_num_of_products",
+          "topic": "churn",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "date": "",
+          "language": "en"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_4#0000",
+        "doc_id": "kaggle_segment_num_of_products_4",
+        "text": "# Churn segment card: NumOfProducts = 4\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 4.\n\n- Customers in segment: 60 (0.6% of 10,000 customers)\n- Churned customers (Exited = 1): 60\n- Churn rate: 100.0% (overall churn rate: 20.4%)\n- Mean balance: 93,733.13\n- Mean estimated salary: 104,763.72\n- Mean credit score: 653.6\n- Mean age: 45.7\n- Mean loyalty points earned: 574.2\n\nIn plain language: customers with NumOfProducts = 4 left the bank at a rate of 100.0%, which is 4.91 times the overall churn rate (higher).",
+        "score": 0.016129032258064516,
+        "metadata": {
+          "source_type": "dataset_stats",
+          "title": "Churn segment: NumOfProducts = 4",
+          "geography": "EU",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "date": "",
+          "retrieved_at": "2026-11-19",
+          "doc_hash": "b17c18dec1a5b21b677a82a96b4b4cde5678301bc22e73834e6a74f9255c26da",
+          "columns": "Exited,NumOfProducts",
+          "header_path": "",
+          "source": "kaggle_derived",
+          "chunk_index": 0,
+          "language": "en",
+          "license": "See Kaggle dataset page (license not verified)",
+          "doc_id": "kaggle_segment_num_of_products_4",
+          "topic": "churn",
+          "format": "generated"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_2#0000",
+        "doc_id": "kaggle_segment_num_of_products_2",
+        "text": "# Churn segment card: NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 2.\n\n- Customers in segment: 4,590 (45.9% of 10,000 customers)\n- Churned customers (Exited = 1): 349\n- Churn rate: 7.6% (overall churn rate: 20.4%)\n- Mean balance: 51,879.15\n- Mean estimated salary: 100,452.01\n- Mean credit score: 652.2\n- Mean age: 37.8\n- Mean loyalty points earned: 603.7\n\nIn plain language: customers with NumOfProducts = 2 left the bank at a rate of 7.6%, which is 0.37 times the overall churn rate (lower).",
+        "score": 0.015873015873015872,
+        "metadata": {
+          "doc_hash": "80642c8cc7e502517cbd350360ce9d5bd985403d1baf0de392dcc207365172bb",
+          "geography": "EU",
+          "date": "",
+          "title": "Churn segment: NumOfProducts = 2",
+          "format": "generated",
+          "source_type": "dataset_stats",
+          "topic": "churn",
+          "doc_id": "kaggle_segment_num_of_products_2",
+          "chunk_index": 0,
+          "license": "See Kaggle dataset page (license not verified)",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "source": "kaggle_derived",
+          "retrieved_at": "2026-11-19",
+          "columns": "Exited,NumOfProducts",
+          "header_path": "",
+          "language": "en"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_3#0000",
+        "doc_id": "kaggle_segment_num_of_products_3",
+        "text": "# Churn segment card: NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 3.\n\n- Customers in segment: 266 (2.7% of 10,000 customers)\n- Churned customers (Exited = 1): 220\n- Churn rate: 82.7% (overall churn rate: 20.4%)\n- Mean balance: 75,458.33\n- Mean estimated salary: 104,318.13\n- Mean credit score: 648.1\n- Mean age: 43.2\n- Mean loyalty points earned: 603.9\n\nIn plain language: customers with NumOfProducts = 3 left the bank at a rate of 82.7%, which is 4.06 times the overall churn rate (higher).",
+        "score": 0.015504807692307693,
+        "metadata": {
+          "chunk_index": 0,
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "doc_hash": "91cb51da65bbfca23ebfe02f5d4e7f265a52a09d5f43c154d2fcdd8a9f155076",
+          "retrieved_at": "2026-11-19",
+          "source": "kaggle_derived",
+          "title": "Churn segment: NumOfProducts = 3",
+          "header_path": "",
+          "geography": "EU",
+          "columns": "Exited,NumOfProducts",
+          "language": "en",
+          "source_type": "dataset_stats",
+          "date": "",
+          "format": "generated",
+          "license": "See Kaggle dataset page (license not verified)",
+          "topic": "churn",
+          "doc_id": "kaggle_segment_num_of_products_3"
+        }
+      }
+    ],
+    "cited_ids": [
+      "kaggle_segment_num_of_products_4",
+      "kaggle_segment_num_of_products_2"
+    ],
+    "latency_s": 0.7840863290002744,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}"
+  }
+}

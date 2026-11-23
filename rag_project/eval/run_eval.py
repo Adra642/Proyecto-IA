@@ -5,7 +5,7 @@ Answers are cached on disk (key: provider and model, prompts, index, retrieval s
 
 Usage::
 
-    uv run python -m eval.run_eval [--modes no_rag,rag] [--ids D1,R3] [--refresh]
+    uv run python -m eval.run_eval [--modes no_rag,rag,rag_advanced] [--ids D1,R3] [--refresh]
 """
 
 from __future__ import annotations
@@ -26,13 +26,15 @@ from eval.answer_cache import CACHE_DIR, AnswerCache
 from eval.questions import Question, load_questions
 from factory import Container
 from rag.prompts import PROMPT_VERSION
+from rag.router import ROUTER_VERSION
 
 log = get_logger(__name__)
 OUT_DIR = Path(__file__).parent
-MODES = ("no_rag", "rag")
+MODES = ("no_rag", "rag", "rag_advanced")
+RETRIEVAL_MODES = ("rag", "rag_advanced")
 CSV_FIELDS = [
     "id", "category", "mode", "model", "question", "answer", "retrieved_doc_ids",
-    "cited_ids", "refused", "latency_s", "from_cache", "error",
+    "cited_ids", "refused", "route", "latency_s", "from_cache", "error",
 ]  # fmt: skip
 
 
@@ -45,6 +47,10 @@ class Answerer(Protocol):
 
     def answer_rag(self, question: str) -> RagAnswer:
         """Answer with retrieval."""
+        ...
+
+    def answer_advanced(self, question: str) -> RagAnswer:
+        """Answer with routing, hybrid search and optional reranking."""
         ...
 
 
@@ -63,16 +69,20 @@ def key_parts(
     settings: Settings, model_id: str, corpus_hash: str, q: Question, mode: str
 ) -> dict[str, Any]:
     """Everything that determines an answer (the cache key)."""
-    return {
+    retrieval = mode in RETRIEVAL_MODES
+    parts: dict[str, Any] = {
         "mode": mode,
         "question": q.question,
         "model": model_id,
         "prompts": PROMPT_VERSION,
-        "top_k": settings.retrieval.top_k if mode == "rag" else None,
-        "chunking": settings.chunking.model_dump() if mode == "rag" else None,
-        "embedding": settings.embeddings.model if mode == "rag" else None,
-        "corpus": corpus_hash if mode == "rag" else None,
+        "top_k": settings.retrieval.top_k if retrieval else None,
+        "chunking": settings.chunking.model_dump() if retrieval else None,
+        "embedding": settings.embeddings.model if retrieval else None,
+        "corpus": corpus_hash if retrieval else None,
     }
+    if mode == "rag_advanced":
+        parts["advanced"] = {**settings.retrieval.model_dump(mode="json"), "router": ROUTER_VERSION}
+    return parts
 
 
 def run_questions(
@@ -93,11 +103,11 @@ def run_questions(
                 log.info("%s %-6s cached", q.id, mode)
                 continue
             try:
-                answer = (
-                    chain.answer_no_rag(q.question)
-                    if mode == "no_rag"
-                    else chain.answer_rag(q.question)
-                )
+                answer = {
+                    "no_rag": chain.answer_no_rag,
+                    "rag": chain.answer_rag,
+                    "rag_advanced": chain.answer_advanced,
+                }[mode](q.question)
             except Exception as exc:
                 log.error("%s %s failed: %s", q.id, mode, exc)
                 rows.append(ResultRow(q, mode, None, False, error=str(exc)))
@@ -121,6 +131,7 @@ def to_record(row: ResultRow) -> dict[str, Any]:
         "retrieved_doc_ids": [c.doc_id for c in a.chunks] if a else [],
         "cited_ids": a.cited_ids if a else [],
         "refused": a.refused if a else False,
+        "route": a.route if a else "",
         "latency_s": round(a.latency_s, 2) if a else None,
         "from_cache": row.from_cache,
         "error": row.error,

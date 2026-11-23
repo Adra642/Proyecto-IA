@@ -24,7 +24,7 @@ flowchart LR
 ```
 
 ## Links
-- App: *Stage 4*
+- App (Google Cloud Run): <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>
 - Quarto site: *Stage 6*
 - Repository: <https://github.com/Adra642/Proyecto-IA> (folder `rag_project/`)
 
@@ -213,8 +213,48 @@ index with `data/processed/` (a no-op when current; a cold build takes about 5 m
 The interface is in Spanish: a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
 accordion with title, link, source, similarity and the retrieved text), a **Comparar** tab (same
 question, No RAG | RAG side by side), example buttons (the evaluation questions) and an **Acerca de**
-tab. Rate-limited calls are retried once, then a friendly message is shown. *RAG avanzado* and the
-metadata filters arrive in Stage 5.
+tab. Rate-limited calls are retried once, then a friendly message is shown. **RAG avanzado**
+(hybrid search, routing and metadata filters) has its own mode and filter controls (source type,
+geography, language); the **Comparar** tab shows all three modes side by side.
+
+## Advanced RAG (Stage 5)
+Mode *RAG avanzado* (`RagChain.answer_advanced`) = **router** -> **hybrid retrieval** (BM25 + vector)
+-> optional **reranking** -> same prompt and LLM as plain RAG:
+- `rag/lexical.py`: BM25 (`rank_bm25`) over title + header path + text; `matches_where` applies the same
+  Chroma-style filters to the lexical side.
+- `rag/retrievers.py`: `HybridRetriever` fuses the two rankings with weighted reciprocal-rank fusion
+  (0.5/0.5, `rrf_k` 60, 20 candidates from each); `RerankingRetriever` decorates any retriever with a
+  `Reranker` (`rag/rerank.py`, FlashRank, local ONNX, no key).
+- `rag/router.py`: deterministic rules decide *retrieve or answer directly* (small talk) and a filter
+  (`source_type`, plus `geography in [country, EU]` when the question names one country). The filter is a
+  hint: when it finds nothing the search is repeated without it. Filters picked in the UI override the router.
+- Reranking is **implemented but off by default** (`retrieval.rerank_enabled: false`): it did not help on
+  our questions (see the table).
+
+```bash
+uv run python -m eval.ablation     # retrieval-only ablation -> eval/ablation.csv, ablation_detail.csv
+uv run python -m eval.run_eval     # now also runs rag_advanced (cached answers)
+```
+
+Retrieval ablation (12 questions with gold sources; hit@4 = what the LLM sees; chunk level):
+
+| Configuration | hit@1 | hit@4 | MRR |
+|---|---|---|---|
+| vector (baseline) | 0.667 | 0.917 | 0.794 |
+| + hybrid (BM25 + vector) | **0.833** | **1.000** | **0.903** |
+| + rerank (FlashRank TinyBERT) | 0.833 | 1.000 | 0.896 |
+| + filters (router, hybrid) | 0.833 | 1.000 | 0.903 |
+| + filters + rerank (TinyBERT) | 0.833 | 1.000 | 0.896 |
+| rerank MiniLM-L-12 (+filters) | 0.667 | 1.000 | 0.812 |
+| rerank MultiBERT-L-12 (+filters) | 0.417 | 0.500 | 0.454 |
+
+Hybrid search is the technique that pays off: the plain "churn rate in Germany" question (**D6**) goes
+from rank 5 to rank 1 and the answer from wrong to right (numeric match 0 to 1 in `eval/auto_summary.csv`).
+Reranking and filters add nothing measurable on top of hybrid here, and the larger rerankers hurt:
+the cross-encoders are trained on web passages and push the statistic cards down, and the multilingual
+model is far worse. With 12 questions one question is 0.083, so treat small differences as noise.
+Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.00 / 0.83 / 1.00 and R 0.25 /
+0.75 / 0.62 for No RAG / RAG / RAG avanzado; R4 and R1 are still imperfect (R1 needs the neighbour chunk).
 
 ## Tests and quality
 ```bash
@@ -248,14 +288,26 @@ or the Cloud Console.
    the *Secret Manager Secret Accessor* role.
 3. Cloud Run, *Create service*, *Continuously deploy from a repository*: connect the GitHub repo,
    build type **Dockerfile** `rag_project/deploy/Dockerfile`, source directory `rag_project`
-   (or use `deploy/cloudbuild.yaml`, which sets a 30-minute build timeout).
+   (or use `deploy/cloudbuild.yaml`: 30-minute timeout and a layer cache from the previous image).
 4. Settings: region `europe-west1`, **2 GiB memory, 2 CPU**, min instances 0 (1 for the live demo),
    max instances 2, allow unauthenticated invocations, and the secret as env var `GOOGLE_API_KEY`.
 5. Create a **budget alert** (Billing, Budgets & alerts) before the first deployment.
 
-Cloud Shell alternative: `gcloud run deploy rag-churn --source rag_project --dockerfile deploy/Dockerfile
---region europe-west1 --memory 2Gi --cpu 2 --allow-unauthenticated --set-secrets GOOGLE_API_KEY=google-api-key:latest`
-(check `gcloud run deploy --help` for the flags your version accepts).
+Cloud Shell, building with the config file (the route used for the live deployment):
+```bash
+gcloud builds submit rag_project --config rag_project/deploy/cloudbuild.yaml \
+  --substitutions=SHORT_SHA=v2,_CONTEXT=. --timeout=30m
+```
+Uploading only `rag_project/` keeps the other project's files out of the build. `SHORT_SHA` is only set
+automatically by triggers, so change it for every manual build.
+
+**Image size and build time.** The Dockerfile installs only the runtime dependencies (`uv sync
+--no-default-groups`: the data-pipeline packages live in the `pipeline` group, which `uv sync` still
+installs locally) with `--no-cache` (uv's wheel cache was 1.7 GB of the old image), and orders its layers
+as dependencies, then model and index, then the app. `cloudbuild.yaml` pulls the previous `:latest`
+and builds with `--cache-from`, so a build after a UI-only change reuses the dependency and index layers.
+A first build, or one after a `uv.lock` change, still takes about 10 minutes (the index embeds the
+corpus: about 200 s on CPU). Measured sizes and times are in `PROGRESS.md` (Stage 5).
 
 *Quarto docs: Stage 6.*
 
@@ -266,7 +318,8 @@ rag_project/
 ├── core/            settings (pydantic-settings), logging, exceptions, domain models, corpus loader
 ├── rag/             llm.py (adapters, fallback, throttle/retry), embeddings.py, chunking.py,
 │                    vectorstore.py (Chroma repository), index.py (CLI), retrievers.py, prompts.py,
-│                    chain.py (No-RAG and RAG modes, privacy guard)
+│                    chain.py (No-RAG, RAG and advanced modes, privacy guard),
+│                    lexical.py (BM25, filters), rerank.py (FlashRank), router.py (rules)
 ├── factory.py       composition root: wires components from settings
 ├── data_pipeline/
 │   ├── fetchers/    one module per source + base.py (template, registry)
@@ -276,7 +329,7 @@ rag_project/
 │   └── run_all.py   orchestrator + run report
 ├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py, answer cache,
 │                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
-├── app/             Gradio app: handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
+├── app/             Gradio app (3 modes, filters): handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
 ├── deploy/          Dockerfile (Cloud Run image), cloudbuild.yaml
 ├── docs/            Stage 6
 ├── data/            raw/ (git-ignored cache), processed/ (committed documents)
@@ -295,6 +348,7 @@ Design patterns in use so far:
   routing chunker that picks the strategy by document type.
 - Repository: `VectorStoreRepository` wraps Chroma (`add / query / delete / rebuild`); nothing else imports chromadb.
 - Decorator also wraps the LLM clients: `ThrottledLLM` (min interval) and `RetryingLLM` (backoff on 429).
+- Strategy + Decorator for retrieval: `Retriever` (vector, BM25, hybrid) and `RerankingRetriever` wrapping any of them; `Reranker` strategy.
 - Dependency injection with a composition root (`factory.py`); typed settings and domain models.
 
 ## Troubleshooting

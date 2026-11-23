@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
 from app.handlers import (
     MAX_QUESTION_CHARS,
+    MODE_ADVANCED,
     MODE_NO_RAG,
     MODE_RAG,
     MODES,
@@ -47,15 +49,16 @@ class FakeChain:
     def __init__(self, errors: list[Exception] | None = None) -> None:
         self.errors = list(errors or [])
         self.calls: list[tuple[str, str]] = []
+        self.wheres: list[dict[str, Any] | None] = []
 
     def _next(self, mode: str, question: str) -> RagAnswer:
         self.calls.append((mode, question))
         if self.errors:
             raise self.errors.pop(0)
-        chunks = [_chunk()] if mode == "rag" else []
+        chunks = [_chunk()] if mode != "no_rag" else []
         return RagAnswer(
             question=question,
-            mode="rag" if mode == "rag" else "no_rag",
+            mode="no_rag" if mode == "no_rag" else ("rag" if mode == "rag" else "rag_advanced"),
             answer=f"{mode} answer",
             chunks=chunks,
             cited_ids=["doc_a"] if chunks else [],
@@ -69,6 +72,12 @@ class FakeChain:
     def answer_rag(self, question: str) -> RagAnswer:
         return self._next("rag", question)
 
+    def answer_advanced(
+        self, question: str, k: int | None = None, where: dict[str, Any] | None = None
+    ) -> RagAnswer:
+        self.wheres.append(where)
+        return self._next("advanced", question)
+
 
 def _service(chain: FakeChain) -> AppService:
     return AppService(chain, sleep=lambda _s: None)
@@ -80,6 +89,14 @@ def test_ask_routes_by_mode() -> None:
     assert service.ask("q1", MODE_NO_RAG)[0] == "no_rag answer"
     assert service.ask("q2", MODE_RAG)[0] == "rag answer"
     assert chain.calls == [("no_rag", "q1"), ("rag", "q2")]
+
+
+def test_advanced_mode_passes_the_filter_to_the_chain() -> None:
+    chain = FakeChain()
+    where = {"source_type": {"$in": ["regulation"]}}
+    text, answer = _service(chain).ask("q", MODE_ADVANCED, where)
+    assert text == "advanced answer" and answer is not None and answer.mode == "rag_advanced"
+    assert chain.wheres == [where]
 
 
 def test_empty_and_long_questions_do_not_call_the_chain() -> None:
@@ -136,4 +153,4 @@ def test_example_questions_load(tmp_path: Path) -> None:
 def test_ui_builds_and_exposes_both_modes() -> None:
     demo = build_demo(_service(FakeChain()), ["example question"])
     assert demo is not None and demo.title == "RAG: churn en banca europea"
-    assert MODES == (MODE_NO_RAG, MODE_RAG)
+    assert MODES == (MODE_NO_RAG, MODE_RAG, MODE_ADVANCED)

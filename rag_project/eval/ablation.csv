@@ -1,0 +1,8 @@
+config,questions,hit@1,hit@4,mrr
+vector,12,0.667,0.917,0.794
++hybrid,12,0.833,1.0,0.903
++rerank (TinyBERT),12,0.833,1.0,0.896
++filters (hybrid),12,0.833,1.0,0.903
++filters+rerank (TinyBERT),12,0.833,1.0,0.896
+rerank MiniLM-L-12,12,0.667,1.0,0.812
+rerank MultiBERT-L-12,12,0.417,0.5,0.454

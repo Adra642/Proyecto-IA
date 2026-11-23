@@ -13,6 +13,8 @@
 
 - 2026-11-22: **[DECISION] app hosting moved from Hugging Face Spaces to Google Cloud Run** (user decision). The HF Spaces docs say Gradio and Docker Spaces need a paid plan, except 2 ZeroGPU Spaces; I had wrongly said CPU Basic was free. Plan sections 5.1 and Stage 4 updated.
 
+- 2026-11-23: Quarto site (Stage 6) will be published on **GitHub Pages** (user decision). The live app URL goes into the README in this stage.
+
 ## Stage 0: scaffold and environment (branch `stage-0-scaffold`)
 Done:
 - uv project, Python 3.12 pin, CPU-only torch, `uv.lock`, dev/docs groups.
@@ -143,3 +145,31 @@ Open / pending (needs the team):
 - **Cloud Run deployment itself needs your Google Cloud project, billing account, secret and budget alert**; the public-URL acceptance (another device, private window) is checked after the first deploy.
 - `deploy/cloudbuild.yaml` and the Cloud Shell command are untested against a real project.
 - *RAG avanzado* and the filter controls are Stage 5.
+
+## Stage 5: advanced RAG (branch `stage-5-advanced-rag`, from `main` with Stages 0-4)
+Done:
+- `rag/lexical.py` (BM25 + `matches_where`), `rag/retrievers.py` (`HybridRetriever` weighted RRF, `RerankingRetriever`), `rag/rerank.py` (FlashRank), `rag/router.py` (rules: small talk skips retrieval; source-type and single-country filter; fallback to an unfiltered search when empty; user filters override), `RagChain.answer_advanced`, `RagAnswer.mode = rag_advanced` + `route`, `Container.retriever(kind)`.
+- App: mode *RAG avanzado*, filter dropdowns (source type, geography, language), three-column *Comparar* tab, route shown in the status line.
+- `eval/ablation.py` -> `eval/ablation.csv`, `eval/ablation_detail.csv`; `run_eval`/`score` handle `rag_advanced` (cache key includes retrieval settings and router version).
+- Config: `retrieval.candidates/vector_weight/bm25_weight/rrf_k/rerank_enabled/rerank_model`.
+
+Verified: 223 unit tests, 95% coverage, ruff and mypy clean; `tests/integration/test_advanced_live.py` 3 passed on the real index; ablation and a full `run_eval` (42 answers, 0 failed).
+
+Results (see README table): hybrid raises hit@1 0.667 to 0.833, hit@4 0.917 to 1.000, MRR 0.794 to 0.903 and fixes D6 (rank 5 to 1; wrong to right answer). Filters and reranking add nothing on top of hybrid on our 12 questions; MiniLM-L-12 (hit@1 0.667) and MultiBERT (0.417, hit@4 0.5) are worse. **Decision taken by me, not confirmed: reranking stays implemented and measured but disabled by default** (`rerank_enabled: false`); the plan lists reranking but not that it must be on, and enabling a worse configuration for the demo made no sense. Tell me if you want it on.
+
+Open / pending:
+- **Manual scoring** (`eval/manual_scoring.csv` now has 42 rows: three modes) and the L1/L2 literature check are still pending (user chose to do them at the end).
+- Answer level is one run per question and Gemini 3.5 ignores `temperature`: R4 numeric went 1.0 to 0.5 and D1 citation 1 to 0 in advanced mode, probably noise (retrieval is better in both); D6, R1 and R4 are not fully solved (R1 needs neighbour chunks).
+- Semantic chunking and an LLM router were not built (cut order); the router is rule-based and English/Spanish/French/German keywords only.
+- FlashRank downloads its model on first use; the Docker image does not bake it because reranking is off.
+- `eval/chunking_results.csv` is still from before Stage 3 (not re-measured).
+
+### Stage 5 follow-up: smaller image and faster rebuilds (2026-11-23, user request)
+Measured with `podman build` on the laptop:
+- Image size **4.67 GB to 2.76 GB**. Causes found: `uv` left a 1.74 GB wheel cache in the layer (`--no-cache` fixes it); the data-pipeline packages (pymupdf, kagglehub, bs4, lxml, markdownify) are now a `pipeline` dependency group left out of the image (venv 2166 MB to 2030 MB; pandas stays because Gradio needs it). The e5 model (470 MB, fp32) and torch (805 MB) are untouched on purpose (changing them would change the embeddings).
+- Layer order is dependencies, then model + index, then the app. Rebuild after changing only `app/`: dependencies and the index are `Using cache`, 1 s instead of re-embedding for about 208 s.
+- The cold-build total time was **not measured** (the laptop clock jumped during the run); the index step took 208 s as before.
+- `cloudbuild.yaml`: pulls `:latest` and uses `--cache-from` (BuildKit inline cache), pushes the SHA and `latest` tags, `_CONTEXT` substitution so `gcloud builds submit rag_project ...` uploads only the project folder. Default machine type kept (free minutes). **Not yet tried on Cloud Build:** check that the second build there shows cache hits.
+- Dropped the multi-stage idea: with `--no-cache` it saves about 50 MB and would stop the inline cache from covering the dependency and index layers.
+- Not done (user chose safe): deleting torch `test`/`include` folders (about 170 MB).
+- The slim image answers correctly (RAG and RAG avanzado) with the key passed as an environment variable.

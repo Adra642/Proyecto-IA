@@ -91,9 +91,22 @@ class IndexSettings(BaseModel):
 
 
 class RetrievalSettings(BaseModel):
-    """How many chunks are passed to the LLM."""
+    """How many chunks are passed to the LLM and how the advanced retrieval behaves."""
 
     top_k: int = Field(default=4, ge=1)
+    candidates: int = Field(default=20, ge=1)  # fetched before fusion / reranking
+    vector_weight: float = Field(default=0.5, ge=0.0)  # weight of dense ranks in the fusion
+    bm25_weight: float = Field(default=0.5, ge=0.0)  # weight of lexical ranks in the fusion
+    rrf_k: int = Field(default=60, ge=1)  # reciprocal-rank-fusion constant
+    rerank_enabled: bool = False  # advanced mode reranks only if true (see PROGRESS, Stage 5)
+    rerank_model: str = "ms-marco-TinyBERT-L-2-v2"  # FlashRank model name
+    rerank_cache_dir: Path = Path(".flashrank_cache")
+
+    @model_validator(mode="after")
+    def _some_weight(self) -> RetrievalSettings:
+        if self.vector_weight + self.bm25_weight <= 0:
+            raise ValueError("vector_weight and bm25_weight cannot both be zero")
+        return self
 
 
 class Settings(BaseSettings):

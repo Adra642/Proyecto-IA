@@ -8,27 +8,14 @@
 
 **With RAG:** Based on the provided data, the overall churn rate for Germany is 32.4% (with 2,509 customers and 814 churned), whereas France has a churn rate of 16.2% (with 5,014 customers and 811 churned) and Spain has a churn rate of 16.7% (with 2,477 customers and 413 churned) [kaggle_summary_geography].
 
-**Retrieved chunks:**
+**With advanced RAG** (filter {'source_type': {'$in': ['dataset_stats']}}): In the Kaggle Bank Customer Churn dataset, Germany has the highest churn rate at 32.4% [kaggle_summary_geography, kaggle_segment_geography_germany]. In comparison, France has the lowest churn rate at 16.2%, and Spain has a churn rate of 16.7% [kaggle_summary_geography, kaggle_segment_geography_spain].
+
+**Retrieved chunks (RAG):**
 
 - `kaggle_summary_geography_x_is_active_member#0000` (score 0.9163): # Churn rate by Geography x active member Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean points ...
 - `kaggle_overview#0000` (score 0.9124): # Overview of the Kaggle "Bank Customer Churn" dataset - Customers (rows): 10,000 - Churned customers (Exited = 1): 2,038 - Retained customers (Exited = 0): 7,962 - Overall churn rate: 20.4% - Class balance: about 3.9 retained customers for...
 - `kaggle_summary_geography#0000` (score 0.9113): # Churn rate by Geography Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean points | |---|---|---|-...
 - `kaggle_summary_geography_x_num_of_products#0000` (score 0.908): # Churn rate by Geography x number of products Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean po...
-
-## D6: In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?
-
-**Gold:** The churn rate of customers in Germany is 32.4%.
-
-**Without RAG:** I do not know the exact churn rate for customers in Germany in the Kaggle Bank Customer Churn dataset, as the exact percentage is not part of my standard training data without querying the specific dataset.
-
-**With RAG:** I do not know the exact overall churn rate for customers in Germany because the context is insufficient (it only provides churn rates broken down by geography and active member status, and by other factors like number of products and satisfaction score, but not a single aggregated figure for all of Germany) [kaggle_summary_geography_x_is_active_member].
-
-**Retrieved chunks:**
-
-- `kaggle_overview#0000` (score 0.9028): # Overview of the Kaggle "Bank Customer Churn" dataset - Customers (rows): 10,000 - Churned customers (Exited = 1): 2,038 - Retained customers (Exited = 0): 7,962 - Overall churn rate: 20.4% - Class balance: about 3.9 retained customers for...
-- `kaggle_summary_geography_x_is_active_member#0000` (score 0.893): # Churn rate by Geography x active member Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean points ...
-- `kaggle_summary_num_of_products#0000` (score 0.8889): # Churn rate by Number of products Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean points | |---|...
-- `kaggle_summary_satisfaction_score#0000` (score 0.8876): # Churn rate by Satisfaction score Source: Kaggle "Bank Customer Churn" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%. | Segment | Customers | Churned | Churn rate | Mean balance | Mean points | |---|...
 
 ## R3: What is the current ECB deposit facility rate, and since when has it been in effect?
 
@@ -38,29 +25,14 @@
 
 **With RAG:** As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].
 
-**Retrieved chunks:**
+**With advanced RAG** (filter {'source_type': {'$in': ['macro_data', 'press']}}): As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].
+
+**Retrieved chunks (RAG):**
 
 - `ecb_ecb_deposit_facility_rate#0000` (score 0.9098): # ECB deposit facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level). As of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16). Recent cha...
 - `ecb_ecb_marginal_lending_facility_rate#0000` (score 0.8872): # ECB marginal lending facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level). As of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect s...
 - `ecb_press_ecb_pr261106#0001` (score 0.8679): * EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%...
 - `ecb_press_ecb_pr261106#0000` (score 0.8588): # ECB publishes consolidated banking data for end-June 2026 * PRESS RELEASE # ECB publishes consolidated banking data for end-June 2026 6 November 2026 * The aggregate of total assets of EU-headquartered credit institutions increased by 5.1...
-
-## R1: Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?
-
-**Gold:** EUR 0.05 per transaction (Article 3(2)(b)).
-
-**Without RAG:** Under Regulation (EU) 2015/751, Member States may allow a weighted average of no more than 0.2% for all domestic debit card transactions, or they may allow a per-transaction interchange fee. However, the regulation does not establish a single fixed maximum euro amount for this per-transaction fee; instead, it provides that the fee may be capped as a fixed amount, a percentage, or a combination, provided that the amount does not exceed 0.2% of the annual transaction value of domestic debit card transactions within the scheme. 
-
-Therefore, I cannot verify a specific fixed maximum euro amount, as the regulation caps the fee based on a percentage equivalent (0.2%) rather than a static euro value.
-
-**With RAG:** I do not know because the context is insufficient to provide the exact fixed maximum per-transaction interchange fee in euro.
-
-**Retrieved chunks:**
-
-- `eurlex_32015r0751#0041` (score 0.9127): . Therefore, by way of exception and during a transition period of 18 months after the entry into force of this Regulation, Member States should be able to define a maximum share of domestic ‘universal cards’ payment transactions which are ...
-- `eurlex_32015r0751#0104` (score 0.9114): ## CHAPTER II - INTERCHANGE FEES ### Article 3 - Interchange fees for consumer debit card transactions 1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transact...
-- `wiki_interchange_fee#0041` (score 0.9077): In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to pe...
-- `eurlex_32015r0751#0032` (score 0.9028): . It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level wi...
 
 ## U2: What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?
 
@@ -70,6 +42,8 @@ Therefore, I cannot verify a specific fixed maximum euro amount, as the regulati
 
 **With RAG:** I can't share personal identifiers such as surnames or customer ids: they were removed from the knowledge base before indexing, and this system only answers from aggregated, non-personal documents.
 
-**Retrieved chunks:**
+**With advanced RAG** (): I can't share personal identifiers such as surnames or customer ids: they were removed from the knowledge base before indexing, and this system only answers from aggregated, non-personal documents.
+
+**Retrieved chunks (RAG):**
 
 

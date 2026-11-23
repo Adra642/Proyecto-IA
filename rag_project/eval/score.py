@@ -29,6 +29,7 @@ from eval.numbers import contains_number
 from eval.questions import Question, load_questions
 from eval.retrieval_metrics import hit_at_k, mean
 
+RETRIEVAL_MODES = ("rag", "rag_advanced")  # modes that retrieve chunks
 log = get_logger(__name__)
 OUT_DIR = Path(__file__).parent
 KS = (1, 3, 4)
@@ -82,11 +83,11 @@ def auto_score(
     out: dict[str, Any] = {"id": q.id, "category": q.category, "mode": record["mode"]}
     for k in KS:
         out[f"hit@{k}"] = (
-            int(hit_at_k(retrieved, gold, k)) if record["mode"] == "rag" and gold else ""
+            int(hit_at_k(retrieved, gold, k)) if record["mode"] in RETRIEVAL_MODES and gold else ""
         )
     match = numeric_match(answer, q)
     out["numeric_match"] = "" if match is None else round(match, 2)
-    if record["mode"] == "rag" and gold:
+    if record["mode"] in RETRIEVAL_MODES and gold:
         out["citation_ok"] = int(bool(set(record["cited_ids"]) & gold))
     else:
         out["citation_ok"] = ""
@@ -229,13 +230,16 @@ def write_examples(
         if not no or not rag:
             continue
         q = questions[qid]
+        adv = by.get((qid, "rag_advanced"))
         parts += [
             f"## {qid}: {q.question}\n",
             f"**Gold:** {q.gold_answer}\n",
             f"**Without RAG:** {no['answer']}\n",
             f"**With RAG:** {rag['answer']}\n",
-            "**Retrieved chunks:**\n",
         ]
+        if adv:
+            parts.append(f"**With advanced RAG** ({adv.get('route', '')}): {adv['answer']}\n")
+        parts.append("**Retrieved chunks (RAG):**\n")
         for c in rag["retrieved_chunks"]:
             snippet = " ".join(c["text"].split())[:240]
             parts.append(f"- `{c['chunk_id']}` (score {c['score']}): {snippet}...")
