@@ -39,6 +39,9 @@ def main() -> None:
     setup_logging(settings.resolve(settings.paths.logs_dir))
     container = Container(settings)
     ensure_index(container, settings)
+    container.retriever("advanced").retrieve(
+        "warm-up", 1
+    )  # builds the BM25 index now, not on the first question
     examples = load_example_questions(settings.resolve(EXAMPLES_FILE))
     demo = build_demo(AppService(container.chain()), examples)
     demo.queue(default_concurrency_limit=2)

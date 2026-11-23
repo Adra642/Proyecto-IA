@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from typing import Protocol
+from typing import Any, Protocol
 
 from core.exceptions import MissingCredentialError, ProviderError, RateLimitError
 from core.logging_setup import get_logger
@@ -17,8 +17,8 @@ log = get_logger(__name__)
 
 MODE_NO_RAG = "Sin RAG"
 MODE_RAG = "RAG"
-# Stage 5 appends "RAG avanzado" here; the UI reads this tuple.
-MODES: tuple[str, ...] = (MODE_NO_RAG, MODE_RAG)
+MODE_ADVANCED = "RAG avanzado"
+MODES: tuple[str, ...] = (MODE_NO_RAG, MODE_RAG, MODE_ADVANCED)
 
 MSG_RATE_LIMIT = (
     "El proveedor del modelo está saturado (límite de peticiones). "
@@ -44,6 +44,12 @@ class Chain(Protocol):
         """Retrieval-grounded answer."""
         ...
 
+    def answer_advanced(
+        self, question: str, k: int | None = None, where: dict[str, Any] | None = None
+    ) -> RagAnswer:
+        """Routed, hybrid-search answer, optionally restricted by a metadata filter."""
+        ...
+
 
 class AppService:
     """Runs questions through the chain and turns failures into friendly Spanish messages."""
@@ -57,8 +63,10 @@ class AppService:
         self._chain = chain
         self._sleep = sleep
 
-    def ask(self, question: str, mode: str) -> tuple[str, RagAnswer | None]:
-        """Answer ``question`` in ``mode``.
+    def ask(
+        self, question: str, mode: str, where: dict[str, Any] | None = None
+    ) -> tuple[str, RagAnswer | None]:
+        """Answer ``question`` in ``mode``; ``where`` only applies to the advanced mode.
 
         Returns:
             ``(text, answer)``. ``answer`` is ``None`` when ``text`` is an error message.
@@ -69,7 +77,7 @@ class AppService:
         if len(question) > MAX_QUESTION_CHARS:
             return MSG_TOO_LONG, None
         try:
-            result = self._run(question, mode)
+            result = self._run(question, mode, where)
         except MissingCredentialError:
             log.error("LLM credential missing")
             return MSG_NO_KEY, None
@@ -80,18 +88,20 @@ class AppService:
             return MSG_PROVIDER, None
         return result.answer, result
 
-    def _run(self, question: str, mode: str) -> RagAnswer:
+    def _run(self, question: str, mode: str, where: dict[str, Any] | None) -> RagAnswer:
         """Call the chain; retry once when the provider is rate-limited."""
         try:
-            return self._call(question, mode)
+            return self._call(question, mode, where)
         except RateLimitError:
             log.warning("Rate limited; retrying once")
             self._sleep(RETRY_PAUSE_S)
-            return self._call(question, mode)
+            return self._call(question, mode, where)
 
-    def _call(self, question: str, mode: str) -> RagAnswer:
+    def _call(self, question: str, mode: str, where: dict[str, Any] | None) -> RagAnswer:
         if mode == MODE_NO_RAG:
             return self._chain.answer_no_rag(question)
+        if mode == MODE_ADVANCED:
+            return self._chain.answer_advanced(question, where=where)
         return self._chain.answer_rag(question)
 
 
@@ -112,7 +122,7 @@ def format_sources(chunks: list[RetrievedChunk], cited_ids: list[str]) -> str:
         blocks.append(
             f"**{rank}. {link}**{cited}  \n"
             f"`{chunk.doc_id}` · fuente: {meta.get('source', '?')} · "
-            f"tipo: {meta.get('source_type', '?')} · similitud: {chunk.score:.3f}\n\n"
+            f"tipo: {meta.get('source_type', '?')} · puntuación: {chunk.score:.3f}\n\n"
             f"> {text}"
         )
     return "\n\n".join(blocks)
@@ -123,4 +133,5 @@ def format_status(answer: RagAnswer | None) -> str:
     if answer is None:
         return ""
     note = " · rechazada por la guarda de privacidad" if answer.refused else ""
-    return f"⏱ {answer.latency_s:.1f} s · modelo: `{answer.model}`{note}"
+    route = f" · ruta: {answer.route}" if answer.route else ""
+    return f"⏱ {answer.latency_s:.1f} s · modelo: `{answer.model}`{note}{route}"

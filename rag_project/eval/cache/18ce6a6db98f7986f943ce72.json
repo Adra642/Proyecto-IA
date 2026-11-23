@@ -1,0 +1,141 @@
+{
+  "key_parts": {
+    "mode": "rag_advanced",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a",
+    "advanced": {
+      "top_k": 4,
+      "candidates": 20,
+      "vector_weight": 0.5,
+      "bm25_weight": 0.5,
+      "rrf_k": 60,
+      "rerank_enabled": false,
+      "rerank_model": "ms-marco-TinyBERT-L-2-v2",
+      "rerank_cache_dir": ".flashrank_cache",
+      "router": "a9c4dc5aca1c"
+    }
+  },
+  "answer": {
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "mode": "rag_advanced",
+    "answer": "I do not know because the context is insufficient (Portugal is not mentioned in the context, which only covers France, Germany, and Spain) [kaggle_overview].",
+    "chunks": [
+      {
+        "chunk_id": "kaggle_segment_geography_spain#0000",
+        "doc_id": "kaggle_segment_geography_spain",
+        "text": "# Churn segment card: Geography = Spain\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Spain.\n\n- Customers in segment: 2,477 (24.8% of 10,000 customers)\n- Churned customers (Exited = 1): 413\n- Churn rate: 16.7% (overall churn rate: 20.4%)\n- Mean balance: 61,818.15\n- Mean estimated salary: 99,440.57\n- Mean credit score: 651.3\n- Mean age: 38.9\n- Mean loyalty points earned: 601.4\n\nIn plain language: customers with Geography = Spain left the bank at a rate of 16.7%, which is 0.82 times the overall churn rate (lower).",
+        "score": 0.012743506493506494,
+        "metadata": {
+          "date": "",
+          "geography": "ES",
+          "topic": "churn",
+          "source": "kaggle_derived",
+          "title": "Churn segment: Geography = Spain",
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "license": "See Kaggle dataset page (license not verified)",
+          "chunk_index": 0,
+          "doc_id": "kaggle_segment_geography_spain",
+          "columns": "Exited,Geography",
+          "format": "generated",
+          "doc_hash": "c3f03a0866bfa325debea2e574f85a1061bfa6e3ece16115178aef21d5898053",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "source_type": "dataset_stats",
+          "header_path": ""
+        }
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "doc_id": "kaggle_overview",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain.",
+        "score": 0.00819672131147541,
+        "metadata": {
+          "header_path": "",
+          "source": "kaggle_derived",
+          "doc_id": "kaggle_overview",
+          "license": "See Kaggle dataset page (license not verified)",
+          "format": "generated",
+          "retrieved_at": "2026-11-19",
+          "language": "en",
+          "date": "",
+          "chunk_index": 0,
+          "geography": "EU",
+          "doc_hash": "870b4dd7284a4e006d39540859b33895c6b83cc02814bfe9c771bd2be3059a5a",
+          "title": "Overview of the Bank Customer Churn dataset",
+          "topic": "churn",
+          "source_type": "dataset_stats",
+          "columns": "Exited",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn"
+        }
+      },
+      {
+        "chunk_id": "kaggle_segment_has_cr_card_0#0000",
+        "doc_id": "kaggle_segment_has_cr_card_0",
+        "text": "# Churn segment card: HasCrCard = 0\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Has credit card. Segment: HasCrCard = 0.\n\n- Customers in segment: 2,945 (29.4% of 10,000 customers)\n- Churned customers (Exited = 1): 613\n- Churn rate: 20.8% (overall churn rate: 20.4%)\n- Mean balance: 77,920.79\n- Mean estimated salary: 100,974.40\n- Mean credit score: 651.3\n- Mean age: 39.1\n- Mean loyalty points earned: 610.4\n\nIn plain language: customers with HasCrCard = 0 left the bank at a rate of 20.8%, which is about the same as the overall churn rate.",
+        "score": 0.00819672131147541,
+        "metadata": {
+          "columns": "Exited,HasCrCard",
+          "source": "kaggle_derived",
+          "header_path": "",
+          "title": "Churn segment: HasCrCard = 0",
+          "geography": "EU",
+          "date": "",
+          "language": "en",
+          "license": "See Kaggle dataset page (license not verified)",
+          "format": "generated",
+          "doc_id": "kaggle_segment_has_cr_card_0",
+          "source_type": "dataset_stats",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "doc_hash": "4fc5c9979774eca810a6cf0cad4aa2adac760d11d20e97387f878aa8dd1114f2",
+          "chunk_index": 0,
+          "retrieved_at": "2026-11-19",
+          "topic": "churn"
+        }
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "doc_id": "kaggle_summary_geography_x_is_active_member",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1).",
+        "score": 0.008064516129032258,
+        "metadata": {
+          "chunk_index": 0,
+          "license": "See Kaggle dataset page (license not verified)",
+          "topic": "churn",
+          "language": "en",
+          "url": "https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn",
+          "title": "Churn rate by Geography x active member",
+          "date": "",
+          "geography": "EU",
+          "header_path": "",
+          "source": "kaggle_derived",
+          "retrieved_at": "2026-11-19",
+          "doc_id": "kaggle_summary_geography_x_is_active_member",
+          "format": "generated",
+          "doc_hash": "c51cdcab694e32e8fd7276e130ae0591308c9ec0dd15df360c0851af4c0d05c1",
+          "source_type": "dataset_stats",
+          "columns": "Exited,Geography,IsActiveMember"
+        }
+      }
+    ],
+    "cited_ids": [
+      "kaggle_overview"
+    ],
+    "latency_s": 1.002381050000622,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}"
+  }
+}

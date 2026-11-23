@@ -58,6 +58,13 @@ class FakeChain:
             cited_ids=["card_de"], latency_s=2.0, model="m",
         )  # fmt: skip
 
+    def answer_advanced(self, q: str) -> RagAnswer:
+        self.calls.append(("rag_advanced", q))
+        return RagAnswer(
+            question=q, mode="rag_advanced", answer="32.4% [card_de]", chunks=[chunk("card_de")],
+            cited_ids=["card_de"], latency_s=2.5, model="m", route="filter test",
+        )  # fmt: skip
+
 
 def parts_for(q: Question, mode: str) -> dict[str, Any]:
     return {"q": q.question, "mode": mode}

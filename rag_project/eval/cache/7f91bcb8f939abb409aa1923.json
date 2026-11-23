@@ -1,0 +1,141 @@
+{
+  "key_parts": {
+    "mode": "rag_advanced",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a",
+    "advanced": {
+      "top_k": 4,
+      "candidates": 20,
+      "vector_weight": 0.5,
+      "bm25_weight": 0.5,
+      "rrf_k": 60,
+      "rerank_enabled": false,
+      "rerank_model": "ms-marco-TinyBERT-L-2-v2",
+      "rerank_cache_dir": ".flashrank_cache",
+      "router": "a9c4dc5aca1c"
+    }
+  },
+  "answer": {
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "mode": "rag_advanced",
+    "answer": "Based on the provided context, the paper proposes a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking [arxiv_2606_07582]. It addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research [arxiv_2606_07582].",
+    "chunks": [
+      {
+        "chunk_id": "arxiv_2606_07582#0033",
+        "doc_id": "arxiv_2606_07582",
+        "text": "Full paper: https://arxiv.org/abs/2606.07582",
+        "score": 0.01626123744050767,
+        "metadata": {
+          "source_type": "paper",
+          "doc_hash": "b5f37944aaf4cae49f5292fb8b2c2df89618e034245b5070acdf6706b12e66ab",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "chunk_index": 33,
+          "format": "pdf",
+          "header_path": "CONCLUSION (excerpt)",
+          "date": "2026-05-26",
+          "columns": "Exited",
+          "source": "arxiv",
+          "language": "en",
+          "topic": "churn",
+          "doc_id": "arxiv_2606_07582",
+          "geography": "global",
+          "retrieved_at": "2026-11-19",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0000",
+        "doc_id": "arxiv_2606_07582",
+        "text": "# Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles  \nAuthors: Joyjit Roy, Samaresh Kumar Singh, Laxmi Shaw. Published: 2026-05-26. arXiv:2606.07582.",
+        "score": 0.015772478887232988,
+        "metadata": {
+          "geography": "global",
+          "header_path": "",
+          "columns": "Exited",
+          "source_type": "paper",
+          "topic": "churn",
+          "chunk_index": 0,
+          "url": "https://arxiv.org/abs/2606.07582",
+          "language": "en",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "source": "arxiv",
+          "date": "2026-05-26",
+          "doc_id": "arxiv_2606_07582",
+          "format": "pdf",
+          "doc_hash": "b5f37944aaf4cae49f5292fb8b2c2df89618e034245b5070acdf6706b12e66ab",
+          "retrieved_at": "2026-11-19",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0003",
+        "doc_id": "arxiv_2606_07582",
+        "text": ". This study introduces a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking. The proposed framework addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research. The FT-Transformer captures higher-order feature interactions using self-attention, while XGBoost captures gradient-boosted decision boundaries with complementary inductive biases",
+        "score": 0.01527518656716418,
+        "metadata": {
+          "source_type": "paper",
+          "doc_hash": "b5f37944aaf4cae49f5292fb8b2c2df89618e034245b5070acdf6706b12e66ab",
+          "retrieved_at": "2026-11-19",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "url": "https://arxiv.org/abs/2606.07582",
+          "chunk_index": 3,
+          "language": "en",
+          "topic": "churn",
+          "geography": "global",
+          "columns": "Exited",
+          "date": "2026-05-26",
+          "doc_id": "arxiv_2606_07582",
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "header_path": "Abstract",
+          "source": "arxiv",
+          "format": "pdf"
+        }
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0006",
+        "doc_id": "arxiv_2606_07582",
+        "text": "## INTRODUCTION (excerpt)",
+        "score": 0.01518288474810214,
+        "metadata": {
+          "columns": "Exited",
+          "chunk_index": 6,
+          "title": "Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles",
+          "topic": "churn",
+          "doc_hash": "b5f37944aaf4cae49f5292fb8b2c2df89618e034245b5070acdf6706b12e66ab",
+          "source": "arxiv",
+          "format": "pdf",
+          "date": "2026-05-26",
+          "geography": "global",
+          "source_type": "paper",
+          "header_path": "INTRODUCTION (excerpt)",
+          "language": "en",
+          "doc_id": "arxiv_2606_07582",
+          "retrieved_at": "2026-11-19",
+          "license": "arXiv: authors' copyright; metadata, abstract and short excerpts with link",
+          "url": "https://arxiv.org/abs/2606.07582"
+        }
+      }
+    ],
+    "cited_ids": [
+      "arxiv_2606_07582"
+    ],
+    "latency_s": 1.0223812269996415,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['paper']}}"
+  }
+}

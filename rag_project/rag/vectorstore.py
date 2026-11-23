@@ -125,6 +125,18 @@ class VectorStoreRepository:
             )
         return out
 
+    def all_chunks(self) -> list[RetrievedChunk]:
+        """Every stored chunk (score 0): used to build the lexical index."""
+        if self.count() == 0:
+            return []
+        res = self._col.get(include=["documents", "metadatas"])
+        return [
+            RetrievedChunk(
+                chunk_id=cid, doc_id=str(meta["doc_id"]), text=doc, score=0.0, metadata=dict(meta)
+            )
+            for cid, doc, meta in zip(res["ids"], res["documents"], res["metadatas"], strict=True)
+        ]
+
     def delete_document(self, doc_id: str) -> None:
         """Remove every chunk of a document."""
         self._col.delete(where={"doc_id": doc_id})

@@ -1,10 +1,11 @@
-"""Retrievers (Strategy). Stage 3 has plain vector search; Stage 5 adds hybrid and rerank."""
+"""Retrievers (Strategy): vector, hybrid (BM25 + vector fusion) and reranking decorator."""
 
 from __future__ import annotations
 
 from typing import Any, Protocol
 
 from core.models import RetrievedChunk
+from rag.rerank import Reranker
 from rag.vectorstore import VectorStoreRepository
 
 
@@ -30,3 +31,60 @@ class VectorRetriever:
     ) -> list[RetrievedChunk]:
         """Return the ``k`` nearest chunks, optionally filtered by metadata."""
         return self._repo.query(query, k, where)
+
+
+class HybridRetriever:
+    """Weighted reciprocal-rank fusion of a dense and a lexical retriever.
+
+    Ranks, not raw scores, are fused: cosine similarity and BM25 live on different scales.
+    A chunk's fused score is ``sum(weight / (rrf_k + rank))`` over the lists that return it.
+    """
+
+    def __init__(
+        self,
+        dense: Retriever,
+        lexical: Retriever,
+        candidates: int,
+        vector_weight: float = 0.5,
+        bm25_weight: float = 0.5,
+        rrf_k: int = 60,
+    ) -> None:
+        """Args: dense/lexical: the two retrievers; candidates: depth fetched from each."""
+        self._dense = dense
+        self._lexical = lexical
+        self._candidates = candidates
+        self._weights = (vector_weight, bm25_weight)
+        self._rrf_k = rrf_k
+
+    def retrieve(
+        self, query: str, k: int, where: dict[str, Any] | None = None
+    ) -> list[RetrievedChunk]:
+        """Return the ``k`` chunks with the best fused rank."""
+        depth = max(k, self._candidates)
+        fused: dict[str, float] = {}
+        chunks: dict[str, RetrievedChunk] = {}
+        for weight, retriever in zip(self._weights, (self._dense, self._lexical), strict=True):
+            for rank, chunk in enumerate(retriever.retrieve(query, depth, where), 1):
+                fused[chunk.chunk_id] = fused.get(chunk.chunk_id, 0.0) + weight / (
+                    self._rrf_k + rank
+                )
+                chunks.setdefault(chunk.chunk_id, chunk)
+        best = sorted(fused, key=lambda cid: fused[cid], reverse=True)[:k]
+        return [chunks[cid].model_copy(update={"score": fused[cid]}) for cid in best]
+
+
+class RerankingRetriever:
+    """Decorator: fetch many candidates from a base retriever, rerank them, keep the top ``k``."""
+
+    def __init__(self, base: Retriever, reranker: Reranker, candidates: int) -> None:
+        """Args: base: candidate source; reranker: cross-encoder; candidates: pool size."""
+        self._base = base
+        self._reranker = reranker
+        self._candidates = candidates
+
+    def retrieve(
+        self, query: str, k: int, where: dict[str, Any] | None = None
+    ) -> list[RetrievedChunk]:
+        """Return the ``k`` best candidates after reranking."""
+        pool = self._base.retrieve(query, max(k, self._candidates), where)
+        return self._reranker.rerank(query, pool)[:k]

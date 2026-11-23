@@ -85,10 +85,11 @@ class RagAnswer(BaseModel):
     """An answer with the evidence behind it (JSON-serialisable, so it can be cached)."""
 
     question: str
-    mode: Literal["no_rag", "rag"]
+    mode: Literal["no_rag", "rag", "rag_advanced"]
     answer: str
     chunks: list[RetrievedChunk] = Field(default_factory=list)
     cited_ids: list[str] = Field(default_factory=list)
     latency_s: float
     model: str
     refused: bool = False  # answered by a deterministic guard, without calling the LLM
+    route: str = ""  # advanced mode: what the router decided (for display and the memoir)

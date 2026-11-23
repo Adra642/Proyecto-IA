@@ -1,0 +1,141 @@
+{
+  "key_parts": {
+    "mode": "rag_advanced",
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "model": "gemini:gemini-3.5-flash-lite",
+    "prompts": "24849a86677b",
+    "top_k": 4,
+    "chunking": {
+      "strategy": "markdown_recursive",
+      "chunk_size": 600,
+      "chunk_overlap": 90,
+      "atomic_source_types": [
+        "dataset_stats",
+        "macro_data"
+      ]
+    },
+    "embedding": "intfloat/multilingual-e5-small",
+    "corpus": "9464a88ce276c34a",
+    "advanced": {
+      "top_k": 4,
+      "candidates": 20,
+      "vector_weight": 0.5,
+      "bm25_weight": 0.5,
+      "rrf_k": 60,
+      "rerank_enabled": false,
+      "rerank_model": "ms-marco-TinyBERT-L-2-v2",
+      "rerank_cache_dir": ".flashrank_cache",
+      "router": "a9c4dc5aca1c"
+    }
+  },
+  "answer": {
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "mode": "rag_advanced",
+    "answer": "As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].",
+    "chunks": [
+      {
+        "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
+        "doc_id": "ecb_ecb_deposit_facility_rate",
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%",
+        "score": 0.01639344262295082,
+        "metadata": {
+          "url": "https://data.ecb.europa.eu/data/datasets/FM",
+          "date": "2026-09-16",
+          "language": "en",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement",
+          "header_path": "",
+          "columns": "Balance",
+          "title": "ECB deposit facility rate",
+          "format": "csv",
+          "source": "ecb_api",
+          "source_type": "macro_data",
+          "retrieved_at": "2026-11-19",
+          "chunk_index": 0,
+          "doc_id": "ecb_ecb_deposit_facility_rate",
+          "doc_hash": "b162ced41024a16d8c4ee80e72a5687bf1ef990c052ee55c83e4f2a5a6f13b3b",
+          "topic": "deposits_rates",
+          "geography": "EU"
+        }
+      },
+      {
+        "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
+        "doc_id": "ecb_ecb_marginal_lending_facility_rate",
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%",
+        "score": 0.016129032258064516,
+        "metadata": {
+          "header_path": "",
+          "chunk_index": 0,
+          "title": "ECB marginal lending facility rate",
+          "format": "csv",
+          "source_type": "macro_data",
+          "topic": "deposits_rates",
+          "geography": "EU",
+          "doc_id": "ecb_ecb_marginal_lending_facility_rate",
+          "retrieved_at": "2026-11-19",
+          "columns": "Balance",
+          "language": "en",
+          "source": "ecb_api",
+          "date": "2026-09-16",
+          "url": "https://data.ecb.europa.eu/data/datasets/FM",
+          "doc_hash": "d68c1485aab4af5ce96213b58d3171950a3991a4ef646145389e1a18a70e5275",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement"
+        }
+      },
+      {
+        "chunk_id": "ecb_ecb_main_refinancing_operations_rate#0000",
+        "doc_id": "ecb_ecb_main_refinancing_operations_rate",
+        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-19, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%",
+        "score": 0.01562881562881563,
+        "metadata": {
+          "columns": "Balance",
+          "retrieved_at": "2026-11-19",
+          "geography": "EU",
+          "title": "ECB main refinancing operations rate",
+          "date": "2026-09-16",
+          "format": "csv",
+          "header_path": "",
+          "topic": "deposits_rates",
+          "language": "en",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement",
+          "doc_hash": "f0df1ae3957f9e1c8993a488dafa1e5eec16fb81d396809abfb226b2069abb42",
+          "source": "ecb_api",
+          "url": "https://data.ecb.europa.eu/data/datasets/FM",
+          "chunk_index": 0,
+          "source_type": "macro_data",
+          "doc_id": "ecb_ecb_main_refinancing_operations_rate"
+        }
+      },
+      {
+        "chunk_id": "ecb_france_household_deposit_rate_up_to_1_year#0000",
+        "doc_id": "ecb_france_household_deposit_rate_up_to_1_year",
+        "text": "# France household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.FR.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in France (new business), for 2026-09, is 2.54%.\n\nRecent observations:\n- 2026-09: 2.54%\n- 2026-08: 2.36%\n- 2026-07: 2.38%\n- 2026-06: 2.28%\n- 2026-05: 2.22%\n- 2026-04: 2.18%",
+        "score": 0.014242424242424244,
+        "metadata": {
+          "source_type": "macro_data",
+          "doc_id": "ecb_france_household_deposit_rate_up_to_1_year",
+          "chunk_index": 0,
+          "format": "csv",
+          "url": "https://data.ecb.europa.eu/data/datasets/MIR",
+          "language": "en",
+          "geography": "FR",
+          "license": "ECB statistical data: reuse allowed with source acknowledgement",
+          "date": "2026-09-01",
+          "title": "France household deposit rate up to 1 year",
+          "topic": "deposits_rates",
+          "doc_hash": "5e83f79e4b85ccf71d15a724eb71d0312debe4efb86b8e2f18fa7faf57d2224d",
+          "columns": "Balance,Geography",
+          "source": "ecb_api",
+          "header_path": "",
+          "retrieved_at": "2026-11-19"
+        }
+      }
+    ],
+    "cited_ids": [
+      "ecb_ecb_deposit_facility_rate"
+    ],
+    "latency_s": 0.9682983010006865,
+    "model": "gemini:gemini-3.5-flash-lite",
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['macro_data', 'press']}}"
+  }
+}

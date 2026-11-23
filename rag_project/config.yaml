@@ -44,6 +44,13 @@ index:
 
 retrieval:
   top_k: 4                       # chunks passed to the LLM
+  candidates: 20                 # advanced mode: fetched per retriever before fusion / reranking
+  vector_weight: 0.5             # advanced mode: weights of the reciprocal-rank fusion
+  bm25_weight: 0.5
+  rrf_k: 60
+  rerank_enabled: false          # eval/ablation.csv: no gain on our 12 questions
+  rerank_model: ms-marco-TinyBERT-L-2-v2   # FlashRank; MiniLM-L-12 and MultiBERT did worse
+  rerank_cache_dir: .flashrank_cache
 
 # Per-source options (ids follow RAG_PROJECT_PLAN.md Section 4).
 sources:
