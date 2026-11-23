@@ -31,16 +31,16 @@ Cuando exista: pestaña de chat con selector de modo, pestaña **Comparar** (sin
 
 ### Parte 4: evaluación y técnicas avanzadas (fases C y E) · ~7 min
 Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recuperación. Y mostramos también dónde falla."*
-1. Diseño: 14 preguntas (D, L, R, U), gold generado, caché, puntuación automática y manual 0/1/2.
+1. Diseño: 14 preguntas (D, L, R, U), gold generado, puntuación automática y manual 0/1/2.
 2. Resultados: D (0 → 0,83 de cifras correctas), R (0,25 → 0,75), L (el paper correcto citado), R3 (dato del BCE vigente), U (ambos modos bien: no discrimina).
 3. Honestidad: D6 y R1 fallan y R4 mejoró a medias; explicar que el documento correcto se recuperó pero no el trozo (apartado (b) en el siguiente trozo; el título repetido; la frase común del dataset); corrección aplicada y re-medida; el resto, objetivo de la Etapa 5.
 4. Qué haremos en el RAG avanzado (Etapa 5): híbrido BM25 + vector, reranking, filtros, router y tabla de ablación. **Si aún no está hecho, presentarlo como trabajo futuro, nunca como logro.**
 
-Demo: `uv run python -m eval.run_eval` (respuestas en caché) y abrir `eval/results.csv`; `uv run python -m eval.score --examples` genera `eval/examples.md`.
+Demo: `uv run python -m eval.run_eval` (llama al modelo) y abrir `eval/results.csv`; `uv run python -m eval.score --examples` genera `eval/examples.md`.
 
 ## 2. Plan B de la demo (por si falla algo)
 
-- **Límite de la API gratuita**: la evaluación usa la **caché** (`eval/cache/`), no gasta llamadas. En una demo en vivo, tener 2 o 3 preguntas ya respondidas y capturas.
+- **Límite de la API gratuita**: cada ejecución de la evaluación gasta llamadas (no hay caché de respuestas). En una demo en vivo, tener 2 o 3 preguntas ya respondidas y capturas.
 - **Sin red**: `uv run pytest` (184 tests sin red) y la consulta al índice (`rag.index --query`) funcionan sin LLM.
 - **Arranque lento del modelo de embeddings**: la primera carga tarda; abrir la terminal y ejecutar una consulta con antelación.
 - Tener grabado un **vídeo corto** y capturas de la demo (también lo pide el plan).
@@ -92,9 +92,9 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 32. **¿Cómo generáis las respuestas correctas?** Desde `stats.json` y con regex sobre el texto ingerido; solo L1 y L2 son borradores que una persona verifica contra el PDF.
 33. **¿Por qué falla el RAG en D6 y R1 (y R4 a medias)?** Recupera el documento correcto pero no el trozo con la cifra, o la frase común del dataset diluye «Alemania»; lo diagnosticamos y corregimos el contexto del embedding (mejoró R4); el resto se atacará con híbrido, filtros y reranking.
 34. **¿Por qué `hit@k` puede engañar?** Mide si el documento correcto aparece, no si el trozo contiene la respuesta.
-35. **¿Cómo gestionáis los límites de la API?** Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional y caché de respuestas.
+35. **¿Cómo gestionáis los límites de la API?** Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional.
 36. **¿Por qué Gemini 3.5 flash lite?** Se probaron los modelos disponibles: este responde en torno a 1 s con respuestas correctas; el 2.5 está retirado.
-37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso cacheamos las respuestas y puntuamos esas.
+37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso es una ejecución por pregunta y se aceptan pequeñas diferencias entre ejecuciones.
 38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 14 (12 más 2 diagnósticos); R1 y R2 originales las sabía el modelo sin RAG y el plan pide sustituirlas por preguntas más específicas.
 39. **¿Quién puntúa las respuestas?** El equipo, manualmente, con 0 / 1 / 2 y la validez de la cita; la puntuación automática es solo una segunda opinión.
 

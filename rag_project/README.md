@@ -172,16 +172,16 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
   behavioural (U: an answer that is not in the corpus, and a request for a surname that must be
   refused). No gold number is typed by hand: dataset values come from `stats.json`, regulatory and
   ECB/Eurostat values are read from the ingested texts with regexes stored in the question file.
-- Answers are cached in `eval/cache/` (key: provider and model, prompts version, chunking and
-  embedding settings, hash of the indexed corpus, question), so a re-run is free and reproducible;
-  `--refresh` ignores the cache. Client-side throttling and retry with backoff handle rate limits.
+- There is no answer cache: every run calls the LLM again and overwrites `eval/results.json`, so small
+  differences between runs are expected (see the `temperature` note below). Client-side throttling and retry
+  with backoff handle rate limits.
 - Manual scoring (`score_0_1_2` in `eval/manual_scoring.csv`): 0 = wrong or hallucinated, 1 = partly
   right or vague, 2 = correct and specific; plus `citation_correct_Y_N` for RAG. Re-exporting keeps
   what you already filled in.
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
   (drafted from abstracts): a human must tick them.
 
-Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one cached run):
+Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one run):
 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
@@ -347,7 +347,7 @@ rag_project/
 │   ├── clean.py, build_docs.py            cleaning steps; pandas -> churn documents + stats
 │   ├── writer.py, pii_check.py            output files, SOURCES.md; privacy scan
 │   └── run_all.py   orchestrator + run report
-├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py, answer cache,
+├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py,
 │                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
 ├── app/             Gradio app (3 modes, filters): handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
 ├── deploy/          Dockerfile (Cloud Run image), cloudbuild.yaml
@@ -375,7 +375,7 @@ Design patterns in use so far:
 - *Missing API key:* the error names the variable; set it in `.env` or the environment.
 - *Rate limits:* set `llm.fallback_order` or switch `LLM_PROVIDER`.
 - *Model not found (404):* provider models get retired; list what your key can use and update `llm.models` in `config.yaml` (Gemini 2.5 models are retired; the default is `gemini-3.5-flash-lite`).
-- *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary between runs; the evaluation caches answers.
+- *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary slightly between runs; the evaluation does not try to hide that (one run per question, no cache).
 - *HTTP 429 during the evaluation:* the client waits and retries (10 s, 20 s, 40 s); raise `llm.min_interval_seconds` if it keeps happening.
 - *Kaggle:* the public dataset downloads anonymously with `kagglehub`. If it ever needs auth, set
   `KAGGLE_USERNAME` / `KAGGLE_KEY`, or put a raw CSV URL in `sources.a1.fallback_url`.

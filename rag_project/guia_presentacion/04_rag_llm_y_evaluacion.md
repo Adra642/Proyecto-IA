@@ -28,7 +28,7 @@ Solo se exige la clave del proveedor elegido. Las claves van en `.env` (nunca en
 ### Modelos y verificación (decisión confirmada por el usuario)
 - **Gemini**: se probó en vivo con la clave del equipo. `gemini-2.5-flash` está **retirado** (error 404); `gemini-3.7-flash` y `gemini-3.8-flash` agotaron el tiempo; funcionaron `gemini-3.5-flash`, `3.6-flash` y `3.5-flash-lite`. Se eligió **`gemini-3.5-flash-lite`**: unos 1 s por respuesta frente a 5-13 s de los otros, con respuestas igual de correctas.
 - Groq (`llama-3.3-70b-versatile`) y DeepSeek (`deepseek-flash`) se comprobaron solo contra su documentación (no hay claves): **no se han llamado**.
-- **Advertencia técnica**: los modelos Gemini 3.5 **ignoran `temperature`**. El plan pedía `temperature = 0` para comparación reproducible; con Gemini no se puede garantizar. Mitigación: **caché en disco de las respuestas de evaluación** y puntuar esas respuestas cacheadas, una ejecución por pregunta.
+- **Advertencia técnica**: los modelos Gemini 3.5 **ignoran `temperature`**. El plan pedía `temperature = 0` para comparación reproducible; con Gemini no se puede garantizar. Se acepta: una ejecución por pregunta, sin caché de respuestas, y se asume que puede haber pequeñas diferencias entre ejecuciones.
 
 ## 2. Prompts (`rag/prompts.py`)
 
@@ -37,7 +37,7 @@ Dos plantillas:
 - **Sin RAG**: "Responde de forma concisa. Si no lo sabes o no puedes verificarlo, dilo en vez de adivinar. Pregunta: ...". Es la línea base (mismo modelo, sin contexto).
 - **Con RAG**: reglas explícitas: usar **solo** el contexto; si no contiene la respuesta, decir claramente que no se sabe; **citar fuentes como `[doc_id]`**; responder en el idioma de la pregunta; **nunca revelar identificadores personales**; ser conciso y dar las cifras exactas del contexto.
 
-`format_context()` presenta cada trozo con cabecera `[doc_id] título > ruta (fuente, país)`. `PROMPT_VERSION` es un hash corto de las plantillas y entra en la clave de caché: cambiar un prompt invalida las respuestas guardadas.
+`format_context()` presenta cada trozo con cabecera `[doc_id] título > ruta (fuente, país)`. `PROMPT_VERSION` es un hash corto de las plantillas.
 
 ## 3. La cadena `RagChain` (`rag/chain.py`)
 
@@ -75,10 +75,10 @@ Cada pregunta incluye el **contexto completo** ("En el dataset Kaggle Bank Custo
 
 `eval/numbers.py` entiende formatos como `100,000`, `100 000`, `32,4 %`, `0.324`.
 
-### Ejecución y caché (`eval/run_eval.py`, `eval/answer_cache.py`)
+### Ejecución (`eval/run_eval.py`)
 `uv run python -m eval.run_eval` responde cada pregunta en los dos modos y guarda `eval/results.json` y `results.csv` (respuesta, trozos recuperados con su texto, citas, latencia). Si una respuesta falla, se **registra el error y se continúa**.
 
-La **caché** guarda un JSON por respuesta. La clave incluye: **modo, pregunta, proveedor y modelo, versión de los prompts, `top_k`, configuración de chunking, modelo de embeddings y una huella del corpus indexado**. Así, cambiar cualquier cosa relevante invalida la respuesta y no se mezclan resultados obsoletos; y repetir la evaluación no vuelve a gastar llamadas.
+No hay caché de respuestas: cada ejecución vuelve a llamar al modelo y sobrescribe `results.json`. Las pequeñas diferencias entre ejecuciones se aceptan.
 
 ### Puntuación (`eval/score.py`)
 **Automática** (segunda opinión, no sustituye a la persona):
@@ -142,4 +142,4 @@ Lectura honesta:
 - *¿Qué pasa si no hay información?* Contexto vacío: respuesta fija "no lo sé". Con contexto irrelevante, el prompt obliga a decir que es insuficiente (caso U1).
 - *¿Qué hace la guarda de privacidad?* Rechaza antes de llamar al LLM las preguntas por apellidos o clientes concretos; además esos datos nunca se indexaron.
 - *¿Por qué fallan D6 y R1 (y R4 a medias)?* Recuperamos el documento correcto pero no el trozo exacto, o la frase común del dataset diluye la palabra «Alemania»; lo diagnosticamos, corregimos el contexto de embedding (mejoró R4) y atacaremos el resto con búsqueda híbrida, filtros y reranking en la Etapa 5.
-- *¿Cómo gestionáis los límites de la API gratuita?* Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional y caché de respuestas (en una ejecución saltó un 429 y se recuperó solo, con 35 s de espera).
+- *¿Cómo gestionáis los límites de la API gratuita?* Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional (en una ejecución saltó un 429 y se recuperó solo, con 35 s de espera).

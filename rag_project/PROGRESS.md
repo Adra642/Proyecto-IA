@@ -196,3 +196,10 @@ Re-ran `uv run python -m eval.chunking_experiment --with-fixed` with chunker ver
 - Against the first run (MRR 0.933 for 600, 1000 and fixed): the drop for 600 comes from two questions added in Stage 3 (D6 rank 5, R4 rank 2) and D3, which went from rank 1 to rank 2 (cause not isolated: header change or question rewrite). The only question that separates 600 from 1000 / fixed is R4 (rank 2 vs 1), so the gap is one question out of 12.
 - [DECISION] kept at 600 / 90 (confirmed by the user on 2026-11-20): smaller context and an inconclusive gap. **1000 is now slightly ahead on MRR; the user may want to revisit.** Changing it would rebuild the index and invalidate the cached answers.
 - The site page `03-chunking-vectordb` and the README were updated with the new numbers; the plot's y-axis was widened (the 300 bar was below the old lower limit).
+
+### Answer cache removed (2026-11-23, user request, branch `chunking-remeasure`)
+- The user decided the evaluation answer cache is not needed and that run-to-run differences from Gemini ignoring `temperature` do not matter.
+- Removed `eval/answer_cache.py`, the 59 files in `eval/cache/`, the `--refresh` flag, `key_parts`, `Container.corpus_hash` and the `from_cache` field; `run_questions` now always calls the chain. README, site page `04-evaluacion`, `guia_presentacion` and `.dockerignore` updated.
+- The committed `eval/results.json` and `results.csv` come from the last cached run and still have a `from_cache` field; the next `eval.run_eval` drops it. `PROMPT_VERSION` and `ROUTER_VERSION` stay (still tested) but no longer feed any key.
+- Consequence: every `eval.run_eval` run now spends LLM calls (free-tier rate limits apply) and may change the numbers slightly.
+- Chunk size: **kept at 600 / 90** (option 2). The cache was one of the two costs of switching to 1000; the other (index rebuild, re-running the evaluation and ablation, updating the site) remains.

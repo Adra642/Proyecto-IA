@@ -23,7 +23,7 @@ Una tabla para consultar rápido "¿por qué hicimos X?" y poder defenderlo. Cad
 | 15 | **Prompt sin RAG que permite abstenerse** | Forzar siempre una respuesta | Línea base honesta; evita medir "alucinación forzada" | `rag/prompts.py` |
 | 16 | **Guarda de privacidad determinista** en el modo RAG | Confiar solo en el prompt | No llama al LLM, no puede alucinar un apellido | `rag/chain.py` |
 | 17 | **Verificar las citas** contra los trozos recuperados | Fiarse de lo que escribe el modelo | Una cita inventada no cuenta | `extract_citations` |
-| 18 | **Caché de respuestas de evaluación**, una ejecución por pregunta | Varias ejecuciones | Reproducible y sin gasto de cuota; Gemini 3.5 ignora `temperature` | `eval/answer_cache.py` |
+| 18 | **Sin caché de respuestas**, una ejecución por pregunta (caché retirada el 2026-11-23) | Caché en disco; varias ejecuciones | Gemini 3.5 ignora `temperature` y las pequeñas diferencias entre ejecuciones no importan | `eval/run_eval.py` |
 | 19 | **Sustituir preguntas que la línea base ya sabía** (R1, R2 originales) | Mantenerlas | Pide el plan; si el modelo ya acierta, no demuestra nada | `eval/questions.json` |
 | 20 | **Conservar una pregunta donde el RAG falla (R4)** como diagnóstico | Ocultarla | Honestidad y motivación para el RAG avanzado | `eval/questions.json` |
 | 21 | **arXiv: resumen y extractos**, no el texto completo | Texto completo | Derechos de autor: no republicar PDFs enteros | `fetchers/arxiv.py` |
@@ -49,7 +49,7 @@ Una tabla para consultar rápido "¿por qué hicimos X?" y poder defenderlo. Cad
 
 - Conjunto de evaluación pequeño (14 preguntas, 3 de ellas diagnósticos) y una ejecución por pregunta.
 - El experimento de tamaño de chunk discrimina poco (ver `03_chunking_embeddings_vectordb.md`).
-- Gemini 3.5 ignora la temperatura: respuestas no estrictamente reproducibles (de ahí la caché).
+- Gemini 3.5 ignora la temperatura: respuestas no estrictamente reproducibles (se acepta).
 - Gold de L1 y L2 pendiente de verificación humana contra el PDF; puntuación manual pendiente.
 - Groq y DeepSeek no probados con llamadas reales (sin claves).
 - Fuente HFCS (B5) sin tablas de riqueza por edad (el BCE no las expone en una URL estable); la fuente B4 solo ve lo que hay en el feed RSS; no se encontró la página del informe *Consumer Trends* de la EBA.

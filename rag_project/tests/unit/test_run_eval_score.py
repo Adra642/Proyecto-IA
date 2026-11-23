@@ -6,10 +6,8 @@ from typing import Any
 import pytest
 
 from core.models import RagAnswer, RetrievedChunk
-from core.settings import Settings
-from eval.answer_cache import AnswerCache, cache_key
 from eval.questions import GoldNumber, Question
-from eval.run_eval import key_parts, run_questions, to_record, write_results
+from eval.run_eval import run_questions, to_record, write_results
 from eval.score import (
     auto_score,
     export_manual,
@@ -66,36 +64,17 @@ class FakeChain:
         )  # fmt: skip
 
 
-def parts_for(q: Question, mode: str) -> dict[str, Any]:
-    return {"q": q.question, "mode": mode}
-
-
-def test_cache_key_is_stable_and_sensitive(settings: Settings) -> None:
-    a = key_parts(settings, "gemini:x", "hash", question(), "rag")
-    assert cache_key(a) == cache_key(dict(a))
-    assert cache_key(a) != cache_key(key_parts(settings, "groq:y", "hash", question(), "rag"))
-    assert cache_key(a) != cache_key(key_parts(settings, "gemini:x", "other", question(), "rag"))
-    assert cache_key(a) != cache_key(key_parts(settings, "gemini:x", "hash", question(), "no_rag"))
-    no_rag = key_parts(settings, "gemini:x", "hash", question(), "no_rag")
-    assert no_rag["corpus"] is None and no_rag["top_k"] is None
-
-
-def test_answers_are_cached_and_refresh_bypasses(tmp_path: Path) -> None:
+def test_every_run_calls_the_chain() -> None:
     chain = FakeChain()
     qs = [question("D1"), question("D2")]
-    first = run_questions(chain, qs, ["no_rag", "rag"], AnswerCache(tmp_path), parts_for)
-    assert len(chain.calls) == 4 and not any(r.from_cache for r in first)
-    second = run_questions(chain, qs, ["no_rag", "rag"], AnswerCache(tmp_path), parts_for)
-    assert len(chain.calls) == 4 and all(r.from_cache for r in second)
-    cached = second[1].answer
-    assert cached is not None and cached == first[1].answer and cached.latency_s == 2.0
-    run_questions(chain, qs, ["rag"], AnswerCache(tmp_path, refresh=True), parts_for)
-    assert len(chain.calls) == 6
+    run_questions(chain, qs, ["no_rag", "rag"])
+    run_questions(chain, qs, ["no_rag", "rag"])
+    assert len(chain.calls) == 8
 
 
 def test_a_failing_question_is_recorded_not_raised(tmp_path: Path) -> None:
     qs = [question("D1"), question("D2", question="boom?")]
-    rows = run_questions(FakeChain(), qs, ["rag"], AnswerCache(tmp_path), parts_for)
+    rows = run_questions(FakeChain(), qs, ["rag"])
     assert [r.error for r in rows] == ["", "provider down"] and rows[1].answer is None
     records = write_results(rows, tmp_path)
     assert records[1]["error"] == "provider down" and records[1]["answer"] == ""
@@ -103,9 +82,7 @@ def test_a_failing_question_is_recorded_not_raised(tmp_path: Path) -> None:
 
 
 def test_results_files(tmp_path: Path) -> None:
-    rows = run_questions(
-        FakeChain(), [question()], ["no_rag", "rag"], AnswerCache(tmp_path / "c"), parts_for
-    )
+    rows = run_questions(FakeChain(), [question()], ["no_rag", "rag"])
     write_results(rows, tmp_path)
     data = json.loads((tmp_path / "results.json").read_text(encoding="utf-8"))
     assert data[1]["retrieved_chunks"][0]["chunk_id"] == "card_de#0000" and data[1]["mode"] == "rag"
