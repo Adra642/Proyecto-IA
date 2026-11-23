@@ -3,7 +3,7 @@
 FROM python:3.12-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /usr/local/bin/uv
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PYTHONUNBUFFERED=1 \
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_HTTP_TIMEOUT=120 PYTHONUNBUFFERED=1 \
     HF_HOME=/app/.hf_cache PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 
