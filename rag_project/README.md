@@ -24,7 +24,7 @@ flowchart LR
 ```
 
 ## Links
-- App: *Stage 4*
+- App (Google Cloud Run): <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>
 - Quarto site: *Stage 6*
 - Repository: <https://github.com/Adra642/Proyecto-IA> (folder `rag_project/`)
 
