@@ -163,3 +163,13 @@ Open / pending:
 - Semantic chunking and an LLM router were not built (cut order); the router is rule-based and English/Spanish/French/German keywords only.
 - FlashRank downloads its model on first use; the Docker image does not bake it because reranking is off.
 - `eval/chunking_results.csv` is still from before Stage 3 (not re-measured).
+
+### Stage 5 follow-up: smaller image and faster rebuilds (2026-11-23, user request)
+Measured with `podman build` on the laptop:
+- Image size **4.67 GB to 2.76 GB**. Causes found: `uv` left a 1.74 GB wheel cache in the layer (`--no-cache` fixes it); the data-pipeline packages (pymupdf, kagglehub, bs4, lxml, markdownify) are now a `pipeline` dependency group left out of the image (venv 2166 MB to 2030 MB; pandas stays because Gradio needs it). The e5 model (470 MB, fp32) and torch (805 MB) are untouched on purpose (changing them would change the embeddings).
+- Layer order is dependencies, then model + index, then the app. Rebuild after changing only `app/`: dependencies and the index are `Using cache`, 1 s instead of re-embedding for about 208 s.
+- The cold-build total time was **not measured** (the laptop clock jumped during the run); the index step took 208 s as before.
+- `cloudbuild.yaml`: pulls `:latest` and uses `--cache-from` (BuildKit inline cache), pushes the SHA and `latest` tags, `_CONTEXT` substitution so `gcloud builds submit rag_project ...` uploads only the project folder. Default machine type kept (free minutes). **Not yet tried on Cloud Build:** check that the second build there shows cache hits.
+- Dropped the multi-stage idea: with `--no-cache` it saves about 50 MB and would stop the inline cache from covering the dependency and index layers.
+- Not done (user chose safe): deleting torch `test`/`include` folders (about 170 MB).
+- The slim image answers correctly (RAG and RAG avanzado) with the key passed as an environment variable.

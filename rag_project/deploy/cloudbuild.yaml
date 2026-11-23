@@ -1,26 +1,52 @@
-# Cloud Build config for the Cloud Run service (used by a trigger on the repo root).
-# Longer timeout than the 10-minute default: the image build embeds the corpus (about 5 minutes).
-# Not exercised end to end by the team yet: check the first build log.
+# Cloud Build config for the Cloud Run service.
+#
+# Trigger on the repo root (default _CONTEXT=rag_project), or build by hand, uploading only the
+# project folder:
+#   gcloud builds submit rag_project --config rag_project/deploy/cloudbuild.yaml \
+#     --substitutions=SHORT_SHA=v1,_CONTEXT=. --timeout=30m
+#
+# Cloud Build starts with no layer cache, so the previous :latest image is pulled and used as
+# --cache-from (BuildKit inline cache): an unchanged dependency set, or an unchanged corpus and
+# rag/ code, is not rebuilt. A first build, or a change to uv.lock, still takes about 10 minutes.
+# Not exercised end to end by the team yet: check the first two build logs.
 substitutions:
   _REGION: europe-west1
   _SERVICE: rag-churn
   _REPO: rag
+  _CONTEXT: rag_project
+  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}
 options:
   logging: CLOUD_LOGGING_ONLY
+  dynamic_substitutions: true
 timeout: 1800s
 steps:
-  - name: gcr.io/cloud-builders/docker
-    dir: rag_project
-    args: [build, -f, deploy/Dockerfile, -t, "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}", .]
-  - name: gcr.io/cloud-builders/docker
-    args: [push, "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}"]
-  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  - id: pull-cache
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args: ["-c", "docker pull ${_IMAGE}:latest || echo 'no cache image yet (first build)'"]
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    dir: ${_CONTEXT}
+    env: ["DOCKER_BUILDKIT=1"]
+    args:
+      - build
+      - --build-arg=BUILDKIT_INLINE_CACHE=1
+      - --cache-from=${_IMAGE}:latest
+      - -f=deploy/Dockerfile
+      - -t=${_IMAGE}:${SHORT_SHA}
+      - -t=${_IMAGE}:latest
+      - .
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, "${_IMAGE}"]
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
     args:
       - run
       - deploy
       - ${_SERVICE}
-      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}
+      - --image=${_IMAGE}:${SHORT_SHA}
       - --region=${_REGION}
       - --memory=2Gi
       - --cpu=2
@@ -29,4 +55,5 @@ steps:
       - --allow-unauthenticated
       - --set-secrets=GOOGLE_API_KEY=google-api-key:latest
 images:
-  - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}"
+  - ${_IMAGE}:${SHORT_SHA}
+  - ${_IMAGE}:latest

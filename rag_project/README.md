@@ -288,14 +288,26 @@ or the Cloud Console.
    the *Secret Manager Secret Accessor* role.
 3. Cloud Run, *Create service*, *Continuously deploy from a repository*: connect the GitHub repo,
    build type **Dockerfile** `rag_project/deploy/Dockerfile`, source directory `rag_project`
-   (or use `deploy/cloudbuild.yaml`, which sets a 30-minute build timeout).
+   (or use `deploy/cloudbuild.yaml`: 30-minute timeout and a layer cache from the previous image).
 4. Settings: region `europe-west1`, **2 GiB memory, 2 CPU**, min instances 0 (1 for the live demo),
    max instances 2, allow unauthenticated invocations, and the secret as env var `GOOGLE_API_KEY`.
 5. Create a **budget alert** (Billing, Budgets & alerts) before the first deployment.
 
-Cloud Shell alternative: `gcloud run deploy rag-churn --source rag_project --dockerfile deploy/Dockerfile
---region europe-west1 --memory 2Gi --cpu 2 --allow-unauthenticated --set-secrets GOOGLE_API_KEY=google-api-key:latest`
-(check `gcloud run deploy --help` for the flags your version accepts).
+Cloud Shell, building with the config file (the route used for the live deployment):
+```bash
+gcloud builds submit rag_project --config rag_project/deploy/cloudbuild.yaml \
+  --substitutions=SHORT_SHA=v2,_CONTEXT=. --timeout=30m
+```
+Uploading only `rag_project/` keeps the other project's files out of the build. `SHORT_SHA` is only set
+automatically by triggers, so change it for every manual build.
+
+**Image size and build time.** The Dockerfile installs only the runtime dependencies (`uv sync
+--no-default-groups`: the data-pipeline packages live in the `pipeline` group, which `uv sync` still
+installs locally) with `--no-cache` (uv's wheel cache was 1.7 GB of the old image), and orders its layers
+as dependencies, then model and index, then the app. `cloudbuild.yaml` pulls the previous `:latest`
+and builds with `--cache-from`, so a build after a UI-only change reuses the dependency and index layers.
+A first build, or one after a `uv.lock` change, still takes about 10 minutes (the index embeds the
+corpus: about 200 s on CPU). Measured sizes and times are in `PROGRESS.md` (Stage 5).
 
 *Quarto docs: Stage 6.*
 
