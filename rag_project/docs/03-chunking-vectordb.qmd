@@ -1,0 +1,108 @@
+---
+title: "Chunking y base vectorial"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from _helpers import read_csv, md_table, show_source
+import matplotlib.pyplot as plt
+```
+
+## Estrategia de *chunking* por tipo de documento
+
+No todos los documentos se parten igual. Un `RoutingChunker` elige la estrategia según el tipo:
+
+| Tipo de documento | Estrategia | Por qué |
+|---|---|---|
+| `dataset_stats` (fichas y resúmenes del dataset), `macro_data` (series) | **Atómico**: un documento = un *chunk* | Son cortos y autocontenidos; partirlos separaría una cifra de su etiqueta |
+| Resto (artículos, leyes, páginas web, guías) | **Markdown + recursivo**: divide por encabezados y luego por tamaño | Respeta la estructura del texto y conserva la ruta de encabezados (por ejemplo `CAPÍTULO I > Artículo 4`) |
+
+```{python}
+#| echo: false
+show_source("rag/chunking.py", "RoutingChunker")
+```
+
+La **ruta de encabezados** y el título del documento se anteponen al texto que se vectoriza
+(`embedding_text`), de modo que un fragmento de la mitad de un reglamento conserva su contexto.
+
+## ¿Qué tamaño de *chunk*? Un experimento
+
+El tamaño es un compromiso: *chunks* pequeños son más precisos pero pierden contexto y multiplican el
+número de vectores; *chunks* grandes arrastran ruido al contexto del LLM y diluyen la similitud. Se probó el
+mismo corpus con varios tamaños (solapamiento del 15 %) y se midió la recuperación a nivel de *chunk* con
+las preguntas de evaluación.
+
+```{python}
+#| echo: false
+rows = read_csv("eval/chunking_results.csv")
+md_table([
+    {
+        "Variante": r["variant"],
+        "Chunks": f'{int(r["chunks_total"]):,}',
+        "hit@1": r["hit@1"],
+        "hit@5": r["hit@5"],
+        "MRR": r["mrr"],
+        "Contexto medio (top-5, caracteres)": f'{float(r["avg_context_chars_top5"]):,.0f}',
+    }
+    for r in rows
+])
+```
+
+```{python}
+#| echo: false
+#| fig-cap: "Calidad de recuperación (MRR) frente al contexto que recibe el LLM, por variante."
+fig, ax = plt.subplots(figsize=(6.5, 3.2))
+labels = [r["variant"].replace("markdown_recursive_", "md ").replace("fixed_", "fijo ") for r in rows]
+ax.bar(labels, [float(r["mrr"]) for r in rows], color="#3b6ea5")
+ax.set_ylim(0.8, 0.96)
+ax.set_ylabel("MRR")
+ax2 = ax.twinx()
+ax2.plot(labels, [float(r["avg_context_chars_top5"]) for r in rows], "o-", color="#c4572a")
+ax2.set_ylabel("caracteres de contexto")
+fig.tight_layout()
+plt.show()
+```
+
+**Decisión: 600 caracteres con 90 de solapamiento** (confirmada por el equipo). Empata con 1000 en calidad
+(MRR 0,933) con menos contexto por consulta (2 795 frente a 3 341 caracteres), y mejora a 300, que fragmenta
+demasiado (13 466 *chunks* y el peor MRR). Con unos 415 caracteres de media por *chunk*, cada fragmento
+cabe holgadamente en el contexto del modelo.
+
+::: {.callout-warning}
+## Cómo leer el experimento
+Con 10 preguntas, una pregunta pesa 0,1, así que las diferencias entre 600 y 1000 no son concluyentes. Los
+documentos atómicos no dependen del tamaño. Este experimento se hizo **antes** de acortar la ruta de
+encabezados y de ampliar las preguntas; se mantuvo la decisión y no se repitió la medición completa.
+:::
+
+## ¿Por qué ChromaDB?
+
+| Opción | Filtros por metadatos | Infraestructura | Veredicto |
+|---|---|---|---|
+| **ChromaDB** (embebida, persistente) | **Sí, nativos** (`where`) | Ninguna: es una carpeta | **Elegida** |
+| FAISS | No (hay que filtrar a mano) | Ninguna | Rápida, pero sin filtros |
+| Qdrant, Milvus, Pinecone | Sí | Un servidor aparte o un servicio de pago | Excesivo para 6 309 *chunks* |
+
+Con ~6 300 vectores, una base embebida basta; los **filtros por metadatos** (tipo de fuente, geografía,
+idioma) son un requisito del RAG avanzado, y Chroma los trae. La contrapartida es que no escala a millones de
+vectores ni se comparte entre procesos. Para ese caso habría que migrar a Qdrant o Milvus. Todo el código accede
+a Chroma a través de un único *repositorio*, así que migrar significaría reescribir una clase.
+
+```{python}
+#| echo: false
+show_source("rag/vectorstore.py", "VectorStoreRepository.query")
+```
+
+## Embeddings
+
+Se usa `intfloat/multilingual-e5-small` (384 dimensiones) con `sentence-transformers`: es **multilingüe**
+(el corpus mezcla inglés, español, francés y alemán, y las preguntas pueden venir en cualquiera) y lo bastante
+pequeño para ejecutarse en CPU. El modelo e5 exige prefijos: `"passage: "` para los documentos y
+`"query: "` para las preguntas, y el código los aplica en un único lugar.
+La distancia es coseno.
+
+El índice resultante tiene **178 documentos y 6 309 *chunks***; construirlo en frío tarda unos 200 s en CPU y se
+sincroniza de forma incremental (cada documento guarda una huella de su contenido y de la configuración, y solo
+se reindexa lo que cambia).

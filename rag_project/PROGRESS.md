@@ -173,3 +173,19 @@ Measured with `podman build` on the laptop:
 - Dropped the multi-stage idea: with `--no-cache` it saves about 50 MB and would stop the inline cache from covering the dependency and index layers.
 - Not done (user chose safe): deleting torch `test`/`include` folders (about 170 MB).
 - The slim image answers correctly (RAG and RAG avanzado) with the key passed as an environment variable.
+
+## Stage 6: Quarto memoir and publication (branch `stage-6-quarto`, from `main` with Stages 0-5)
+Done:
+- `docs/` Quarto website in Spanish: `index`, `01-motivacion-datos`, `02-pipeline`, `03-chunking-vectordb`, `04-evaluacion`, `05-rag-avanzado`, `06-app-despliegue`, `07-equipo-referencias`, `_quarto.yml` (freeze auto), `_helpers.py` (CSV/JSON readers, Markdown tables, code excerpts cut from the sources with `ast`, so nothing heavy is imported), `styles.css`, `img/app_inicio.png` (screenshot of the live app).
+- Content comes from the repository: source catalog and dictionary from `data/`, chunk-size table and plot from `eval/chunking_results.csv`, evaluation tables and before/after examples from `eval/results.json` and `auto_summary.csv`, ablation from `eval/ablation.csv`; Mermaid diagrams for the pipeline, the architecture and the advanced mode.
+- `.github/workflows/rag_project-docs.yml` (repo root, filtered to `rag_project/**`): renders with Quarto 1.10.19 and deploys to GitHub Pages on `main`; pull requests only render.
+- README: links and a "Quarto documentation site" section.
+
+Verified: `uv run quarto render docs` renders all 8 pages with no Python errors (checked the HTML for tracebacks and empty tables); one rendered page inspected in a screenshot. The workflow file parses as YAML; **it has not run yet** (it needs the PR merged and Pages enabled).
+
+Needs the team (cannot be done by me):
+- **Enable Pages:** repo *Settings, Pages, Source = GitHub Actions*; then check the first run of `rag_project-docs` and open the URL.
+- **Fill in** the team table (`docs/07-equipo-referencias.qmd`: names, roles, contributions) and the **Loop URL** in `docs/index.qmd`; post the site URL in Loop.
+- **Manual scoring** (still pending): the evaluation page shows a "pendiente" note until `eval/manual_scoring.csv` has scores, then fills in its own table.
+- Only one app screenshot (the empty *Chat* tab): a headless browser cannot type a question. Add screenshots of an answered question, the *Fuentes* accordion and the *Comparar* tab to `docs/img/` and reference them in `06-app-despliegue.qmd` (optional).
+- Link checks: the site links to the app, repo and project 1 folder (`bank-churn-prediction`); the Pages URL assumes the repo is `Adra642/Proyecto-IA` and public (it is).

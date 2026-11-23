@@ -1,0 +1,102 @@
+---
+title: "Pipeline de datos"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from _helpers import show_source
+```
+
+Toda la ingesta es **automática y repetible**: `uv run python -m data_pipeline.run_all` descarga, limpia y
+escribe los documentos sin tocar ningún fichero a mano. Ejecutarlo de nuevo no duplica ni corrompe nada
+(es **idempotente**: dos ejecuciones seguidas producen carpetas idénticas, comprobado con `diff -r`).
+
+```{mermaid}
+flowchart LR
+  S[13 fuentes<br/>registro de fetchers] --> F[BaseFetcher<br/>caché · reintentos · límite de ritmo]
+  F --> R[(data/raw<br/>caché con manifiesto)]
+  R --> P[Parseo<br/>HTML · PDF · JSON · CSV]
+  P --> C[Limpieza<br/>HTML→Markdown · normalizar · deduplicar · longitud mínima]
+  K[CSV de Kaggle] --> D[Estadísticas con pandas<br/>fichas de segmento · hallazgos]
+  D --> W
+  C --> W[Escritura<br/>Markdown con front matter]
+  W --> V[Comprobación de PII]
+  V --> O[(data/processed<br/>178 documentos)]
+```
+
+## Diseño de los *fetchers*
+
+Cada fuente es una clase pequeña. La clase base implementa **una sola vez** la caché, los reintentos, el
+límite de ritmo y el registro (*Template Method*); cada fuente solo dice qué descargar (`_items`,
+`_download`) y cómo interpretarlo (`_parse`). Un decorador registra la clase en un diccionario, así que
+**añadir una fuente es añadir una clase**, sin tocar el orquestador (abierto/cerrado).
+
+```{python}
+#| echo: false
+show_source("data_pipeline/fetchers/base.py", "BaseFetcher.fetch")
+```
+
+```{python}
+#| echo: false
+show_source("data_pipeline/fetchers/base.py", "register_fetcher")
+```
+
+Decisiones de robustez que se descubrieron ejecutando contra servicios reales:
+
+- **Cortesía:** `User-Agent` identificado, respeto de `robots.txt`, al menos 1 s entre peticiones al mismo
+  servidor (2 s en Wikipedia, que respondió con HTTP 429) y reintentos con espera exponencial.
+- **arXiv:** `export.arxiv.org/pdf` lo prohíbe `robots.txt`; los PDF se piden a `arxiv.org/pdf`, respetando su
+  *crawl delay* de 15 s.
+- **EUR-Lex:** devuelve un desafío anti-bot; el *fetcher* lo detecta y cae a la versión XHTML de Cellar.
+- **Una fuente que falla no detiene el resto:** el error se registra y la ejecución continúa (hay una prueba
+  unitaria con un *fetcher* que lanza excepción y otro que falla).
+
+## Limpieza como cadena de funciones puras
+
+La limpieza es una lista ordenada de pasos pequeños y comprobables: `HTML→Markdown → normalizar →
+deduplicar → longitud mínima`.
+
+```{python}
+#| echo: false
+show_source("data_pipeline/clean.py", "clean_documents")
+```
+
+## Del CSV al conocimiento
+
+Las columnas personales se eliminan **antes** de calcular nada. Después, funciones puras de pandas calculan las
+estadísticas por segmento y otras funciones las convierten en texto con metadatos. Como son puras, se
+prueban contra un CSV diminuto con valores calculados a mano.
+
+```{python}
+#| echo: false
+show_source("data_pipeline/clean.py", "drop_pii")
+```
+
+```{python}
+#| echo: false
+show_source("data_pipeline/build_docs.py", "segment_stats")
+```
+
+El resultado son **66 documentos** del dataset (fichas por país, edad, tipo de tarjeta, número de productos,
+queja…, resúmenes por segmentación, diccionario de datos, panorama general y hallazgos) más un
+`stats.json` con todas las cifras. De ahí salen también las respuestas de referencia de la evaluación.
+
+## Resultado
+
+| | |
+|---|---|
+| Fuentes | 13 (todas verificadas en vivo) |
+| Documentos | 178 (unos 399 000 palabras) |
+| Formatos | CSV, JSON, HTML, PDF y generado |
+| Idiomas | inglés, español, francés, alemán |
+| Ejecución en frío | unos 8 min (el *crawl delay* de arXiv); en caché, segundos |
+
+::: {.callout-note}
+## Limitaciones conocidas
+La fuente B5 (encuesta HFCS del BCE) no expone las tablas en una URL estable, así que el corpus contiene la
+página de presentación y dos artículos de investigación, no las tablas de riqueza por edad. La fuente B4 solo ve
+lo que hay en el RSS del BCE (unas 15 notas recientes). No se localizó el informe de tendencias del consumidor de
+la EBA.
+:::

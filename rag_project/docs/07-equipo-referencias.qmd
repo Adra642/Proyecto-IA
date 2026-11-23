@@ -1,0 +1,37 @@
+---
+title: "Equipo y referencias"
+---
+
+## Equipo
+
+::: {.callout-warning}
+## Pendiente de completar por el equipo
+Esta tabla debe rellenarla el equipo: el código no sabe quién hizo cada parte.
+:::
+
+| Persona | Rol | Contribuciones |
+|---|---|---|
+| *[nombre]* | *[rol]* | *[p. ej. pipeline de datos, evaluación, aplicación y despliegue, documentación]* |
+| *[nombre]* | *[rol]* | *[...]* |
+| *[nombre]* | *[rol]* | *[...]* |
+
+## Tecnologías
+
+LangChain (splitters y adaptadores de modelos), ChromaDB, `sentence-transformers` con
+`intfloat/multilingual-e5-small`, `rank_bm25`, FlashRank, Gradio, Google Gemini (con Groq y DeepSeek como
+alternativas configurables), `uv`, pytest, ruff, mypy, Quarto, Docker o Podman, Google Cloud Run y GitHub Actions.
+
+## Fuentes y referencias
+
+- Dataset: *Bank Customer Churn*, Kaggle (<https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn>).
+- Artículos de arXiv sobre predicción de *churn* bancario, incluidos *Prediction of Customer Churn in Banking Industry*
+  y el trabajo sobre FT-Transformer con *stacking* (19 artículos; lista en `data/SOURCES.md` y en cada documento).
+- Reglamento (UE) 2015/751 sobre tasas de intercambio y otros textos de la UE (EUR-Lex y Cellar).
+- BCE (Data Portal, notas de prensa, encuesta HFCS), Eurostat, Banco Mundial, Autoridad Bancaria Europea.
+- Banco de España, Banque de France, BaFin y Bundesbank (páginas de consumidores); SCHUFA, CIRBE y FICP.
+- Wikipedia (CC BY-SA 4.0).
+- Lewis et al., *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*, 2020.
+- Wang et al., *Text Embeddings by Weakly-Supervised Contrastive Pre-training* (E5), 2022.
+- Cormack et al., *Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods*, 2009.
+
+El detalle de licencias y condiciones de reutilización de cada fuente está en la [página de datos](01-motivacion-datos.qmd).

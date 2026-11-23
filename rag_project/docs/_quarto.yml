@@ -1,0 +1,50 @@
+project:
+  type: website
+  output-dir: _site
+
+lang: es
+
+website:
+  title: "RAG sobre churn en banca europea"
+  description: "Sistema RAG sobre retención de clientes en la banca minorista de Francia, Alemania y España"
+  repo-url: https://github.com/Adra642/Proyecto-IA
+  repo-subdir: rag_project/docs
+  repo-actions: [source]
+  navbar:
+    background: primary
+    left:
+      - href: index.qmd
+        text: Inicio
+      - href: 01-motivacion-datos.qmd
+        text: Datos
+      - href: 02-pipeline.qmd
+        text: Pipeline
+      - href: 03-chunking-vectordb.qmd
+        text: Chunking y vector DB
+      - href: 04-evaluacion.qmd
+        text: Evaluación
+      - href: 05-rag-avanzado.qmd
+        text: RAG avanzado
+      - href: 06-app-despliegue.qmd
+        text: App y despliegue
+      - href: 07-equipo-referencias.qmd
+        text: Equipo
+    right:
+      - icon: github
+        href: https://github.com/Adra642/Proyecto-IA/tree/main/rag_project
+        aria-label: Repositorio
+  page-footer: "Proyecto RAG · churn en banca minorista europea · presentación 27 nov 2026"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-title: "En esta página"
+    code-copy: true
+    code-overflow: wrap
+    smooth-scroll: true
+
+execute:
+  freeze: auto   # _freeze/ is git-ignored: CI always re-executes against the committed eval/ results
+  warning: false

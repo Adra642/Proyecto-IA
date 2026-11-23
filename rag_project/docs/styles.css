@@ -1,0 +1,4 @@
+.callout-note, .callout-tip, .callout-warning { font-size: 0.95rem; }
+table { font-size: 0.9rem; }
+.cell-output-display table { width: 100%; }
+img { max-width: 100%; }

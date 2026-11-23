@@ -1,0 +1,73 @@
+---
+title: "RAG sobre churn y retención en banca europea"
+subtitle: "Un sistema de recuperación aumentada que supera al mismo LLM sin recuperación"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from _helpers import read_csv, md_table, read_json
+```
+
+## Resumen
+
+Este proyecto construye, de extremo a extremo y de forma automática, un sistema **RAG**
+(*Retrieval-Augmented Generation*) sobre un subtema concreto: **la retención de clientes y el *churn* en la banca
+minorista europea (Francia, Alemania, España)**. Combina lo que dicen los propios datos del banco
+(el dataset *Bank Customer Churn* de Kaggle, convertido en conocimiento con estadísticas calculadas por código)
+con literatura, regulación y datos macroeconómicos.
+
+La pregunta que responde el proyecto es sencilla: **¿mejora un LLM cuando puede consultar documentos
+especializados?** Se compara el mismo modelo (Gemini 3.5 Flash-Lite) en tres modos: *sin RAG*, *RAG* y *RAG avanzado*.
+
+## Enlaces
+
+| | |
+|---|---|
+| **Aplicación (Google Cloud Run)** | <https://rag-churn-6lkxbo5a5a-ew.a.run.app/> |
+| **Repositorio** | <https://github.com/Adra642/Proyecto-IA/tree/main/rag_project> |
+| **Proyecto 1 (modelo de predicción de churn)** | <https://github.com/Adra642/Proyecto-IA/tree/main/bank-churn-prediction> |
+| **Loop (Teams)** | *[pegar aquí la URL del espacio de Loop]* |
+
+## Resultado principal
+
+```{python}
+#| echo: false
+rows = read_csv("eval/auto_summary.csv")
+names = {"no_rag": "Sin RAG", "rag": "RAG", "rag_advanced": "RAG avanzado"}
+cats = {"D": "D: datos propios (dataset)", "R": "R: regulación y macro"}
+out = []
+for cat, label in cats.items():
+    row = {"Categoría": label}
+    for mode, name in names.items():
+        match = [r for r in rows if r["category"] == cat and r["mode"] == mode]
+        row[name] = f'{float(match[0]["numeric_match"]):.2f}' if match and match[0]["numeric_match"] else "—"
+    out.append(row)
+md_table(out)
+```
+
+: Acierto numérico automático (0 a 1) de la respuesta frente a la cifra de referencia, calculada por código. Cada pregunta se ejecutó una vez.
+
+Sin documentos, el modelo no conoce las cifras del dataset ni los detalles de la regulación y, bien calibrado,
+**admite que no lo sabe**. Con RAG las responde con cita al documento de origen. La búsqueda híbrida del modo
+avanzado corrige el caso más claro que falló con RAG simple (la tasa de *churn* en Alemania).
+
+## Cómo leer este sitio
+
+1. [Datos](01-motivacion-datos.qmd): por qué este tema, el dataset y el catálogo de fuentes con sus licencias.
+2. [Pipeline](02-pipeline.qmd): descarga, limpieza y generación de documentos, todo automatizado.
+3. [Chunking y base vectorial](03-chunking-vectordb.qmd): decisiones técnicas justificadas con un experimento.
+4. [Evaluación](04-evaluacion.qmd): sin RAG frente a con RAG, con ejemplos.
+5. [RAG avanzado](05-rag-avanzado.qmd): búsqueda híbrida, filtros, enrutador y reranking, con ablación.
+6. [App y despliegue](06-app-despliegue.qmd): la interfaz y cómo se publica.
+7. [Equipo y referencias](07-equipo-referencias.qmd).
+
+```{mermaid}
+flowchart LR
+  A[Fuentes públicas<br/>Kaggle · arXiv · BCE · UE ...] --> B[Pipeline<br/>descarga · limpieza · documentos]
+  B --> C[(Chroma<br/>6 309 chunks)]
+  C --> D[Recuperación<br/>vectorial · híbrida · filtros]
+  D --> E[LLM<br/>Gemini 3.5 Flash-Lite]
+  E --> F[App Gradio<br/>Cloud Run]
+```

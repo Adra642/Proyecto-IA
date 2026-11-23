@@ -1,0 +1,110 @@
+---
+title: "RAG avanzado"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, ".")
+from _helpers import read_csv, md_table, show_source
+import matplotlib.pyplot as plt
+```
+
+El modo **RAG avanzado** añade tres piezas al RAG simple y se evaluó cada una por separado.
+
+```{mermaid}
+flowchart LR
+  Q[Pregunta] --> R{Enrutador<br/>reglas}
+  R -->|charla| L[LLM directo]
+  R -->|consulta| F[Filtro por metadatos<br/>tipo de fuente · país]
+  F --> H[Búsqueda híbrida<br/>BM25 + vectorial<br/>fusión RRF]
+  H -.opcional.-> K[Reranking<br/>FlashRank]
+  H --> P[Prompt con contexto]
+  K -.-> P
+  P --> L2[LLM]
+```
+
+## 1. Búsqueda híbrida (BM25 + vectorial)
+
+La búsqueda vectorial entiende el significado pero falla con términos exactos ("2015/751", "NumOfProducts"); BM25
+hace lo contrario. Se piden 20 candidatos a cada una y se **fusionan por rango** (*reciprocal rank fusion*, pesos 0,5/0,5):
+se fusionan posiciones y no puntuaciones porque la similitud coseno y BM25 tienen escalas distintas.
+
+```{python}
+#| echo: false
+show_source("rag/retrievers.py", "HybridRetriever.retrieve")
+```
+
+## 2. Enrutador y filtros por metadatos
+
+Un enrutador **por reglas** (determinista, gratuito, sin llamar a un modelo) decide si hace falta recuperar y qué
+filtro aplicar: una pregunta que menciona "Kaggle" o "dataset" busca solo en `dataset_stats`; una que cita un
+reglamento, en `regulation` y `regulator_guide`; si nombra un único país, se restringe a ese país y a la UE. **El
+filtro es una pista**: si no encuentra nada, se repite la búsqueda sin filtro. Los filtros elegidos en la interfaz
+prevalecen sobre los del enrutador.
+
+```{python}
+#| echo: false
+show_source("rag/router.py", "RuleRouter.route")
+```
+
+## 3. Reranking (FlashRank)
+
+Se recuperan 20 candidatos y un *cross-encoder* local (FlashRank, sin API) los reordena. Está **implementado y
+medido, pero desactivado por defecto**, por lo que muestra la tabla.
+
+## Ablación
+
+Recuperación sola (sin LLM, determinista) sobre las 12 preguntas con documento de referencia. *hit@4* es lo que ve el LLM.
+
+```{python}
+#| echo: false
+rows = read_csv("eval/ablation.csv")
+md_table([
+    {"Configuración": r["config"], "hit@1": r["hit@1"], "hit@4": r["hit@4"], "MRR": r["mrr"]} for r in rows
+])
+```
+
+```{python}
+#| echo: false
+#| fig-cap: "MRR por configuración de recuperación."
+fig, ax = plt.subplots(figsize=(7, 3.2))
+labels = [r["config"] for r in rows]
+ax.barh(labels[::-1], [float(r["mrr"]) for r in rows][::-1], color="#3b6ea5")
+ax.set_xlabel("MRR")
+fig.tight_layout()
+plt.show()
+```
+
+**Qué muestra y qué no.**
+
+- **La búsqueda híbrida es lo que rinde**: hit@4 sube de 0,92 a 1,00 y el MRR de 0,79 a 0,90. El caso claro es la
+  pregunta simple "¿tasa de *churn* en Alemania?" (**D6**): con búsqueda vectorial la ficha de Alemania queda en el puesto 5 y
+  el modelo responde que no lo sabe; con la híbrida queda la primera y acierta (32,4 %).
+- **El reranking no aporta** sobre la híbrida en estas preguntas, y los *cross-encoders* mayores empeoran: se entrenaron con pasajes web
+  y desplazan las fichas estadísticas; el modelo multilingüe es mucho peor (hit@4 de 0,50).
+- **Los filtros no mejoran la recuperación** medida sobre la híbrida (ya acertaba), pero reducen el ruido y permiten filtrar a mano en la interfaz.
+- Con 12 preguntas, una vale 0,083: conviene tomar las diferencias pequeñas como ruido.
+
+```{python}
+#| echo: false
+detail = read_csv("eval/ablation_detail.csv")
+want = {"D6": "Pregunta D6 (churn en Alemania)", "D1": "D1", "R4": "R4"}
+cfgs = ["vector", "+hybrid", "+rerank (TinyBERT)", "+filters (hybrid)"]
+table = []
+for qid in want:
+    row = {"Pregunta": qid}
+    for c in cfgs:
+        m = [d["gold_rank"] for d in detail if d["id"] == qid and d["config"] == c]
+        row[c] = (m[0] or "—") if m else "—"
+    table.append(row)
+md_table(table)
+```
+
+: Posición del primer documento de referencia en el *ranking* (1 es lo mejor) para algunas preguntas.
+
+::: {.callout-note}
+## Lo que no se hizo
+Hay un enrutador por reglas (palabras clave en inglés, español, francés y alemán) y no uno basado en un LLM; el
+*chunking* semántico, opcional en el plan, no se implementó.
+:::
