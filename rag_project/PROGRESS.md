@@ -162,7 +162,7 @@ Open / pending:
 - Answer level is one run per question and Gemini 3.5 ignores `temperature`: R4 numeric went 1.0 to 0.5 and D1 citation 1 to 0 in advanced mode, probably noise (retrieval is better in both); D6, R1 and R4 are not fully solved (R1 needs neighbour chunks).
 - Semantic chunking and an LLM router were not built (cut order); the router is rule-based and English/Spanish/French/German keywords only.
 - FlashRank downloads its model on first use; the Docker image does not bake it because reranking is off.
-- `eval/chunking_results.csv` is still from before Stage 3 (not re-measured).
+- `eval/chunking_results.csv` was re-measured on 2026-11-23 (see the follow-up below).
 
 ### Stage 5 follow-up: smaller image and faster rebuilds (2026-11-23, user request)
 Measured with `podman build` on the laptop:
@@ -189,3 +189,10 @@ Needs the team (cannot be done by me):
 - **Manual scoring** (still pending): the evaluation page shows a "pendiente" note until `eval/manual_scoring.csv` has scores, then fills in its own table.
 - Only one app screenshot (the empty *Chat* tab): a headless browser cannot type a question. Add screenshots of an answered question, the *Fuentes* accordion and the *Comparar* tab to `docs/img/` and reference them in `06-app-despliegue.qmd` (optional).
 - Link checks: the site links to the app, repo and project 1 folder (`bank-churn-prediction`); the Pages URL assumes the repo is `Adra642/Proyecto-IA` and public (it is).
+
+### Chunk-size experiment re-measured (2026-11-23, branch `chunking-remeasure`)
+Re-ran `uv run python -m eval.chunking_experiment --with-fixed` with chunker version 2 and the 12 retrieval questions (the first run used 10 questions and the old header paths).
+- hit@5 = 1.00 for all variants. hit@1 / MRR: 300 chars 0.667 / 0.781, **600 chars 0.667 / 0.794**, 1000 chars 0.750 / 0.836, fixed 600 0.750 / 0.836. Average top-5 context: 2,128 / 2,568 / 2,975 / 2,556 chars.
+- Against the first run (MRR 0.933 for 600, 1000 and fixed): the drop for 600 comes from two questions added in Stage 3 (D6 rank 5, R4 rank 2) and D3, which went from rank 1 to rank 2 (cause not isolated: header change or question rewrite). The only question that separates 600 from 1000 / fixed is R4 (rank 2 vs 1), so the gap is one question out of 12.
+- [DECISION] kept at 600 / 90 (confirmed by the user on 2026-11-20): smaller context and an inconclusive gap. **1000 is now slightly ahead on MRR; the user may want to revisit.** Changing it would rebuild the index and invalidate the cached answers.
+- The site page `03-chunking-vectordb` and the README were updated with the new numbers; the plot's y-axis was widened (the 300 bar was below the old lower limit).

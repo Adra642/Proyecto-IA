@@ -138,7 +138,7 @@ uv run python -m eval.chunking_experiment --with-fixed   # about 20 min on CPU: 
 ```
 
 Writes `eval/chunking_results.csv`, `eval/chunking_detail.csv` (per question) and
-`eval/chunking_results.png`. Retrieval only, 10 questions with gold sources (`eval/questions.json`),
+`eval/chunking_results.png`. Retrieval only, 12 questions with gold sources (`eval/questions.json`),
 scored at chunk level (hit@k, MRR):
 
 | Variant | Chunks | Avg chars | hit@1 | hit@3 | hit@5 | MRR | Context (top 5, chars) |
