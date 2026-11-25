@@ -106,7 +106,7 @@ class RagChain:
     ) -> RagAnswer:
         """Retrieve, then answer only from the retrieved context, citing ``[doc_id]``.
 
-        Personal-data requests are refused and empty retrievals answered "I do not know"
+        Personal-data requests are refused and empty retrievals answered "No lo sé"
         without calling the LLM.
         """
         start = self._clock()
