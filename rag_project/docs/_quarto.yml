@@ -10,25 +10,42 @@ website:
   repo-url: https://github.com/Adra642/Proyecto-IA
   repo-subdir: rag_project/docs
   repo-actions: [source]
+  page-navigation: true   # "Anterior" / "Siguiente" buttons at the end of each page
+  # Quarto builds those buttons only from a sidebar. This one only supplies the page order and is
+  # hidden in styles.css: the navbar "Contenido" menu is the visible navigation.
+  sidebar:
+    id: page-order
+    style: docked
+    contents:
+      - index.qmd
+      - 01-motivacion-datos.qmd
+      - 02-pipeline.qmd
+      - 03-chunking-vectordb.qmd
+      - 04-evaluacion.qmd
+      - 05-rag-avanzado.qmd
+      - 06-app-despliegue.qmd
+      - 07-equipo-referencias.qmd
   navbar:
     background: primary
     left:
       - href: index.qmd
         text: Inicio
-      - href: 01-motivacion-datos.qmd
-        text: Datos
-      - href: 02-pipeline.qmd
-        text: Pipeline
-      - href: 03-chunking-vectordb.qmd
-        text: Chunking y vector DB
-      - href: 04-evaluacion.qmd
-        text: Evaluación
-      - href: 05-rag-avanzado.qmd
-        text: RAG avanzado
-      - href: 06-app-despliegue.qmd
-        text: App y despliegue
-      - href: 07-equipo-referencias.qmd
-        text: Equipo
+      - text: Contenido
+        menu:
+          - href: 01-motivacion-datos.qmd
+            text: Datos
+          - href: 02-pipeline.qmd
+            text: Pipeline
+          - href: 03-chunking-vectordb.qmd
+            text: Chunking y vector DB
+          - href: 04-evaluacion.qmd
+            text: Evaluación
+          - href: 05-rag-avanzado.qmd
+            text: RAG avanzado
+          - href: 06-app-despliegue.qmd
+            text: App y despliegue
+          - href: 07-equipo-referencias.qmd
+            text: Equipo
     right:
       - icon: github
         href: https://github.com/Adra642/Proyecto-IA/tree/main/rag_project
