@@ -1,4 +1,4 @@
-# 05. Ingeniería: patrones de diseño, configuración, tests y calidad
+# 07. Ingeniería: patrones de diseño, configuración, tests y calidad
 
 La rúbrica incluye "dominio técnico individual" y el plan exige patrones de diseño **solo donde haya al menos dos implementaciones intercambiables o una necesidad real** (nada de sobreingeniería). Esta guía indica dónde se usa cada patrón y cómo justificarlo.
 
@@ -6,7 +6,7 @@ La rúbrica incluye "dominio técnico individual" y el plan exige patrones de di
 
 | Patrón | Dónde está | Por qué se usa (la justificación) |
 |---|---|---|
-| **Strategy** | `Chunker` (`PassthroughChunker`, `MarkdownRecursiveChunker`, `FixedSizeChunker`) en `rag/chunking.py`; `Retriever` (`VectorRetriever`, y en la Etapa 5 híbrido y reranking) en `rag/retrievers.py` | Hay varias formas válidas de trocear y de recuperar, y se comparan experimentalmente; se elige desde `config.yaml` |
+| **Strategy** | `Chunker` (`PassthroughChunker`, `MarkdownRecursiveChunker`, `FixedSizeChunker`) en `rag/chunking.py`; `Retriever` (`VectorRetriever`, `HybridRetriever` y `RerankingRetriever`) en `rag/retrievers.py`; `Router` (`RuleRouter`) en `rag/router.py` | Hay varias formas válidas de trocear y de recuperar, y se comparan experimentalmente; se elige desde `config.yaml` |
 | **Factory / Registry** | `@register_fetcher("a4")` y `FETCHER_REGISTRY`; `build_chunker(cfg)`; `build_llm(settings)`; `build_embedder(settings)` | Añadir una fuente = una clase nueva + un bloque de configuración, sin editar el orquestador (abierto/cerrado) |
 | **Template Method** | `BaseFetcher.fetch()` en `data_pipeline/fetchers/base.py` | Caché, reintentos, aislamiento de errores y logging se escriben **una sola vez**; las subclases solo implementan `_items`, `_download` y `_parse` |
 | **Adapter** | `GeminiAdapter`, `GroqAdapter`, `DeepSeekAdapter` en `rag/llm.py`; `E5Embedder` en `rag/embeddings.py` | Cambiar de proveedor toca solo la configuración; el resto del código usa el protocolo `LLMClient` |
@@ -15,7 +15,7 @@ La rúbrica incluye "dominio técnico individual" y el plan exige patrones de di
 | **Repository** | `VectorStoreRepository` en `rag/vectorstore.py` | El resto del código no depende de Chroma; si se cambiase de base vectorial, solo cambia esta clase |
 | **Inyección de dependencias + raíz de composición** | `factory.py` (`Container`) | Los componentes reciben sus colaboradores por el constructor; **un solo sitio** los conecta desde la configuración; **no hay variables globales ni singletons** con clientes |
 
-Qué **no** se hizo (a propósito): no hay jerarquías de herencia profundas ni interfaces para cosas con una sola implementación. Por ejemplo, `Retriever` ya es un protocolo pero hoy solo tiene `VectorRetriever`; se justifica porque en la Etapa 5 tendrá varias.
+Qué **no** se hizo (a propósito): no hay jerarquías de herencia profundas ni interfaces para cosas con una sola implementación. Cada protocolo (`Chunker`, `Retriever`, `LLMClient`, `Embedder`) tiene al menos dos implementaciones reales.
 
 ### Protocolos en vez de clases base abstractas
 `LLMClient`, `Embedder`, `Chunker` y `Retriever` son `typing.Protocol`: cualquier objeto con los métodos adecuados vale (por eso los tests usan *fakes* simples sin heredar de nada).
@@ -25,7 +25,7 @@ Qué **no** se hizo (a propósito): no hay jerarquías de herencia profundas ni 
 - Una clase `Settings` de **pydantic-settings** con subsecciones tipadas (`PathsSettings`, `HttpSettings`, `LLMSettings`, `EmbeddingSettings`, `ChunkingSettings`, `IndexSettings`, `RetrievalSettings`).
 - **Prioridad** (de mayor a menor): variables de entorno, archivo `.env`, `config.yaml`. Se implementa en `settings_customise_sources`.
 - Atajo: la variable `LLM_PROVIDER` sustituye a `llm.provider`. Valores anidados con doble guion bajo: `LLM__MODELS__GROQ=...`.
-- **Secretos** (`GOOGLE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, claves de Kaggle y Hugging Face) solo salen del entorno o `.env`, son `SecretStr` y nunca se registran. `.env.example` contiene solo los **nombres**.
+- **Secretos** (`GOOGLE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, clave de Kaggle; `HF_TOKEN` es opcional y lo lee directamente la librería de Hugging Face del entorno) solo salen del entorno o `.env`, son `SecretStr` y nunca se registran. `.env.example` contiene solo los **nombres**.
 - **Validación con mensaje claro**: una configuración inválida lanza `ConfigError` indicando el campo (por ejemplo, intervalo mínimo de red menor que 1 s, solapamiento mayor o igual que el tamaño, proveedor desconocido).
 - `load_settings(path)` carga y valida; `Settings.resolve(path)` convierte rutas relativas en absolutas respecto a la raíz del proyecto (sin rutas "a mano").
 
@@ -47,7 +47,7 @@ Jerarquía bajo `RagProjectError`: `ConfigError`, `FetchError`, `IndexingError`,
 
 | Tipo | Dónde | Características |
 |---|---|---|
-| **Unitarios** | `tests/unit/` | Sin red ni claves; rápidos y deterministas; **184 tests**; cobertura de aproximadamente 96 % en `core`, `rag` y `data_pipeline` (objetivo del plan: 80 %) |
+| **Unitarios** | `tests/unit/` | Sin red ni claves; rápidos y deterministas; **223 tests**; cobertura de aproximadamente 95 % en `core`, `rag` y `data_pipeline` (objetivo del plan: 80 %) |
 | **Integración** | `tests/integration/` | Marcados `@pytest.mark.integration`; excluidos por defecto; usan red, modelo de embeddings y LLM reales (por ejemplo: cada fuente devuelve documentos, el índice acierta consultas en ES y DE, Gemini responde) |
 
 Cómo se prueba sin red ni claves:
@@ -57,7 +57,7 @@ Cómo se prueba sin red ni claves:
 - Un **CSV diminuto de 12 filas con valores calculados a mano** para verificar las estadísticas de `build_docs`.
 - Los PDFs de prueba se generan en el propio test con `pymupdf`.
 
-Qué se cubre (resumen): limpieza (PII fuera, duplicados, HTML), estadísticas, chunkers (tamaños, solapamiento, rutas de encabezados, atómicos sin partir), clase base de fetchers (caché, reintento, un fallo no detiene el resto), repositorio e indexador (incremental, rebuild, filtros), cadena (contexto en el prompt, sin contexto = "no sé", PII rechazada, citas), puntuación (hit@k, MRR, números), configuración (errores claros) y decoradores del LLM.
+Qué se cubre (resumen): limpieza (PII fuera, duplicados, HTML), estadísticas, chunkers (tamaños, solapamiento, rutas de encabezados, atómicos sin partir), clase base de fetchers (caché, reintento, un fallo no detiene el resto), repositorio e indexador (incremental, rebuild, filtros), recuperación híbrida y fusión RRF, reranking, router, la app (el manejador devuelve respuesta con fakes y los errores salen en español), cadena (contexto en el prompt, sin contexto = "no sé", PII rechazada, citas), puntuación (hit@k, MRR, números), configuración (errores claros) y decoradores del LLM.
 
 ## 7. Calidad de código
 
@@ -69,13 +69,13 @@ Qué se cubre (resumen): limpieza (PII fuera, duplicados, HTML), estadísticas, 
 ## 8. Reproducibilidad y multiplataforma
 
 - **uv**: `uv sync` crea `.venv/` desde `uv.lock` (versiones exactas). **Python 3.12** fijado en `.python-version`.
-- PyTorch **solo CPU** (índice de PyTorch declarado en `pyproject.toml`) para que instale igual en Linux y Windows y en Hugging Face Spaces.
+- PyTorch **solo CPU** (índice de PyTorch declarado en `pyproject.toml`) para que instale igual en Linux y Windows y en el contenedor de Cloud Run.
 - `pathlib.Path` para todo, `encoding="utf-8"` siempre (acentos en ES/FR/DE), escritura de archivos en **bytes** (sin traducción de saltos de línea en Windows), `.gitattributes` con `eol=lf`, sin scripts de shell ni enlaces simbólicos.
 - Todos los scripts se ejecutan con `uv run python -m ...` desde `rag_project/` y son **idempotentes**.
 
 ## 9. Flujo de trabajo con git
 
-- **Una rama y un pull request por etapa** (`stage-0-scaffold`, `stage-1-pipeline`, `stage-2-chunking-index`, `stage-3-evaluation`), commits pequeños con mensaje claro, y PR con qué se hizo, cómo se verificó (comandos y resultados) y problemas abiertos.
+- **Una rama y un pull request por etapa** (`stage-0-scaffold` … `stage-6-quarto`), commits pequeños con mensaje claro, y PR con qué se hizo, cómo se verificó (comandos y resultados) y problemas abiertos.
 - Nunca se sube a `main` directamente y nadie fusiona su propio PR salvo instrucción expresa del usuario.
 - Nunca se versionan secretos (`.env` está en `.gitignore`).
 - Lección aprendida: al apilar PRs, si la rama base se fusiona primero, el PR siguiente debe **reorientarse a `main`** o se fusiona en la rama equivocada (pasó con la Etapa 1 y se resolvió con un PR de traspaso).

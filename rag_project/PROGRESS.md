@@ -162,7 +162,7 @@ Open / pending:
 - Answer level is one run per question and Gemini 3.5 ignores `temperature`: R4 numeric went 1.0 to 0.5 and D1 citation 1 to 0 in advanced mode, probably noise (retrieval is better in both); D6, R1 and R4 are not fully solved (R1 needs neighbour chunks).
 - Semantic chunking and an LLM router were not built (cut order); the router is rule-based and English/Spanish/French/German keywords only.
 - FlashRank downloads its model on first use; the Docker image does not bake it because reranking is off.
-- `eval/chunking_results.csv` is still from before Stage 3 (not re-measured).
+- `eval/chunking_results.csv` was re-measured on 2026-11-23 (see the follow-up below).
 
 ### Stage 5 follow-up: smaller image and faster rebuilds (2026-11-23, user request)
 Measured with `podman build` on the laptop:
@@ -189,3 +189,32 @@ Needs the team (cannot be done by me):
 - **Manual scoring** (still pending): the evaluation page shows a "pendiente" note until `eval/manual_scoring.csv` has scores, then fills in its own table.
 - Only one app screenshot (the empty *Chat* tab): a headless browser cannot type a question. Add screenshots of an answered question, the *Fuentes* accordion and the *Comparar* tab to `docs/img/` and reference them in `06-app-despliegue.qmd` (optional).
 - Link checks: the site links to the app, repo and project 1 folder (`bank-churn-prediction`); the Pages URL assumes the repo is `Adra642/Proyecto-IA` and public (it is).
+
+### Chunk-size experiment re-measured (2026-11-23, branch `chunking-remeasure`)
+Re-ran `uv run python -m eval.chunking_experiment --with-fixed` with chunker version 2 and the 12 retrieval questions (the first run used 10 questions and the old header paths).
+- hit@5 = 1.00 for all variants. hit@1 / MRR: 300 chars 0.667 / 0.781, **600 chars 0.667 / 0.794**, 1000 chars 0.750 / 0.836, fixed 600 0.750 / 0.836. Average top-5 context: 2,128 / 2,568 / 2,975 / 2,556 chars.
+- Against the first run (MRR 0.933 for 600, 1000 and fixed): the drop for 600 comes from two questions added in Stage 3 (D6 rank 5, R4 rank 2) and D3, which went from rank 1 to rank 2 (cause not isolated: header change or question rewrite). The only question that separates 600 from 1000 / fixed is R4 (rank 2 vs 1), so the gap is one question out of 12.
+- [DECISION] kept at 600 / 90 (confirmed by the user on 2026-11-20): smaller context and an inconclusive gap. **1000 is now slightly ahead on MRR; the user may want to revisit.** Changing it would rebuild the index and invalidate the cached answers.
+- The site page `03-chunking-vectordb` and the README were updated with the new numbers; the plot's y-axis was widened (the 300 bar was below the old lower limit).
+
+### Answer cache removed (2026-11-23, user request, branch `chunking-remeasure`)
+- The user decided the evaluation answer cache is not needed and that run-to-run differences from Gemini ignoring `temperature` do not matter.
+- Removed `eval/answer_cache.py`, the 59 files in `eval/cache/`, the `--refresh` flag, `key_parts`, `Container.corpus_hash` and the `from_cache` field; `run_questions` now always calls the chain. README, site page `04-evaluacion`, `documentacion` and `.dockerignore` updated.
+- The committed `eval/results.json` and `results.csv` come from the last cached run and still have a `from_cache` field; the next `eval.run_eval` drops it. `PROMPT_VERSION` and `ROUTER_VERSION` stay (still tested) but no longer feed any key.
+- Consequence: every `eval.run_eval` run now spends LLM calls (free-tier rate limits apply) and may change the numbers slightly.
+- Chunk size: **kept at 600 / 90** (option 2). The cache was one of the two costs of switching to 1000; the other (index rebuild, re-running the evaluation and ablation, updating the site) remains.
+
+### Cleanup / refactor (2026-11-25, branch `refactor-cleanup`)
+Audit with `ruff` (F, ERA), `vulture` and `deptry`, checked by hand against the code, the Quarto pages and the Dockerfile.
+- Removed dead code left by the answer-cache removal: `PROMPT_VERSION` (`rag/prompts.py`), `ROUTER_VERSION` (`rag/router.py`) and their two tests' assertions.
+- Removed the unused `hf_token` setting (nothing read it; `.env` values never reach `huggingface_hub`, which reads the real `HF_TOKEN` environment variable). Dropped it from `.env.example`, the README table and `tests/conftest.py`.
+- Removed the unused direct dependencies `langchain` and `langchain-core` (never imported; `langchain-core` stays as a transitive dependency of the provider packages, the orchestration packages `langgraph*` left the lock). `scikit-learn` moved to the `pipeline` group (only `build_docs.py` imports it; `sentence-transformers` still brings it into the image). `uv.lock` regenerated.
+- Deleted two empty `.gitkeep` files in folders that already have content (`docs/`, `tests/fixtures/`).
+- Folder structure reviewed: no change needed (`core/ rag/ data_pipeline/ eval/ app/ deploy/ docs/ tests/` match the plan; `documentacion/` is the team's defence guide).
+- Left on purpose: `export-reqs` poe task (the plan keeps it as a convenience), `from_cache` in the committed `eval/results.json` (dropped on the next `eval.run_eval`).
+Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass, 95% coverage.
+
+### Spanish answers, Quarto navigation and presentation guide (2026-11-25, branch `refactor-cleanup`)
+- **Answers in Spanish:** the No-RAG and RAG prompts now say "always answer in Spanish"; the fixed `REFUSAL_PII` and `NO_CONTEXT` messages are in Spanish; `eval/score.py` recognises Spanish abstentions. Tests updated (223 pass). The saved `eval/results.json` is from before this change (English answers); re-run `eval.run_eval` to refresh it (spends LLM calls).
+- **Quarto navbar:** a *Contenido* dropdown holds the seven parts. Anterior / Siguiente buttons come from `page-navigation`; Quarto only builds them from a sidebar, so a sidebar with the page order is declared and hidden in `styles.css`.
+- **Presentation guide:** `guia_presentacion/` moved to `documentacion/` (separate from the Quarto `docs/`), rewritten for the current state, with new files for advanced RAG and for the app, deployment and site.

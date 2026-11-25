@@ -142,7 +142,6 @@ class Settings(BaseSettings):
     deepseek_api_key: SecretStr | None = None
     kaggle_username: str | None = None
     kaggle_key: SecretStr | None = None
-    hf_token: SecretStr | None = None
 
     @model_validator(mode="after")
     def _apply_provider_shortcut(self) -> Settings:

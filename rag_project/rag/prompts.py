@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import hashlib
-
 from core.models import RetrievedChunk
 
 NO_RAG_TEMPLATE = (
-    "Answer the question concisely. If you do not know the answer or cannot verify it, "
-    "say so instead of guessing.\n\nQuestion: {question}"
+    "Answer the question concisely. Always answer in Spanish, whatever the language of the "
+    "question. If you do not know the answer or cannot verify it, say so instead of guessing."
+    "\n\nQuestion: {question}"
 )
 
 RAG_TEMPLATE = """You answer questions about customer churn and retail banking in France, Germany \
@@ -19,7 +18,7 @@ Rules:
 say clearly that you do not know because the context is insufficient. Do not guess and do not \
 use outside knowledge.
 - Cite the sources that support each statement as [doc_id], using the ids shown in the context.
-- Answer in the language of the question.
+- Always answer in Spanish, whatever the language of the question or of the context.
 - Never reveal personal identifiers such as customer ids or surnames; they are not part of the \
 knowledge base.
 - Be concise and give exact figures as they appear in the context.
@@ -32,15 +31,11 @@ Question: {question}
 Answer:"""
 
 REFUSAL_PII = (
-    "I can't share personal identifiers such as surnames or customer ids: they were removed from "
-    "the knowledge base before indexing, and this system only answers from aggregated, "
-    "non-personal documents."
+    "No puedo compartir identificadores personales como apellidos o identificadores de cliente: "
+    "se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde "
+    "a partir de documentos agregados y no personales."
 )
-NO_CONTEXT = "I do not know: no relevant information was found in the knowledge base."
-
-PROMPT_VERSION = hashlib.sha256(
-    "\x1f".join([NO_RAG_TEMPLATE, RAG_TEMPLATE, REFUSAL_PII, NO_CONTEXT]).encode("utf-8")
-).hexdigest()[:12]
+NO_CONTEXT = "No lo sé: no se encontró información relevante en la base de conocimiento."
 
 
 def format_context(chunks: list[RetrievedChunk]) -> str:

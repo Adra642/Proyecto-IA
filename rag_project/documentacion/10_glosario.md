@@ -74,7 +74,7 @@ Términos del proyecto explicados en lenguaje sencillo, ordenados por tema.
 | **uv** | Gestor de entornos y dependencias de Python con archivo de bloqueo (`uv.lock`) |
 | **poe (poethepoet)** | Ejecutor de tareas multiplataforma (`uv run poe test`) |
 
-## Técnicas de la Etapa 5 (pendientes)
+## Técnicas avanzadas (implementadas)
 
 | Término | Explicación |
 |---|---|
@@ -82,4 +82,16 @@ Términos del proyecto explicados en lenguaje sencillo, ordenados por tema.
 | **Búsqueda híbrida** | Combinar la búsqueda léxica (BM25) y la vectorial |
 | **Reranking** | Reordenar los mejores resultados con un modelo más preciso (aquí FlashRank, local) |
 | **Router / RAG adaptativo** | Decidir si hace falta recuperar y con qué estrategia, según la pregunta |
+| **RRF (Reciprocal Rank Fusion)** | Fusiona dos listas ordenadas sumando `peso / (k + posición)`; no necesita normalizar puntuaciones |
+| **Cross-encoder** | Modelo que puntúa pareja (pregunta, pasaje) a la vez; es el tipo de modelo de reranking |
 | **Ablación** | Medir el efecto de cada técnica añadiéndolas una a una |
+
+## Despliegue y documentación
+
+| Término | Explicación |
+|---|---|
+| **Cloud Run** | Servicio de Google que ejecuta contenedores y escala a cero cuando no hay tráfico |
+| **Secret Manager** | Almacén de secretos de Google; entrega la clave del LLM al contenedor como variable de entorno |
+| **Arranque en frío** | Primera petición tras escalar a cero: el contenedor debe iniciarse y cargar el modelo |
+| **GitHub Pages** | Alojamiento estático gratuito del sitio Quarto, desplegado por un workflow |
+| **Quarto** | Herramienta que convierte `.qmd` (Markdown con código) en un sitio web |

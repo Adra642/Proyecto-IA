@@ -1,5 +1,5 @@
 variant,strategy,chunk_size,chunk_overlap,chunks_total,avg_chunk_chars,hit@1,hit@3,hit@5,mrr,avg_context_chars_top5,questions,embed_seconds
-markdown_recursive_300,markdown_recursive,300,45,13466,197.4,0.8,1.0,1.0,0.883,2154.4,10,431.5
-markdown_recursive_600,markdown_recursive,600,90,6309,414.7,0.9,1.0,1.0,0.933,2794.6,10,303.9
-markdown_recursive_1000,markdown_recursive,1000,150,3873,680.6,0.9,1.0,1.0,0.933,3340.7,10,265.2
-fixed_600,fixed,600,90,6000,437.5,0.9,1.0,1.0,0.933,2735.4,10,229.0
+markdown_recursive_300,markdown_recursive,300,45,13466,197.4,0.667,0.917,1.0,0.781,2127.5,12,242.8
+markdown_recursive_600,markdown_recursive,600,90,6309,414.7,0.667,0.917,1.0,0.794,2567.8,12,153.9
+markdown_recursive_1000,markdown_recursive,1000,150,3873,680.6,0.75,0.917,1.0,0.836,2975.4,12,132.3
+fixed_600,fixed,600,90,6000,437.5,0.75,0.917,1.0,0.836,2556.1,12,127.4

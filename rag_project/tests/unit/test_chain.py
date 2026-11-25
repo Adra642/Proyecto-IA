@@ -5,7 +5,7 @@ import pytest
 
 from core.models import RetrievedChunk
 from rag.chain import RagChain, extract_citations, is_pii_request
-from rag.prompts import NO_CONTEXT, PROMPT_VERSION, build_no_rag_prompt, build_rag_prompt
+from rag.prompts import NO_CONTEXT, REFUSAL_PII, build_no_rag_prompt, build_rag_prompt
 
 
 class FakeLLM:
@@ -93,7 +93,7 @@ def test_pii_requests_are_refused_without_calling_the_llm(question: str) -> None
     llm = FakeLLM()
     chain, retriever = make(llm, [DE])
     result = chain.answer_rag(question)
-    assert result.refused and "can't share personal identifiers" in result.answer
+    assert result.refused and result.answer == REFUSAL_PII
     assert llm.prompts == [] and retriever.calls == [] and result.chunks == []
 
 
@@ -118,12 +118,16 @@ def test_no_rag_mode_is_the_plain_llm() -> None:
     assert retriever.calls == [] and result.mode == "no_rag" and result.chunks == []
 
 
+def test_prompts_ask_for_spanish_answers() -> None:
+    assert "in Spanish" in build_no_rag_prompt("q") and "in Spanish" in build_rag_prompt("q", [DE])
+    assert NO_CONTEXT.startswith("No lo sé") and REFUSAL_PII.startswith("No puedo")
+
+
 def test_citations_only_count_retrieved_documents() -> None:
     text = "See [card_de], again [card_de#0002], and [made_up_doc]. Also [card_fr]."
     assert extract_citations(text, [DE, FR]) == ["card_de", "card_fr"]
     assert extract_citations("no citations here", [DE]) == []
 
 
-def test_prompts_are_stable_and_versioned() -> None:
-    assert len(PROMPT_VERSION) == 12
+def test_rag_prompt_cites_context() -> None:
     assert build_rag_prompt("q", [DE]).count("[card_de]") >= 1

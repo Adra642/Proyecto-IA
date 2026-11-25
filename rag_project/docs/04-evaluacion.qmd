@@ -16,9 +16,9 @@ results = {(r["id"], r["mode"]): r for r in read_json("eval/results.json")}
 
 Se parte de **14 preguntas de nicho** que un LLM genérico no debería poder contestar con precisión. Cada una
 se contesta con **el mismo modelo** (Gemini 3.5 Flash-Lite, mismo *prompt* base) en tres modos, y se compara con una respuesta de
-referencia **generada por código** a partir de `stats.json` o del texto de los documentos. Las respuestas
-se guardan en una caché en disco (la clave incluye modelo, *prompts*, índice y configuración), de modo que los
-resultados que se muestran son reproducibles.
+referencia **generada por código** a partir de `stats.json` o del texto de los documentos. Cada ejecución
+vuelve a llamar al modelo, que no es determinista (Gemini 3.5 ignora `temperature`); los resultados que se muestran
+son los de una ejecución, guardados en `eval/results.json`.
 
 | Categoría | Qué mide | Preguntas |
 |---|---|---|

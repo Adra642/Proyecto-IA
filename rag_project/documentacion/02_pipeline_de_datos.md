@@ -1,4 +1,4 @@
-# 02. Pipeline de datos (Etapa 1)
+# 02. Pipeline de datos
 
 Objetivo: que **un solo comando** reconstruya todo el corpus, sin ningún archivo cargado a mano, de forma **idempotente** (ejecutarlo dos veces da exactamente lo mismo) y **robusta** (si una fuente falla, las demás siguen).
 

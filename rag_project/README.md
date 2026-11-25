@@ -5,8 +5,8 @@ French, German and Spanish retail banking. It turns the Kaggle *Bank Customer Ch
 computed text documents and combines them with public sources (papers, Wikipedia, ECB/Eurostat/World
 Bank data, EU law, regulators) to show that RAG beats the same LLM without retrieval.
 
-> **Status:** Stages 0 (scaffold), 1 (data pipeline), 2 (chunking, index) and 3 (evaluation) done.
-> Later stages (app, advanced RAG, docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
+> **Status:** Stages 0 to 6 done (pipeline, index, evaluation, app on Cloud Run, advanced RAG, Quarto site).
+> Progress and open items are in [PROGRESS.md](PROGRESS.md). Presentation guide for the team (Spanish): [documentacion/](documentacion/00_INDICE.md).
 > The project is self-contained: it does not import from the churn-prediction project.
 
 ## Architecture
@@ -25,7 +25,7 @@ flowchart LR
 
 ## Links
 - App (Google Cloud Run): <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>
-- Quarto site (GitHub Pages): <https://adra642.github.io/Proyecto-IA/> (live after the first deployment of the workflow)
+- Quarto site (GitHub Pages): <https://adra642.github.io/Proyecto-IA/>
 - Repository: <https://github.com/Adra642/Proyecto-IA> (folder `rag_project/`)
 
 ## Prerequisites
@@ -68,7 +68,6 @@ LLM provider's key is needed.
 | `GROQ_API_KEY` | Groq | <https://console.groq.com/keys> |
 | `DEEPSEEK_API_KEY` | DeepSeek (pay-as-you-go) | <https://platform.deepseek.com> |
 | `KAGGLE_USERNAME`, `KAGGLE_KEY` | Kaggle dataset download, only if anonymous access fails | Kaggle account settings, API token |
-| `HF_TOKEN` | optional: higher Hugging Face Hub rate limits when downloading the e5 model | <https://huggingface.co/settings/tokens> |
 
 `llm.fallback_order` (e.g. `[gemini, groq, deepseek]`) makes the app try the next provider when
 the active one is rate-limited. Nested values can be overridden with `__`, e.g.
@@ -138,7 +137,7 @@ uv run python -m eval.chunking_experiment --with-fixed   # about 20 min on CPU: 
 ```
 
 Writes `eval/chunking_results.csv`, `eval/chunking_detail.csv` (per question) and
-`eval/chunking_results.png`. Retrieval only, 10 questions with gold sources (`eval/questions.json`),
+`eval/chunking_results.png`. Retrieval only, 12 questions with gold sources (`eval/questions.json`),
 scored at chunk level (hit@k, MRR):
 
 | Variant | Chunks | Avg chars | hit@1 | hit@3 | hit@5 | MRR | Context (top 5, chars) |
@@ -172,16 +171,16 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
   behavioural (U: an answer that is not in the corpus, and a request for a surname that must be
   refused). No gold number is typed by hand: dataset values come from `stats.json`, regulatory and
   ECB/Eurostat values are read from the ingested texts with regexes stored in the question file.
-- Answers are cached in `eval/cache/` (key: provider and model, prompts version, chunking and
-  embedding settings, hash of the indexed corpus, question), so a re-run is free and reproducible;
-  `--refresh` ignores the cache. Client-side throttling and retry with backoff handle rate limits.
+- There is no answer cache: every run calls the LLM again and overwrites `eval/results.json`, so small
+  differences between runs are expected (see the `temperature` note below). Client-side throttling and retry
+  with backoff handle rate limits.
 - Manual scoring (`score_0_1_2` in `eval/manual_scoring.csv`): 0 = wrong or hallucinated, 1 = partly
   right or vague, 2 = correct and specific; plus `citation_correct_Y_N` for RAG. Re-exporting keeps
   what you already filled in.
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
   (drafted from abstracts): a human must tick them.
 
-Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one cached run):
+Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one run):
 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
@@ -210,7 +209,7 @@ uv run python -m app.app          # or: uv run poe app   -> http://localhost:808
 ```
 It needs `GOOGLE_API_KEY` (or the key of the provider chosen in `.env`). On start it syncs the Chroma
 index with `data/processed/` (a no-op when current; a cold build takes about 5 minutes on CPU).
-The interface is in Spanish: a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
+The interface and every answer are in Spanish (the prompts ask for Spanish whatever the question's language): a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
 accordion with title, link, source, similarity and the retrieved text), a **Comparar** tab (same
 question, No RAG | RAG side by side), example buttons (the evaluation questions) and an **Acerca de**
 tab. Rate-limited calls are retried once, then a friendly message is shown. **RAG avanzado**
@@ -347,7 +346,7 @@ rag_project/
 │   ├── clean.py, build_docs.py            cleaning steps; pandas -> churn documents + stats
 │   ├── writer.py, pii_check.py            output files, SOURCES.md; privacy scan
 │   └── run_all.py   orchestrator + run report
-├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py, answer cache,
+├── eval/            questions.json (+ gold), generate_gold.py, run_eval.py, score.py,
 │                    retrieval_metrics.py, chunking_experiment.py; results, scores and examples
 ├── app/             Gradio app (3 modes, filters): handlers.py (logic, errors, sources), ui.py (Blocks), app.py (entry)
 ├── deploy/          Dockerfile (Cloud Run image), cloudbuild.yaml
@@ -375,7 +374,7 @@ Design patterns in use so far:
 - *Missing API key:* the error names the variable; set it in `.env` or the environment.
 - *Rate limits:* set `llm.fallback_order` or switch `LLM_PROVIDER`.
 - *Model not found (404):* provider models get retired; list what your key can use and update `llm.models` in `config.yaml` (Gemini 2.5 models are retired; the default is `gemini-3.5-flash-lite`).
-- *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary between runs; the evaluation caches answers.
+- *Gemini ignores `temperature`:* the 3.5 models use fixed sampling, so answers can vary slightly between runs; the evaluation does not try to hide that (one run per question, no cache).
 - *HTTP 429 during the evaluation:* the client waits and retries (10 s, 20 s, 40 s); raise `llm.min_interval_seconds` if it keeps happening.
 - *Kaggle:* the public dataset downloads anonymously with `kagglehub`. If it ever needs auth, set
   `KAGGLE_USERNAME` / `KAGGLE_KEY`, or put a raw CSV URL in `sources.a1.fallback_url`.

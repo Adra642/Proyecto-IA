@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-
 from core.settings import Settings
 from rag.chain import RagChain
 from rag.chunking import Chunker, build_chunker
@@ -100,14 +98,8 @@ class Container:
             self._rerankers[model_name] = FlashRankReranker(model_name, cache)
         return self._rerankers[model_name]
 
-    def corpus_hash(self) -> str:
-        """Short hash of the indexed documents (fingerprints), used in cache keys."""
-        hashes = self.vector_store().doc_hashes()
-        blob = "".join(f"{k}:{v}" for k, v in sorted(hashes.items()))
-        return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
-
     def model_id(self) -> str:
-        """``provider:model`` of the primary LLM (used in logs and cache keys)."""
+        """``provider:model`` of the primary LLM (used in logs)."""
         provider = self.settings.llm.provider
         return f"{provider}:{self.settings.llm.models[provider]}"
 

@@ -40,7 +40,9 @@ UNKNOWN = re.compile(
     r"|no (?:relevant )?information|insufficient"
     r"|cannot (?:find|verify|determine|answer|provide|share)"
     r"|can'?t (?:share|provide|verify|find)|unable to|not available"
-    r"|no (?:sé|tengo)|ne sais pas|weiß nicht|not covered",
+    r"|no (?:lo )?s[eé]\b|no tengo|no puedo"
+    r"|no (?:se )?(?:encontr|dispon|hay informaci|incluye|figura|contiene)"
+    r"|(?:contexto|informaci[oó]n) (?:es )?insuficiente|ne sais pas|weiß nicht|not covered",
     re.IGNORECASE,
 )
 

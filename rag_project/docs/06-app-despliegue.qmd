@@ -12,7 +12,7 @@ from _helpers import show_file
 ## La aplicación
 
 **Enlace público: <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>** (Gradio, desplegada en Google Cloud Run).
-Las etiquetas están en español; las respuestas siguen el idioma de la pregunta.
+Las etiquetas están en español; las respuestas se dan siempre en español, sea cual sea el idioma de la pregunta.
 
 ![Pestaña *Chat*: selector de modo, filtros, conversación, fuentes y preguntas de ejemplo.](img/app_inicio.png){fig-alt="Interfaz de la aplicación"}
 

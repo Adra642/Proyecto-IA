@@ -11,6 +11,5 @@ data/raw
 logs
 docs
 tests
-guia_presentacion
-eval/cache
+documentacion
 .flashrank_cache

@@ -2,3 +2,14 @@
 table { font-size: 0.9rem; }
 .cell-output-display table { width: 100%; }
 img { max-width: 100%; }
+
+/* The sidebar only provides the page order for the Anterior / Siguiente buttons. */
+#quarto-sidebar, .sidebar-toggle, .quarto-sidebar-toggle, button.sidebar-toggle { display: none !important; }
+.page-columns { --quarto-sidebar-width: 0px; }
+@media (min-width: 992px) {
+  body.nav-sidebar .page-columns { grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(0, 1fr) [body-content-end body-end] 1.5em [page-end-inset page-end screen-end-inset screen-end]; }
+}
+
+/* Label the page-navigation buttons in Spanish (Quarto only shows the target title). */
+.nav-page-previous .nav-page-text::before { content: "Anterior: "; font-weight: 600; }
+.nav-page-next .nav-page-text::before { content: "Siguiente: "; font-weight: 600; }

@@ -56,7 +56,7 @@ md_table([
 fig, ax = plt.subplots(figsize=(6.5, 3.2))
 labels = [r["variant"].replace("markdown_recursive_", "md ").replace("fixed_", "fijo ") for r in rows]
 ax.bar(labels, [float(r["mrr"]) for r in rows], color="#3b6ea5")
-ax.set_ylim(0.8, 0.96)
+ax.set_ylim(0.7, 0.9)
 ax.set_ylabel("MRR")
 ax2 = ax.twinx()
 ax2.plot(labels, [float(r["avg_context_chars_top5"]) for r in rows], "o-", color="#c4572a")
@@ -65,16 +65,21 @@ fig.tight_layout()
 plt.show()
 ```
 
-**Decisión: 600 caracteres con 90 de solapamiento** (confirmada por el equipo). Empata con 1000 en calidad
-(MRR 0,933) con menos contexto por consulta (2 795 frente a 3 341 caracteres), y mejora a 300, que fragmenta
-demasiado (13 466 *chunks* y el peor MRR). Con unos 415 caracteres de media por *chunk*, cada fragmento
-cabe holgadamente en el contexto del modelo.
+**Decisión: 600 caracteres con 90 de solapamiento** (confirmada por el equipo tras la primera medición y
+mantenida tras repetirla). Con las 12 preguntas de recuperación y el chunker actual (versión 2), las cuatro
+variantes aciertan en el top 5 (hit@5 = 1,00) y 300 caracteres sigue siendo la peor en MRR (0,781; 13 466
+*chunks*). 600 (MRR 0,794) queda **por debajo de 1000 y del tamaño fijo de 600 (MRR 0,836 ambos)**, y la
+diferencia es una sola pregunta, R4, cuyo documento sale en el puesto 2 con 600 y en el 1 con 1000 o con
+fragmentos fijos. A cambio, 600 da menos contexto al LLM (2 568 frente a 2 975 caracteres) y unos 415
+caracteres de media por *chunk*. Se mantiene 600 por ese menor contexto y porque la diferencia no es
+concluyente; 1000 sería una alternativa igual de defendible.
 
 ::: {.callout-warning}
 ## Cómo leer el experimento
-Con 10 preguntas, una pregunta pesa 0,1, así que las diferencias entre 600 y 1000 no son concluyentes. Los
-documentos atómicos no dependen del tamaño. Este experimento se hizo **antes** de acortar la ruta de
-encabezados y de ampliar las preguntas; se mantuvo la decisión y no se repitió la medición completa.
+Con 12 preguntas, una pregunta pesa 0,083, así que las diferencias entre 600 y 1000 no son concluyentes. Los
+documentos atómicos no dependen del tamaño. La medición se repitió tras acortar la ruta de encabezados y
+ampliar las preguntas (la primera daba MRR 0,933 para 600, 1000 y fijo). La bajada de 600 se explica por dos preguntas nuevas, D6
+(puesto 5) y R4 (puesto 2), y por D3, que pasó del puesto 1 al 2 con el cambio de encabezados o de pregunta.
 :::
 
 ## ¿Por qué ChromaDB?
