@@ -15,7 +15,7 @@ from rag.lexical import BM25Retriever, matches_where, tokenize
 from rag.prompts import NO_CONTEXT, REFUSAL_PII
 from rag.rerank import rerank_text
 from rag.retrievers import HybridRetriever, RerankingRetriever
-from rag.router import ROUTER_VERSION, Route, RuleRouter, all_of, where_from_filters
+from rag.router import Route, RuleRouter, all_of, where_from_filters
 
 
 def chunk(cid: str, text: str, **meta: str) -> RetrievedChunk:
@@ -170,7 +170,6 @@ def test_where_helpers() -> None:
     assert where_from_filters(["paper"], [], ["en"]) == {
         "$and": [{"source_type": {"$in": ["paper"]}}, {"language": {"$in": ["en"]}}]
     }
-    assert len(ROUTER_VERSION) == 12
 
 
 # --- advanced chain ----------------------------------------------------------------------------

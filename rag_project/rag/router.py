@@ -6,15 +6,11 @@ Rules instead of an LLM call: deterministic, free, instant and unit-testable. Th
 
 from __future__ import annotations
 
-import hashlib
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
-# Changes whenever the rules change, so cached advanced answers are not reused (eval cache key).
-ROUTER_VERSION = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
 SMALL_TALK_MAX_CHARS = 60
 _SMALL_TALK = re.compile(
     r"^\W*(hi|hello|hey|hola|buenas|bonjour|salut|hallo|thanks|thank you|gracias|merci|danke|"

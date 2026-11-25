@@ -5,8 +5,8 @@ French, German and Spanish retail banking. It turns the Kaggle *Bank Customer Ch
 computed text documents and combines them with public sources (papers, Wikipedia, ECB/Eurostat/World
 Bank data, EU law, regulators) to show that RAG beats the same LLM without retrieval.
 
-> **Status:** Stages 0 (scaffold), 1 (data pipeline), 2 (chunking, index) and 3 (evaluation) done.
-> Later stages (app, advanced RAG, docs) are tracked in [PROGRESS.md](PROGRESS.md); sections below marked *Stage n* are filled in then.
+> **Status:** Stages 0 to 6 done (pipeline, index, evaluation, app on Cloud Run, advanced RAG, Quarto site).
+> Progress and open items are in [PROGRESS.md](PROGRESS.md). Presentation guide for the team (Spanish): [documentacion/](documentacion/00_INDICE.md).
 > The project is self-contained: it does not import from the churn-prediction project.
 
 ## Architecture
@@ -25,7 +25,7 @@ flowchart LR
 
 ## Links
 - App (Google Cloud Run): <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>
-- Quarto site (GitHub Pages): <https://adra642.github.io/Proyecto-IA/> (live after the first deployment of the workflow)
+- Quarto site (GitHub Pages): <https://adra642.github.io/Proyecto-IA/>
 - Repository: <https://github.com/Adra642/Proyecto-IA> (folder `rag_project/`)
 
 ## Prerequisites
@@ -68,7 +68,6 @@ LLM provider's key is needed.
 | `GROQ_API_KEY` | Groq | <https://console.groq.com/keys> |
 | `DEEPSEEK_API_KEY` | DeepSeek (pay-as-you-go) | <https://platform.deepseek.com> |
 | `KAGGLE_USERNAME`, `KAGGLE_KEY` | Kaggle dataset download, only if anonymous access fails | Kaggle account settings, API token |
-| `HF_TOKEN` | optional: higher Hugging Face Hub rate limits when downloading the e5 model | <https://huggingface.co/settings/tokens> |
 
 `llm.fallback_order` (e.g. `[gemini, groq, deepseek]`) makes the app try the next provider when
 the active one is rate-limited. Nested values can be overridden with `__`, e.g.
@@ -210,7 +209,7 @@ uv run python -m app.app          # or: uv run poe app   -> http://localhost:808
 ```
 It needs `GOOGLE_API_KEY` (or the key of the provider chosen in `.env`). On start it syncs the Chroma
 index with `data/processed/` (a no-op when current; a cold build takes about 5 minutes on CPU).
-The interface is in Spanish: a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
+The interface and every answer are in Spanish (the prompts ask for Spanish whatever the question's language): a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
 accordion with title, link, source, similarity and the retrieved text), a **Comparar** tab (same
 question, No RAG | RAG side by side), example buttons (the evaluation questions) and an **Acerca de**
 tab. Rate-limited calls are retried once, then a friendly message is shown. **RAG avanzado**

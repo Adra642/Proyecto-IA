@@ -63,16 +63,17 @@ flowchart LR
     V --> RET
     RET --> CHAIN[RagChain<br/>prompt con contexto y citas]
     CHAIN --> LLM[LLM Gemini<br/>con throttling, reintentos, fallback]
-    LLM --> ANS[Respuesta con fuentes]
-    ANS --> EV[Evaluación<br/>sin RAG vs con RAG]
-    ANS -.-> APP[App Gradio<br/>pendiente, Etapa 4]
+    LLM --> ANS[Respuesta en español con fuentes]
+    ANS --> EV[Evaluación<br/>sin RAG, RAG y RAG avanzado]
+    ANS --> APP[App Gradio en Cloud Run]
+    RET -.-> ADV[Modo avanzado<br/>router, BM25 + vectorial, filtros]
 ```
 
 Lectura del diagrama: de izquierda a derecha hay **tres fases** que se ejecutan por separado:
 
 1. **Ingesta** (`data_pipeline`): produce `data/processed/`.
 2. **Indexación** (`rag.index`): trocea, calcula vectores y rellena ChromaDB.
-3. **Consulta** (`rag.chain`): en tiempo de pregunta, recupera y genera. La evaluación y la futura app usan esta fase.
+3. **Consulta** (`rag.chain`): en tiempo de pregunta, recupera y genera. La evaluación y la app usan esta fase.
 
 ## 6. Mapa de carpetas
 
@@ -89,17 +90,18 @@ rag_project/
 │   ├── clean.py, build_docs.py            Limpieza de texto; estadísticas con pandas y fichas
 │   ├── writer.py, pii_check.py            Escritura de archivos y SOURCES.md; comprobación de privacidad
 │   └── run_all.py           Orquestador con informe de ejecución
-├── rag/                     FASES 2 y 3: chunking, embeddings, base vectorial, LLM, cadena RAG
-├── eval/                    Preguntas, respuestas gold generadas, ejecución, puntuación, experimento de chunking
-├── app/                     (vacía; app Gradio en la Etapa 4)
-├── docs/                    (vacía; sitio Quarto en la Etapa 6)
+├── rag/                     FASES 2 y 3: chunking, embeddings, base vectorial, LLM, cadena RAG, búsqueda híbrida, reranking y router
+├── eval/                    Preguntas, respuestas gold generadas, ejecución, puntuación, experimento de chunking y ablación
+├── app/                     App Gradio: punto de entrada, servicio con manejo de errores e interfaz
+├── deploy/                  Dockerfile y cloudbuild.yaml para Cloud Run
+├── docs/                    Sitio Quarto en español (solo .qmd, estilos y ayudantes)
+├── documentacion/           Esta guía de presentación (Markdown, separada del sitio)
 ├── data/
 │   ├── raw/                 Caché de descargas (NO se versiona)
 │   ├── processed/           Corpus final en Markdown + stats.json (SÍ se versiona, es pequeño)
 │   └── SOURCES.md           Tabla autogenerada de fuentes, licencias y fechas
 ├── chroma_db/               Índice vectorial (NO se versiona; se reconstruye)
 ├── tests/                   unit/ (offline), integration/ (red, LLM; marcados), fixtures/
-├── guia_presentacion/       Esta guía
 ├── README.md                Cómo reproducir todo
 └── PROGRESS.md              Diario de etapas, decisiones y problemas abiertos
 ```
@@ -127,22 +129,23 @@ flowchart TD
 
 ## 7. Aislamiento del proyecto 1
 
-El proyecto 1 (modelo de predicción de churn en `bank-churn-prediction/`) **no se importa, no se depende de él y no se modifica**. El único vínculo es el dataset de origen. Este proyecto tiene su propio `pyproject.toml`, `uv.lock` y `.venv/`. La única excepción permitida por el plan sería un workflow de GitHub en la raíz con nombre `rag_project-*.yml`.
+El proyecto 1 (modelo de predicción de churn en `bank-churn-prediction/`) **no se importa, no se depende de él y no se modifica**. El único vínculo es el dataset de origen. Este proyecto tiene su propio `pyproject.toml`, `uv.lock` y `.venv/`. La única excepción es el workflow de GitHub Pages, que debe vivir en la raíz del repositorio (`.github/workflows/rag_project-docs.yml`, filtrado a `rag_project/**`).
 
 ## 8. Stack y por qué
 
 | Componente | Elección | Motivo principal |
 |---|---|---|
 | Lenguaje y entorno | Python 3.12 con **uv** (`.venv/`, `uv.lock`) | Instalaciones reproducibles y rápidas; 3.12 porque el sistema tenía 3.14, demasiado nuevo para varias librerías (torch, chromadb) |
-| Orquestación LLM | **LangChain** (modelos de chat, divisores de texto) | Integraciones listas con Gemini, Groq y DeepSeek |
-| Base vectorial | **ChromaDB** persistente | Filtros por metadatos, sin servidor, fácil de desplegar en Hugging Face Spaces |
+| Orquestación LLM | **LangChain** (modelos de chat de los proveedores y divisores de texto) | Integraciones listas con Gemini, Groq y DeepSeek |
+| Base vectorial | **ChromaDB** persistente | Filtros por metadatos, sin servidor, el índice cabe dentro de la imagen del contenedor |
 | Embeddings | `intfloat/multilingual-e5-small` | Multilingüe (EN/ES/FR/DE) y pequeño: corre en CPU gratuita |
 | LLM | Gemini (`gemini-3.5-flash-lite`), con Groq y DeepSeek como alternativas | Gemini tiene capa gratuita; selector en configuración |
-| Reranking (pendiente) | FlashRank | Local, sin clave |
-| Búsqueda léxica (pendiente) | `rank_bm25` | Para la búsqueda híbrida |
-| Interfaz (pendiente) | Gradio | Encaja con Hugging Face Spaces |
-| Documentación (pendiente) | Quarto en GitHub Pages | Requisito de la entrega |
-| Calidad | ruff, mypy (modo estricto), pytest + cobertura, pre-commit, poethepoet | Ver `05_ingenieria_patrones_y_calidad.md` |
+| Reranking | FlashRank (implementado, desactivado por defecto) | Local, sin clave |
+| Búsqueda léxica | `rank_bm25` | Búsqueda híbrida con la vectorial |
+| Interfaz | Gradio (Blocks), en español | Python puro, corre en un solo contenedor |
+| Despliegue | Docker/Podman + Google Cloud Run | Escala a cero con cuota gratuita; Hugging Face Spaces exige plan de pago para Gradio |
+| Documentación | Quarto en GitHub Pages | Requisito de la entrega |
+| Calidad | ruff, mypy (modo estricto), pytest + cobertura, pre-commit, poethepoet | Ver `07_ingenieria_patrones_y_calidad.md` |
 
 ## 9. Flujo completo de una pregunta
 
@@ -178,3 +181,5 @@ Puntos que conviene saber explicar:
 - La **guarda de privacidad** y el caso de **contexto vacío** no llaman al LLM: son deterministas, baratos y no pueden "alucinar".
 - Las **citas** que el modelo escribe como `[doc_id]` se **verifican**: solo se cuentan si ese documento está realmente entre los trozos recuperados (`extract_citations`).
 - El modo **sin RAG** (`answer_no_rag`) usa el mismo modelo pero **sin contexto ni guarda**: es una línea base limpia.
+- El modo **RAG avanzado** (`answer_advanced`) cambia solo la recuperación: router por reglas y búsqueda híbrida BM25 + vectorial con filtros (ver `05_rag_avanzado.md`). El prompt y el LLM son los mismos.
+- Todas las respuestas son **en español**, aunque la pregunta o los documentos estén en otro idioma.

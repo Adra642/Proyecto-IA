@@ -19,7 +19,6 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> pytest.MonkeyPatch:
         "DEEPSEEK_API_KEY",
         "KAGGLE_USERNAME",
         "KAGGLE_KEY",
-        "HF_TOKEN",
     ):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setitem(Settings.model_config, "env_file", None)

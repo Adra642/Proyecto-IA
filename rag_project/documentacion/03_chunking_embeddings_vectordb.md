@@ -1,4 +1,4 @@
-# 03. Chunking, embeddings y base vectorial (Etapa 2)
+# 03. Chunking, embeddings y base vectorial
 
 Esta es la parte que más se pregunta en la defensa ("justificación técnica del chunking y de la base vectorial"). Hay que poder explicar **qué se decidió, por qué y con qué evidencia**.
 
@@ -49,28 +49,27 @@ Métricas (a nivel de chunk):
 - **hit@k**: ¿alguno de los k primeros trozos pertenece a un documento correcto?
 - **MRR** (*mean reciprocal rank*): media de 1/posición del primer trozo correcto. Vale 1 si siempre es el primero.
 
-Resultados (10 preguntas con fuentes de referencia):
+Resultados (12 preguntas con fuentes de referencia, chunker versión 2; `eval/chunking_results.csv`):
 
 | Variante | Chunks | Caracteres medios | hit@1 | hit@3 | hit@5 | MRR | Contexto top-5 (caracteres) |
 |---|---|---|---|---|---|---|---|
-| 300 / solape 45 | 13.466 | 197 | 0,80 | 1,00 | 1,00 | 0,883 | 2.154 |
-| **600 / solape 90** | 6.309 | 415 | 0,90 | 1,00 | 1,00 | 0,933 | 2.795 |
-| 1000 / solape 150 | 3.873 | 681 | 0,90 | 1,00 | 1,00 | 0,933 | 3.341 |
-| Fijo 600 (sin encabezados) | 6.000 | 438 | 0,90 | 1,00 | 1,00 | 0,933 | 2.735 |
+| 300 / solape 45 | 13.466 | 197 | 0,667 | 0,917 | 1,00 | 0,781 | 2.128 |
+| **600 / solape 90** | 6.309 | 415 | 0,667 | 0,917 | 1,00 | 0,794 | 2.568 |
+| 1000 / solape 150 | 3.873 | 681 | 0,750 | 0,917 | 1,00 | 0,836 | 2.975 |
+| Fijo 600 (sin encabezados) | 6.000 | 438 | 0,750 | 0,917 | 1,00 | 0,836 | 2.556 |
 
-**Decisión del equipo: 600 caracteres con 90 de solapamiento (15 %).** Argumentos:
-1. 300 es peor (una pregunta más falla en el primer puesto) y **duplica** los trozos.
-2. 600 y 1000 empatan en calidad, pero 600 envía al LLM un **16 % menos de contexto** (menos ruido y menos tokens).
-3. Es el valor por defecto razonable para texto estructurado y encaja con el límite del modelo de embeddings.
+**Tamaño en uso: 600 caracteres con 90 de solapamiento (15 %).** Argumentos:
+1. 300 duplica los trozos (13.466 frente a 6.309) sin mejorar la recuperación.
+2. 600 y 1000 llegan al mismo hit@5 (1,00); 1000 va ligeramente por delante en MRR (0,836 frente a 0,794), pero la diferencia la produce **una sola pregunta de 12** (R4, puesto 2 frente a 1) y 1000 envía más texto al LLM (2.975 frente a 2.568 caracteres en el top 5).
+3. Es un valor razonable para texto estructurado y encaja con el límite del modelo de embeddings.
+4. Además, la recuperación híbrida del modo avanzado (ver `05_rag_avanzado.md`) compensa la diferencia de posición de esas preguntas.
 
 **Limitaciones que hay que reconocer (ser honestos puntúa):**
-- Con 10 preguntas, una pregunta pesa 0,1; la diferencia entre 300 y 600 es una sola pregunta.
+- Con 12 preguntas, una pregunta pesa 0,083: las diferencias entre 600 y 1000 son ruido.
 - Los documentos atómicos (fichas, notas macro) **no cambian con el tamaño**, así que el experimento discrimina poco.
-- El chunking por encabezados **empata** con el fijo en estas métricas; su ventaja real es que el trozo conserva la ruta de encabezados para citar. Las métricas son a nivel de documento/chunk, no miden si el trozo contiene la respuesta (ver `04_rag_llm_y_evaluacion.md`, caso R1/R4).
-- El experimento se ejecutó antes del ajuste "sin H1" (versión 2 del chunker); el ajuste no cambia los límites de los trozos, solo el texto que se convierte en vector.
+- El chunking por encabezados **empata** con el de tamaño fijo en estas métricas; su ventaja real es que el trozo conserva la ruta de encabezados para citar. Las métricas no miden si el trozo contiene la respuesta (caso R1).
 - No se implementó el chunking semántico (era opcional).
-
-Anécdota útil: la variante de 600 tardó 55 minutos de reloj pero el temporizador interno midió solo 304 s: el portátil se suspendió. Las otras variantes tardaron unos 4 minutos.
+- Cambiar a 1000 obligaría a reconstruir el índice, repetir la evaluación y la ablación y actualizar el sitio; el equipo decidió mantener 600/90.
 
 ## 4. Embeddings: `intfloat/multilingual-e5-small`
 
@@ -78,7 +77,7 @@ Un **embedding** convierte un texto en un vector de números de modo que textos 
 
 Por qué este modelo:
 - **Multilingüe**: el corpus está en inglés, español, francés y alemán, y una pregunta en español debe encontrar un texto en español o inglés. Se comprobó: "reclamación al Banco de España" y "SCHUFA Score Berechnung" recuperan los documentos correctos.
-- **Pequeño**: corre en CPU, lo que permite alojarlo en el nivel gratuito de Hugging Face Spaces.
+- **Pequeño**: corre en CPU, lo que permite alojarlo en el nivel gratuito de Cloud Run.
 
 Particularidad de la familia e5: exige **prefijos**. Los pasajes se codifican como `"passage: ..."` y las consultas como `"query: ..."`. Lo implementa `E5Embedder` (`rag/embeddings.py`) con `embed_passages()` y `embed_query()`, y los vectores se normalizan (así el producto escalar equivale al coseno).
 
@@ -115,7 +114,7 @@ Comprobación de aceptación de la etapa: la consulta "churn rate in Germany" de
 
 ## 7. Preguntas probables
 
-- *¿Por qué 600 y no 1000 si empatan?* Mismo resultado con menos contexto (menos ruido y menos coste de tokens); lo decidió el equipo con los datos del experimento.
+- *¿Por qué 600 y no 1000 si 1000 sale algo mejor en MRR?* La diferencia es una pregunta de 12 (ruido), 600 envía menos contexto y 300 sería peor en tamaño del índice; lo decidió el equipo con los datos del experimento y lo reconocemos como limitación.
 - *¿Por qué no troceáis las fichas?* Una ficha es una unidad completa; cortarla separaría la cifra de su etiqueta.
 - *¿Qué hace el solapamiento?* Evita perder una frase que cae justo en la frontera entre dos trozos.
 - *¿Por qué ChromaDB y no FAISS o Qdrant?* Filtros por metadatos nativos, sin servidor, persistente y fácil de desplegar gratis. Con unos miles de vectores no se necesita más.

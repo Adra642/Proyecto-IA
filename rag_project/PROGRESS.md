@@ -199,7 +199,22 @@ Re-ran `uv run python -m eval.chunking_experiment --with-fixed` with chunker ver
 
 ### Answer cache removed (2026-11-23, user request, branch `chunking-remeasure`)
 - The user decided the evaluation answer cache is not needed and that run-to-run differences from Gemini ignoring `temperature` do not matter.
-- Removed `eval/answer_cache.py`, the 59 files in `eval/cache/`, the `--refresh` flag, `key_parts`, `Container.corpus_hash` and the `from_cache` field; `run_questions` now always calls the chain. README, site page `04-evaluacion`, `guia_presentacion` and `.dockerignore` updated.
+- Removed `eval/answer_cache.py`, the 59 files in `eval/cache/`, the `--refresh` flag, `key_parts`, `Container.corpus_hash` and the `from_cache` field; `run_questions` now always calls the chain. README, site page `04-evaluacion`, `documentacion` and `.dockerignore` updated.
 - The committed `eval/results.json` and `results.csv` come from the last cached run and still have a `from_cache` field; the next `eval.run_eval` drops it. `PROMPT_VERSION` and `ROUTER_VERSION` stay (still tested) but no longer feed any key.
 - Consequence: every `eval.run_eval` run now spends LLM calls (free-tier rate limits apply) and may change the numbers slightly.
 - Chunk size: **kept at 600 / 90** (option 2). The cache was one of the two costs of switching to 1000; the other (index rebuild, re-running the evaluation and ablation, updating the site) remains.
+
+### Cleanup / refactor (2026-11-25, branch `refactor-cleanup`)
+Audit with `ruff` (F, ERA), `vulture` and `deptry`, checked by hand against the code, the Quarto pages and the Dockerfile.
+- Removed dead code left by the answer-cache removal: `PROMPT_VERSION` (`rag/prompts.py`), `ROUTER_VERSION` (`rag/router.py`) and their two tests' assertions.
+- Removed the unused `hf_token` setting (nothing read it; `.env` values never reach `huggingface_hub`, which reads the real `HF_TOKEN` environment variable). Dropped it from `.env.example`, the README table and `tests/conftest.py`.
+- Removed the unused direct dependencies `langchain` and `langchain-core` (never imported; `langchain-core` stays as a transitive dependency of the provider packages, the orchestration packages `langgraph*` left the lock). `scikit-learn` moved to the `pipeline` group (only `build_docs.py` imports it; `sentence-transformers` still brings it into the image). `uv.lock` regenerated.
+- Deleted two empty `.gitkeep` files in folders that already have content (`docs/`, `tests/fixtures/`).
+- Folder structure reviewed: no change needed (`core/ rag/ data_pipeline/ eval/ app/ deploy/ docs/ tests/` match the plan; `documentacion/` is the team's defence guide).
+- Left on purpose: `export-reqs` poe task (the plan keeps it as a convenience), `from_cache` in the committed `eval/results.json` (dropped on the next `eval.run_eval`).
+Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass, 95% coverage.
+
+### Spanish answers, Quarto navigation and presentation guide (2026-11-25, branch `refactor-cleanup`)
+- **Answers in Spanish:** the No-RAG and RAG prompts now say "always answer in Spanish"; the fixed `REFUSAL_PII` and `NO_CONTEXT` messages are in Spanish; `eval/score.py` recognises Spanish abstentions. Tests updated (223 pass). The saved `eval/results.json` is from before this change (English answers); re-run `eval.run_eval` to refresh it (spends LLM calls).
+- **Quarto navbar:** a *Contenido* dropdown holds the seven parts. Anterior / Siguiente buttons come from `page-navigation`; Quarto only builds them from a sidebar, so a sidebar with the page order is declared and hidden in `styles.css`.
+- **Presentation guide:** `guia_presentacion/` moved to `documentacion/` (separate from the Quarto `docs/`), rewritten for the current state, with new files for advanced RAG and for the app, deployment and site.
