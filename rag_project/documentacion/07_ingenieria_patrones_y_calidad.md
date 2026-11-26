@@ -25,7 +25,7 @@ Qué **no** se hizo (a propósito): no hay jerarquías de herencia profundas ni 
 - Una clase `Settings` de **pydantic-settings** con subsecciones tipadas (`PathsSettings`, `HttpSettings`, `LLMSettings`, `EmbeddingSettings`, `ChunkingSettings`, `IndexSettings`, `RetrievalSettings`).
 - **Prioridad** (de mayor a menor): variables de entorno, archivo `.env`, `config.yaml`. Se implementa en `settings_customise_sources`.
 - Atajo: la variable `LLM_PROVIDER` sustituye a `llm.provider`. Valores anidados con doble guion bajo: `LLM__MODELS__GROQ=...`.
-- **Secretos** (`GOOGLE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, clave de Kaggle; `HF_TOKEN` es opcional y lo lee directamente la librería de Hugging Face del entorno) solo salen del entorno o `.env`, son `SecretStr` y nunca se registran. `.env.example` contiene solo los **nombres**.
+- **Secretos** (`GOOGLE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, clave de Kaggle) solo salen del entorno o `.env`, son `SecretStr` y nunca se registran. `.env.example` contiene solo los **nombres**.
 - **Validación con mensaje claro**: una configuración inválida lanza `ConfigError` indicando el campo (por ejemplo, intervalo mínimo de red menor que 1 s, solapamiento mayor o igual que el tamaño, proveedor desconocido).
 - `load_settings(path)` carga y valida; `Settings.resolve(path)` convierte rutas relativas en absolutas respecto a la raíz del proyecto (sin rutas "a mano").
 
@@ -64,7 +64,7 @@ Qué se cubre (resumen): limpieza (PII fuera, duplicados, HTML), estadísticas, 
 - **Tipos**: `mypy` en modo estricto, limpio (con excepciones documentadas solo para librerías sin tipos como `pymupdf`).
 - **Estilo y errores**: `ruff` (lint y formato, reglas E, F, I, B, UP, D, SIM) con docstrings estilo Google en módulos, clases y funciones públicas.
 - **pre-commit** con los hooks de ruff (mypy se ejecuta con `poe typecheck`, necesita la carpeta del proyecto).
-- **Tareas multiplataforma** con `poethepoet`: `uv run poe pipeline | test | test-integration | lint | typecheck | export-reqs` (más `index`, `eval`, `app` y `docs` definidos).
+- **Tareas multiplataforma** con `poethepoet`: `uv run poe pipeline | test | test-integration | lint | typecheck` (más `index`, `eval`, `app` y `docs` definidos).
 
 ## 8. Reproducibilidad y multiplataforma
 

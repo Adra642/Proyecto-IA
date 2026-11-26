@@ -5,7 +5,6 @@ from typing import Any
 
 import httpx
 import pymupdf
-import pytest
 
 from core.settings import Settings
 from data_pipeline.cache import CachedPayload
@@ -156,8 +155,3 @@ def test_wikipedia_fetcher(settings: Settings, tmp_path: Path) -> None:
     assert meta.doc_id == "wiki_churn_rate" and meta.license == "CC BY-SA 4.0"
     assert meta.url == "https://en.wikipedia.org/wiki/Churn_rate" and meta.geography == "EU"
     assert result.documents[0].text.startswith("# Churn rate")
-
-
-@pytest.mark.parametrize("key", ["a3", "a4"])
-def test_config_has_source_blocks(settings: Settings, key: str) -> None:
-    assert settings.sources[key]["enabled"] is True

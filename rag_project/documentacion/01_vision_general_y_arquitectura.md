@@ -143,7 +143,7 @@ El proyecto 1 (modelo de predicción de churn en `bank-churn-prediction/`) **no 
 | Reranking | FlashRank (implementado, desactivado por defecto) | Local, sin clave |
 | Búsqueda léxica | `rank_bm25` | Búsqueda híbrida con la vectorial |
 | Interfaz | Gradio (Blocks), en español | Python puro, corre en un solo contenedor |
-| Despliegue | Docker/Podman + Google Cloud Run | Escala a cero con cuota gratuita; Hugging Face Spaces exige plan de pago para Gradio |
+| Despliegue | Docker/Podman + Google Cloud Run | Escala a cero con cuota gratuita |
 | Documentación | Quarto en GitHub Pages | Requisito de la entrega |
 | Calidad | ruff, mypy (modo estricto), pytest + cobertura, pre-commit, poethepoet | Ver `07_ingenieria_patrones_y_calidad.md` |
 

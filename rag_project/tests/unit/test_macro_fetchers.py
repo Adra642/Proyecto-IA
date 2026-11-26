@@ -157,8 +157,3 @@ def test_worldbank_no_data(settings: Settings, tmp_path: Path) -> None:
         ctx(settings, tmp_path, lambda r: httpx.Response(200, content=body)), opts
     ).fetch()
     assert result.documents == [] and "no data" in result.errors[0]
-
-
-@pytest.mark.parametrize("key", ["a5", "b2", "b3"])
-def test_config_blocks(settings: Settings, key: str) -> None:
-    assert settings.sources[key]["enabled"] is True

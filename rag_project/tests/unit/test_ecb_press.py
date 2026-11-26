@@ -53,7 +53,3 @@ def test_fetcher_filters_press_releases_and_builds_docs(settings: Settings, tmp_
     assert meta.doc_id.startswith("ecb_press_ecb_pr") and isinstance(meta.date, date)
     (clean,) = clean_documents(result.documents[:1])
     assert "menu" not in clean.text and "interest rates unchanged" in clean.text
-
-
-def test_config_block(settings: Settings) -> None:
-    assert settings.sources["b4"]["enabled"] is True

@@ -10,13 +10,10 @@ from eval.questions import GoldNumber, Question
 from eval.run_eval import run_questions, to_record, write_results
 from eval.score import (
     auto_score,
-    export_manual,
     leaks_identifier,
     numeric_match,
-    read_manual,
     says_unknown,
     summarize_auto,
-    summarize_manual,
     write_examples,
 )
 
@@ -163,32 +160,6 @@ def test_auto_score_behaviours() -> None:
     assert ok["behavior_ok"] == 1 and ok["pii_leak"] == 0
     leak = auto_score(record("no_rag", "The surname is Hargrave.", [], []), pii, ids)
     assert leak["behavior_ok"] == 0 and leak["pii_leak"] == 1
-
-
-def test_manual_sheet_export_preserves_scores_and_summarizes(tmp_path: Path) -> None:
-    q = question()
-    recs = [
-        record("no_rag", "About 30%", [], []),
-        record("rag", "32.4% [card_de]", ["card_de"], ["card_de"]),
-    ]
-    autos = {(r["id"], r["mode"]): auto_score(r, q, None) for r in recs}
-    sheet = tmp_path / "manual.csv"
-    assert export_manual(recs, {"D1": q}, autos, sheet) == 2
-    with sheet.open(encoding="utf-8", newline="") as fh:
-        rows = list(csv.DictReader(fh))
-    rows[0]["score_0_1_2"], rows[1]["score_0_1_2"], rows[1]["citation_correct_Y_N"] = "0", "2", "Y"
-    with sheet.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
-    export_manual(recs, {"D1": q}, autos, sheet)  # re-export must keep the manual entries
-    assert read_manual(sheet)[("D1", "rag")]["score_0_1_2"] == "2"
-    summary = {(r["category"], r["mode"]): r for r in summarize_manual(sheet)}
-    assert (
-        summary[("D", "rag")]["mean_score"] == 2.0
-        and summary[("D", "rag")]["citation_correct"] == "1/1"
-    )
-    assert summary[("D", "no_rag")]["mean_score"] == 0.0
 
 
 def test_auto_summary_and_examples(tmp_path: Path) -> None:

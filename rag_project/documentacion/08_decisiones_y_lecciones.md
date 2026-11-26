@@ -42,7 +42,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 ### Entrega
 | Decisión | Alternativa descartada | Motivo |
 |---|---|---|
-| **Cloud Run** para la app | Hugging Face Spaces | Spaces exige plan de pago para Gradio y Docker; Cloud Run escala a cero con cuota gratuita |
+| **Cloud Run** para la app | Servidor siempre encendido | Ejecuta el contenedor, escala a cero y tiene cuota gratuita |
 | Índice y modelo **dentro de la imagen** | Construirlos al arrancar | Disco efímero; evita 5 minutos por arranque en frío |
 | **GitHub Pages** para el sitio, con workflow | Cloudflare Pages | Decisión del equipo; Cloudflare Pages es solo estático |
 | Menú desplegable y botones Anterior/Siguiente en Quarto | Barra con ocho enlaces | La barra estaba sobrecargada; la navegación secuencial mejora la lectura |
@@ -65,11 +65,10 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 
 - Evaluación pequeña: 14 preguntas (12 de recuperación) y una ejecución por pregunta; Gemini 3.5 ignora `temperature`.
 - El experimento de tamaño de chunk discrimina poco; 1000 sale algo mejor en MRR (una pregunta de 12).
-- **Puntuación manual pendiente** y referencias L1/L2 sin verificar por una persona.
-- Las respuestas guardadas en `eval/results.json` son de antes del cambio a respuestas en español; las cifras no dependen del idioma, pero hay que reejecutar para tenerlas en español.
+- **Sin puntuación manual** (decisión del equipo): la evaluación es solo automática. Las referencias L1/L2 están verificadas por una persona (26 de noviembre de 2026).
 - R1 necesitaría trozos vecinos; R4 varía entre ejecuciones.
 - El router solo conoce las palabras clave previstas (EN/ES/FR/DE).
-- Groq y DeepSeek no probados con llamadas reales.
+- Groq no probado con llamadas reales; DeepSeek sí (humo, cadena y alternativa), pero la evaluación se hizo solo con Gemini.
 - Fuente HFCS sin tablas de riqueza por edad; B4 solo ve lo que hay en el feed RSS; falta la página *Consumer Trends* de la EBA.
 - Licencias: la del dataset de Kaggle y las condiciones de reutilización de páginas de reguladores no están verificadas (constan así en `SOURCES.md`).
 - Sin chunking semántico ni router con LLM (opcionales).

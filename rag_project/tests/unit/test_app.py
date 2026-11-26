@@ -144,13 +144,17 @@ def test_format_status() -> None:
     assert "1.2 s" in format_status(answer) and "fake:model" in format_status(answer)
 
 
-def test_example_questions_load(tmp_path: Path) -> None:
-    path = tmp_path / "q.json"
-    path.write_text(json.dumps([{"id": "D1", "question": "¿Churn?"}]), encoding="utf-8")
-    assert load_example_questions(path) == ["¿Churn?"]
-
-
 def test_ui_builds_and_exposes_both_modes() -> None:
     demo = build_demo(_service(FakeChain()), ["example question"])
-    assert demo is not None and demo.title == "RAG: churn en banca europea"
+    assert demo.title == "RAG: churn en banca europea"
     assert MODES == (MODE_NO_RAG, MODE_RAG, MODE_ADVANCED)
+
+
+def test_example_questions_prefer_the_spanish_wording(tmp_path: Path) -> None:
+    path = tmp_path / "q.json"
+    items = [
+        {"id": "D1", "question": "Churn?", "question_es": "¿Churn?"},
+        {"id": "D2", "question": "Only English?", "question_es": ""},
+    ]
+    path.write_text(json.dumps(items), encoding="utf-8")
+    assert load_example_questions(path) == ["¿Churn?", "Only English?"]

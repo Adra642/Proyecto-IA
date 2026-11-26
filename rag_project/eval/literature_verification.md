@@ -15,7 +15,7 @@ The gold answers of L1 and L2 are **drafts written from the arXiv abstracts**. P
   - p.7: "Hyperparameter tuning is another step which makes the modeling step by k-NN, decision trees, random forest and ANN time-consuming."
   - p.7: "Following the implementation of random Forest and ANN, and achieving larger values of kappa (0.5 < kappa < 0.6) and F1 the model improves to some extent."
   - p.7: "As appears, overfitting is substantial for random forest while models developed upon Naïve Bayes and decision trees are slightly underfitted."
-- [ ] Verified by a human against the PDF (initials/date: ______ )
+- [X] Verified by a human against the PDF (initials/date: ADRA 26/11/26 )
 
 ## L2
 - Paper: https://arxiv.org/abs/2606.07582 (PDF: https://arxiv.org/pdf/2606.07582)
@@ -28,7 +28,7 @@ The gold answers of L1 and L2 are **drafts written from the arXiv abstracts**. P
   - p.1: "The models are ensembled using out-of-fold (OOF) stacking with a logistic regression meta-learner, which recalibrates overconfident base model outputs and learns optimal combination weights."
   - p.1: "Ablation studies demonstrate that both the transformer component and stacking strategy contribute materially to performance."
   - p.1: "The proposed methodology offers a reproducible and extensible reference architecture for contemporary churn prediction on structured tabular data, bridging recent advances in attention-based modeling with ensemble techniques."
-  - p.1: "INDEX TERMS Customer churn prediction, FT-Transformer, gradient boosting, stacking ensemble, tabular data, class imbalance, probability calibration, reproducible machine learning I."
-  - p.2: "Roy et al.: Customer Churn Prediction Using FT-Transformer and Stacking Ensembles policyholders and an $800 average CLV would preserve around $800,000 annually."
-- [ ] Verified by a human against the PDF (initials/date: ______ )
+  - p.20: "This study demonstrates that systematic integration of transformer-based feature learning with gradient-boosted decision trees achieves strong performance in tabular churn prediction."
+  - p.20: "The proposed framework demonstrates readiness for practical deployment by delivering measurable business value, such as improved retention and reduced intervention overhead."
+- [X] Verified by a human against the PDF (initials/date: ADRA 26/11/26 )
 

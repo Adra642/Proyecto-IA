@@ -23,7 +23,7 @@ Pública en <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>. La **interfaz y las re
 
 ## 2. Despliegue en Google Cloud Run
 
-Hugging Face Spaces era el plan original, pero su documentación exige hoy un plan de pago para Gradio y Docker, así que se despliega un **contenedor en Cloud Run** (escala a cero y tiene cuota gratuita mensual; exige cuenta de facturación y una alerta de presupuesto).
+La app se despliega como un **contenedor en Cloud Run** (escala a cero y tiene cuota gratuita mensual; exige cuenta de facturación y una alerta de presupuesto).
 
 `deploy/Dockerfile`, por capas ordenadas de las que menos cambian a las que más:
 1. **Dependencias de ejecución** (`uv sync --frozen --no-default-groups --no-cache`): sin herramientas de desarrollo ni el grupo `pipeline`.
@@ -65,7 +65,7 @@ Cómo funciona:
 
 ## 4. Preguntas probables
 
-- *¿Por qué Cloud Run y no Hugging Face Spaces?* Spaces exige un plan de pago para Gradio y Docker; Cloud Run escala a cero y tiene cuota gratuita. Cloudflare Pages es solo estático (sirve para el sitio, no para la app).
+- *¿Por qué Cloud Run?* Ejecuta contenedores, escala a cero y tiene cuota gratuita. Cloudflare Pages es solo estático (sirve para el sitio, no para la app).
 - *¿Por qué el índice va dentro de la imagen?* El disco es efímero; así el arranque en frío solo carga el modelo y el índice.
 - *¿Qué pasa si se agota la cuota del modelo?* Un reintento y un mensaje amable; con `llm.fallback_order` podría pasar a otro proveedor.
 - *¿Dónde está la clave?* En Secret Manager, inyectada como variable de entorno; nunca en el repositorio ni en la imagen.

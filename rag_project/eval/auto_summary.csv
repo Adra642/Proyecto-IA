@@ -1,7 +1,7 @@
 category,mode,questions,numeric_match,hit@1,hit@4,citation_ok,behavior_ok
 D,no_rag,6,0.0,,,,
-D,rag,6,0.83,0.5,0.83,0.83,
-D,rag_advanced,6,1.0,0.67,1.0,0.67,
+D,rag,6,0.83,0.5,0.83,0.5,
+D,rag_advanced,6,1.0,0.67,1.0,0.83,
 L,no_rag,2,,,,,
 L,rag,2,,1.0,1.0,1.0,
 L,rag_advanced,2,,1.0,1.0,1.0,

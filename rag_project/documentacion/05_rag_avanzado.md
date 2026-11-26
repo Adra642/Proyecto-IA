@@ -62,7 +62,7 @@ Lectura:
 
 ## 5. A nivel de respuesta (`eval/auto_summary.csv`)
 
-Cifras correctas: D **0,00 / 0,83 / 1,00** y R **0,25 / 0,75 / 0,62** (sin RAG / RAG / RAG avanzado). Citas correctas en R: 0,50 frente a 1,00. R1 sigue imperfecta (su cifra está en el trozo vecino) y R4 varía entre ejecuciones.
+Cifras correctas: D **0,00 / 0,83 / 1,00** y R **0,25 / 0,75 / 0,62** (sin RAG / RAG / RAG avanzado). Citas correctas: D 0,50 frente a 0,83 y R 0,50 frente a 1,00 (RAG frente a avanzado). R1 sigue imperfecta (su cifra está en el trozo vecino) y R4 varía entre ejecuciones.
 
 ## 6. Preguntas probables
 

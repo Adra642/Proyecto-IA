@@ -162,8 +162,7 @@ Fourteen questions (`eval/questions.json`) are answered in two modes with the **
 ```bash
 uv run python -m eval.generate_gold   # fills gold numbers/answers from stats.json and the ingested texts
 uv run python -m eval.run_eval        # answers every question in both modes -> eval/results.csv/.json
-uv run python -m eval.score           # automatic scores + eval/manual_scoring.csv for the team
-uv run python -m eval.score --summary # after scoring by hand: mean score per category and mode
+uv run python -m eval.score           # automatic scores -> eval/auto_scores.csv, eval/auto_summary.csv
 uv run python -m eval.score --examples --example-ids D1,R3   # before/after examples for the memoir
 ```
 
@@ -174,18 +173,18 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
 - There is no answer cache: every run calls the LLM again and overwrites `eval/results.json`, so small
   differences between runs are expected (see the `temperature` note below). Client-side throttling and retry
   with backoff handle rate limits.
-- Manual scoring (`score_0_1_2` in `eval/manual_scoring.csv`): 0 = wrong or hallucinated, 1 = partly
-  right or vague, 2 = correct and specific; plus `citation_correct_Y_N` for RAG. Re-exporting keeps
-  what you already filled in.
+- Scoring is **automatic only** (hit@k, numeric match against the generated gold, citation check,
+  abstention and PII-leak checks); there is no manual scoring step, so differences are read as
+  indicative (14 questions, one run).
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
-  (drafted from abstracts): a human must tick them.
+  (drafted from abstracts); a human verified them against the PDF on 2026-11-26.
 
 Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one run):
 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
 | D dataset (6) | No RAG | 0.00 | | | |
-| D dataset (6) | RAG | 0.83 | 0.83 | 0.83 | |
+| D dataset (6) | RAG | 0.83 | 0.83 | 0.50 | |
 | L literature (2) | No RAG | n/a | | | |
 | L literature (2) | RAG | n/a | 1.00 | 1.00 | |
 | R regulatory/current (4) | No RAG | 0.25 | | | |
@@ -194,8 +193,9 @@ Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one 
 | U behavioural (2) | RAG | | | | 1.00 |
 
 How to read it: RAG answers the dataset, literature and current-data questions with exact, cited
-figures; the plain model says "I do not know" (its prompt allows it, so it does not hallucinate
-numbers, and the behavioural questions do not separate the two modes). Failures are kept on purpose
+figures; the plain model mostly says "no lo sé" (its prompt allows it, and the behavioural questions do not
+separate the two modes); when it does answer without context it can be wrong, e.g. R3, where it gave an
+out-of-date ECB rate (3.25%, "since 23 October 2024") instead of the current one. Failures are kept on purpose
 as diagnostics for the advanced techniques: **D6** (the plain question "churn rate in Germany":
 the phrase "Kaggle Bank Customer Churn dataset" matches every card, so the Germany card ranks 4th),
 **R1** (the answer sits in the chunk after the one retrieved) and **R4** (the model already knows
@@ -271,8 +271,7 @@ From the repo root: `uv run --project rag_project pre-commit install -c rag_proj
 `uv run poe pipeline | index | eval | app | test | test-integration | lint | typecheck`; `docs` arrives in Stage 6.
 
 ## Deployment (Google Cloud Run)
-Hugging Face Spaces was the original plan, but its docs now require a paid plan for Gradio and
-Docker Spaces, so the app is deployed as a container on **Cloud Run** (decision of 2026-11-22).
+The app is deployed as a container on **Cloud Run**.
 
 ```bash
 podman build -f deploy/Dockerfile -t rag-churn .      # or docker build; run from rag_project/
@@ -327,8 +326,6 @@ the site renders. One-time setup: *Settings, Pages, Source = GitHub Actions*. Th
 Cloudflare Pages is also possible (root directory `rag_project/docs`, build command `quarto render`, output
 `_site`) but is not set up.
 
-Before the presentation: fill in the team table in `docs/07-equipo-referencias.qmd`, paste the Loop URL in
-`docs/index.qmd`, and post the site URL in Loop.
 
 ## Project structure
 ```
