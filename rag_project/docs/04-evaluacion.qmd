@@ -93,27 +93,6 @@ for qid in ("D6", "R3", "U2"):
         display(Markdown(f"**{names[mode]}**{extra}: {esc(r['answer'])}  \n_Fuentes citadas: {sources}_"))
 ```
 
-## Puntuación manual
-
-```{python}
-#| echo: false
-manual = read_csv("eval/manual_scoring.csv")
-scored = [r for r in manual if r.get("score_0_1_2", "").strip() != ""]
-if scored:
-    groups = {}
-    for r in scored:
-        groups.setdefault((r["category"], r["mode"]), []).append(int(r["score_0_1_2"]))
-    md_table([
-        {"Cat.": c, "Modo": names[m], "Puntuadas": len(v), "Media (0 a 2)": f"{sum(v) / len(v):.2f}"}
-        for (c, m), v in sorted(groups.items())
-    ])
-else:
-    display(Markdown(
-        "> **Pendiente.** El equipo puntúa a mano cada respuesta (0 = errónea o inventada, 1 = parcial o vaga, "
-        "2 = correcta y concreta, más si la cita es correcta). Esta tabla se rellena sola a partir de "
-        "`eval/manual_scoring.csv` cuando hay puntuaciones."))
-```
-
 ## Límites y casos que siguen fallando
 
 ::: {.callout-warning}
@@ -121,5 +100,6 @@ else:
 - **Una sola ejecución por pregunta**, y los modelos Gemini 3.5 ignoran `temperature`: una cita puede cambiar entre dos ejecuciones con la misma recuperación. Las diferencias pequeñas son ruido.
 - **El modelo base puede decir "no lo sé"**, lo que le favorece frente a uno que inventa; un *prompt* sin esa opción probablemente lo dejaría peor parado.
 - **R1** (importe fijo de la tasa de intercambio) sigue fallando: la respuesta está en el *chunk* siguiente al recuperado. **R4** a veces responde con Wikipedia en lugar del reglamento.
+- **La puntuación es solo automática** (cifras, citas, abstención y fugas de datos personales): no hay puntuación manual. Las referencias de L1 y L2 son borradores hechos a partir de los resúmenes de arXiv y están **pendientes de verificación humana** contra el PDF.
 - Son **14 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
 :::

@@ -65,7 +65,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 
 - Evaluación pequeña: 14 preguntas (12 de recuperación) y una ejecución por pregunta; Gemini 3.5 ignora `temperature`.
 - El experimento de tamaño de chunk discrimina poco; 1000 sale algo mejor en MRR (una pregunta de 12).
-- **Puntuación manual pendiente** y referencias L1/L2 sin verificar por una persona.
+- **Sin puntuación manual** (decisión del equipo): la evaluación es solo automática. Las referencias L1/L2 siguen sin verificar por una persona.
 - R1 necesitaría trozos vecinos; R4 varía entre ejecuciones.
 - El router solo conoce las palabras clave previstas (EN/ES/FR/DE).
 - Groq no probado con llamadas reales; DeepSeek sí (humo, cadena y alternativa), pero la evaluación se hizo solo con Gemini.

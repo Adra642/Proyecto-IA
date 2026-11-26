@@ -40,7 +40,6 @@ Términos del proyecto explicados en lenguaje sencillo, ordenados por tema.
 | **hit@k** | Proporción de preguntas para las que algún trozo correcto aparece entre los k primeros resultados |
 | **MRR** | Media del inverso de la posición del primer resultado correcto; 1 si siempre es el primero |
 | **Gold (respuesta de referencia)** | Respuesta correcta conocida con la que se compara; aquí se genera desde `stats.json` o el texto de las fuentes |
-| **Puntuación manual 0/1/2** | 0 incorrecta o inventada, 1 parcial o vaga, 2 correcta y específica |
 | **Segunda opinión automática** | Comprobaciones por código (cifras, citas, comportamiento) que acompañan, sin sustituir, a la puntuación humana |
 
 ## Datos y privacidad

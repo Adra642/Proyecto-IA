@@ -1,12 +1,8 @@
-"""Score the evaluation: automatic checks, a sheet for manual scoring, and summaries.
-
-Manual scale (``score_0_1_2``): 0 = wrong or hallucinated, 1 = partly right or vague,
-2 = correct and specific. RAG rows also get ``citation_correct_Y_N``.
+"""Score the evaluation automatically (hit@k, numeric match, citations, behaviour, PII leaks).
 
 Usage::
 
-    uv run python -m eval.score                 # auto scores + (re)export eval/manual_scoring.csv
-    uv run python -m eval.score --summary       # aggregate the filled manual sheet
+    uv run python -m eval.score                 # eval/auto_scores.csv and eval/auto_summary.csv
     uv run python -m eval.score --examples      # eval/examples.md for the memoir
 """
 
@@ -33,7 +29,6 @@ RETRIEVAL_MODES = ("rag", "rag_advanced")  # modes that retrieve chunks
 log = get_logger(__name__)
 OUT_DIR = Path(__file__).parent
 KS = (1, 3, 4)
-MANUAL_FIELDS = ["score_0_1_2", "citation_correct_Y_N", "notes"]
 UNKNOWN = re.compile(
     r"do(?:es)? not know|don'?t know|do(?:es)? not contain"
     r"|not (?:in|part of) the (?:context|knowledge)"
@@ -128,75 +123,6 @@ def write_csv(path: Path, rows: Sequence[dict[str, Any]], fields: Sequence[str])
         writer.writerows(rows)
 
 
-def read_manual(path: Path) -> dict[tuple[str, str], dict[str, str]]:
-    """Existing manual entries by ``(id, mode)`` so a re-export never loses them."""
-    if not path.exists():
-        return {}
-    with path.open(encoding="utf-8", newline="") as fh:
-        return {
-            (r["id"], r["mode"]): {f: r.get(f, "") for f in MANUAL_FIELDS}
-            for r in csv.DictReader(fh)
-        }
-
-
-def export_manual(
-    records: Sequence[dict[str, Any]],
-    questions: dict[str, Question],
-    autos: dict[tuple[str, str], dict[str, Any]],
-    path: Path,
-) -> int:
-    """Write the manual scoring sheet, keeping entries already filled in. Returns row count."""
-    previous = read_manual(path)
-    rows = []
-    for rec in records:
-        q = questions[rec["id"]]
-        auto = autos[(rec["id"], rec["mode"])]
-        sources = rec["cited_ids"] or rec["retrieved_doc_ids"]
-        row = {
-            "id": rec["id"], "category": rec["category"], "mode": rec["mode"],
-            "question": rec["question"], "gold_answer": q.gold_answer, "answer": rec["answer"],
-            "gold_sources": "|".join(q.gold_source_ids),
-            "answer_sources": "|".join(dict.fromkeys(sources)),
-            "auto_numeric_match": auto["numeric_match"], "auto_citation_ok": auto["citation_ok"],
-            "auto_behavior_ok": auto["behavior_ok"],
-            **previous.get((rec["id"], rec["mode"]), {f: "" for f in MANUAL_FIELDS}),
-        }  # fmt: skip
-        rows.append(row)
-    fields = [
-        "id", "category", "mode", "question", "gold_answer", "answer", "gold_sources",
-        "answer_sources", "auto_numeric_match", "auto_citation_ok", "auto_behavior_ok",
-        *MANUAL_FIELDS,
-    ]  # fmt: skip
-    write_csv(path, rows, fields)
-    return len(rows)
-
-
-def summarize_manual(path: Path) -> list[dict[str, Any]]:
-    """Mean manual score and citation accuracy per category and mode (scored rows only)."""
-    groups: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
-    with path.open(encoding="utf-8", newline="") as fh:
-        for r in csv.DictReader(fh):
-            if r["score_0_1_2"].strip() != "":
-                groups[(r["category"], r["mode"])].append(r)
-    out = []
-    for (category, mode), rows in sorted(groups.items()):
-        cites = [
-            r["citation_correct_Y_N"].strip().upper()
-            for r in rows
-            if r["citation_correct_Y_N"].strip()
-        ]
-        out.append(
-            {
-                "category": category,
-                "mode": mode,
-                "questions": len(rows),
-                "mean_score": round(mean([float(r["score_0_1_2"]) for r in rows]), 2),
-                "citation_correct": f"{cites.count('Y')}/{len(cites)}" if cites else "",
-            }
-        )
-    return out
-
-
 def summarize_auto(autos: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     """Automatic metrics averaged per category and mode."""
     groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
@@ -252,29 +178,11 @@ def write_examples(
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description="Score the evaluation results.")
-    parser.add_argument("--summary", action="store_true", help="aggregate the filled manual sheet")
     parser.add_argument("--examples", action="store_true", help="write eval/examples.md")
     parser.add_argument("--example-ids", default="D1,R3,U2")
     args = parser.parse_args(argv)
     settings = load_settings()
     setup_logging(settings.resolve(settings.paths.logs_dir))
-    sheet = OUT_DIR / "manual_scoring.csv"
-    if args.summary:
-        rows = summarize_manual(sheet)
-        if not rows:
-            log.warning("No manual scores yet: fill score_0_1_2 in %s", sheet)
-            return 1
-        write_csv(OUT_DIR / "scores_summary.csv", rows, list(rows[0]))
-        for r in rows:
-            log.info(
-                "%s %-6s n=%d mean=%.2f citations=%s",
-                r["category"],
-                r["mode"],
-                r["questions"],
-                r["mean_score"],
-                r["citation_correct"],
-            )
-        return 0
     records = load_results(OUT_DIR / "results.json")
     questions = {q.id: q for q in load_questions()}
     if args.examples:
@@ -282,7 +190,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     identifiers = identifiers_from_raw(settings.resolve(settings.paths.raw_dir))
     autos = [auto_score(r, questions[r["id"]], identifiers) for r in records]
-    index = {(a["id"], a["mode"]): a for a in autos}
     summary = summarize_auto(autos)
     write_csv(
         OUT_DIR / "auto_scores.csv",
@@ -301,7 +208,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         ],
     )
     write_csv(OUT_DIR / "auto_summary.csv", summary, list(summary[0]))
-    n = export_manual(records, questions, index, sheet)
     for s in summary:
         log.info(
             "%s %-6s n=%d numeric=%s hit@1=%s hit@4=%s cite=%s behavior=%s",
@@ -314,7 +220,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             s["citation_ok"],
             s["behavior_ok"],
         )
-    log.info("Manual scoring sheet: %s (%d rows). Score 0/1/2, then run --summary", sheet, n)
     return 0
 
 

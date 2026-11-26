@@ -38,10 +38,10 @@ Demo: abrir la app, preguntar «¿Cuál es la tasa de churn en Alemania?» en lo
 
 ### Parte 4: evaluación y técnicas avanzadas (fases C y E) · ~7 min
 Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recuperación. Y mostramos también dónde falla."*
-1. Diseño: 14 preguntas (D, L, R, U), gold generado, puntuación automática y manual 0/1/2.
+1. Diseño: 14 preguntas (D, L, R, U), gold generado y puntuación automática (cifras, citas, abstención, fugas de datos personales).
 2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,83 → 1,00**; R **0,25 → 0,75 → 0,62** (citas R 0,50 → 1,00 en avanzado); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
 3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,794 → 0,903; hit@4 0,917 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
-4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la puntuación manual y L1/L2 son trabajo humano pendiente; 12 preguntas son pocas.
+4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática y L1/L2 están pendientes de verificación humana; 12 preguntas son pocas.
 
 Demo: `uv run python -m eval.ablation` (sin LLM) y abrir `eval/ablation.csv`; `uv run python -m eval.score --examples` para ejemplos antes/después.
 
@@ -62,7 +62,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 1. **¿Qué aporta el proyecto?** Un RAG completo y automatizado sobre churn bancario europeo que demuestra con datos que el mismo LLM responde mejor con recuperación, y que documenta dónde falla.
 2. **¿Cuál es la idea más importante?** Convertir el CSV en documentos de estadísticas calculadas por código, porque RAG no puede responder preguntas agregadas desde filas sueltas.
 3. **¿Qué relación tiene con el proyecto 1?** Solo el dataset. No se reutiliza código ni el modelo; aquí no se predice churn.
-4. **¿Qué está terminado y qué no?** Todo el sistema está hecho y publicado (pipeline, índice, RAG y RAG avanzado, evaluación, app en Cloud Run y sitio en GitHub Pages). Falta el trabajo humano: la puntuación manual, verificar L1/L2 y rellenar el equipo en el sitio.
+4. **¿Qué está terminado y qué no?** Todo el sistema está hecho y publicado (pipeline, índice, RAG y RAG avanzado, evaluación, app en Cloud Run y sitio en GitHub Pages). Falta el trabajo humano: verificar L1/L2 y publicar la URL en Loop. La evaluación es solo automática.
 5. **¿Qué haríais con más tiempo?** Más preguntas de evaluación y varias ejecuciones por pregunta, trozos vecinos para R1, chunking semántico, probar otros proveedores de LLM.
 
 ### Datos y pipeline
@@ -105,7 +105,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 36b. **¿En qué idioma responde?** Siempre en español, también si la pregunta está en inglés, francés o alemán; las instrucciones del prompt están en inglés y los tres modos las reciben igual.
 37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso es una ejecución por pregunta y se aceptan pequeñas diferencias entre ejecuciones.
 38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 14 (12 de recuperación más 2 diagnósticos); R1 y R2 originales las sabía el modelo sin RAG y el plan pide sustituirlas por preguntas más específicas.
-39. **¿Quién puntúa las respuestas?** El equipo, manualmente, con 0 / 1 / 2 y la validez de la cita (pendiente); la puntuación automática es solo una segunda opinión.
+39. **¿Quién puntúa las respuestas?** Se puntúan automáticamente: cifras de referencia generadas desde `stats.json`, verificación de citas contra los trozos recuperados, abstención y fugas de datos personales. No hay puntuación manual; es una limitación que reconocemos (14 preguntas, una ejecución).
 39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,794 a 0,903 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
 39c. **¿Por qué Cloud Run y no Hugging Face?** Spaces exige un plan de pago para Gradio y Docker; Cloud Run escala a cero con cuota gratuita.
 

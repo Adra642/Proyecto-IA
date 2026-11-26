@@ -29,7 +29,7 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 | [08_decisiones_y_lecciones.md](08_decisiones_y_lecciones.md) | Decisiones con su motivo, lecciones y limitaciones | Todos |
 | [09_guion_y_preguntas_defensa.md](09_guion_y_preguntas_defensa.md) | Reparto en 4 partes, demo en vivo y preguntas probables con respuesta | Todos |
 | [10_glosario.md](10_glosario.md) | Términos técnicos en lenguaje sencillo | Todos |
-| [11_puntuacion_manual_y_verificacion_L1_L2.md](11_puntuacion_manual_y_verificacion_L1_L2.md) | Por qué y cómo hacer la puntuación manual y la verificación de L1/L2 | Parte 4 (con ayuda de otra persona) |
+| [11_verificacion_L1_L2.md](11_verificacion_L1_L2.md) | Por qué y cómo verificar las referencias L1 y L2 | Parte 4 (con ayuda de otra persona) |
 
 ## Estado del proyecto
 
@@ -37,17 +37,16 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 |---|---|---|
 | A. Corpus automatizado | 13 fuentes, 178 documentos, un solo comando, idempotente | Hecho |
 | B. RAG, base vectorial y chunking | LangChain + ChromaDB + e5; chunking por tipo de documento; experimento de tamaño | Hecho |
-| C. Sin RAG frente a con RAG | 14 preguntas, tres modos, puntuación automática | Hecho (falta la puntuación manual) |
+| C. Sin RAG frente a con RAG | 14 preguntas, tres modos, puntuación automática | Hecho (puntuación automática; sin puntuación manual) |
 | D. App web pública | Gradio en Cloud Run, interfaz en español, respuestas siempre en español | Hecho y desplegada |
 | E. Extras | Híbrido BM25 + vector, filtros por metadatos, router, reranking (medido, desactivado) | Hecho |
 | Documentación | Sitio Quarto en español, publicado en GitHub Pages, con menú desplegable y navegación Anterior/Siguiente | Hecho |
 | Calidad | 223 tests unitarios, cobertura 95 %, ruff y mypy estrictos limpios | Hecho |
 
 ### Pendiente del equipo (no lo puede hacer el código)
-1. **Puntuación manual** (guía paso a paso en [11](11_puntuacion_manual_y_verificacion_L1_L2.md)) de las respuestas en `eval/manual_scoring.csv` (escala 0/1/2 y validez de la cita) y luego `uv run python -m eval.score --summary`.
-2. **Verificar L1 y L2** (respuestas de referencia de los papers) con `eval/literature_verification.md`.
-3. Rellenar la **tabla del equipo** (`docs/07-equipo-referencias.qmd`) y la **URL de Loop** en `docs/index.qmd`; publicar la URL del sitio en Loop.
-4. Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app; un vídeo corto de respaldo de la demo.
+1. **Verificar L1 y L2** (respuestas de referencia de los papers) con `eval/literature_verification.md`; guía paso a paso en [11](11_verificacion_L1_L2.md).
+2. Rellenar la **tabla del equipo** (`docs/07-equipo-referencias.qmd`) y la **URL de Loop** en `docs/index.qmd`; publicar la URL del sitio en Loop.
+3. Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app; un vídeo corto de respaldo de la demo.
 
 ## Cifras clave para memorizar
 
@@ -67,7 +66,7 @@ uv run python -m data_pipeline.run_all                       # corpus (usa la ca
 uv run python -m rag.index --query "churn rate in Germany"   # indexa (incremental) y prueba una consulta
 uv run python -m app.app                                     # app en http://localhost:8080 (necesita GOOGLE_API_KEY)
 uv run python -m eval.run_eval                               # sin RAG, RAG y RAG avanzado (gasta llamadas al LLM)
-uv run python -m eval.score                                  # puntuación automática y hoja manual
+uv run python -m eval.score                                  # puntuación automática
 uv run pytest                                                # 223 tests sin red
 uv run quarto render docs                                    # sitio Quarto en docs/_site
 ```

@@ -224,4 +224,4 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 - Example buttons in the app are in Spanish: `eval/questions.json` has a `question_es` field (used only by `app/ui.py`; evaluation still uses the English `question`, so results stay comparable).
 - DeepSeek key tested: smoke test passes, `deepseek-flash` answers the three modes in Spanish through the chain, and the fallback works (gemini with an invalid key and `fallback_order: [gemini, deepseek]` answered through DeepSeek). Note: DeepSeek without RAG answered the Germany churn rate correctly (32.44%), so the dataset appears in its training data; Gemini's baseline does not know it.
 - Quarto: removed the CSS that squeezed the "En esta página" table of contents; team names in `docs/07` formatted.
-- Still pending: manual scoring and L1/L2 verification (team).
+- Manual scoring removed by decision of the team (2026-11-26): `eval/manual_scoring.csv`, `export_manual`/`read_manual`/`summarize_manual`, `--summary`, the site section and the guide were deleted; evaluation is automatic only. L1/L2 verification stays pending.

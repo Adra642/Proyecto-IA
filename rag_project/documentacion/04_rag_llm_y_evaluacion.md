@@ -80,7 +80,7 @@ Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer C
 
 ### Ejecución y puntuación
 - `uv run python -m eval.run_eval` responde cada pregunta en **los tres modos** y guarda `eval/results.json` y `results.csv` (respuesta, trozos con su texto, citas, latencia). Un fallo se registra y la ejecución continúa. No hay caché: cada ejecución llama al modelo.
-- `uv run python -m eval.score` puntúa automáticamente: `hit@k`, `numeric_match` (cifras de referencia presentes en la respuesta), `citation_ok`, `behavior_ok` (¿dice que no lo sabe o se niega? admite frases en español e inglés) y `pii_leak`. Es una segunda opinión: **la puntuación válida es la manual** (`eval/manual_scoring.csv`: 0 incorrecta o inventada, 1 parcial o vaga, 2 correcta y específica, más la validez de la cita). `--summary` agrega y `--examples` genera ejemplos antes/después.
+- `uv run python -m eval.score` puntúa automáticamente: `hit@k`, `numeric_match` (cifras de referencia presentes en la respuesta), `citation_ok`, `behavior_ok` (¿dice que no lo sabe o se niega? admite frases en español e inglés) y `pii_leak`. Es la **única** puntuación (no hay puntuación manual): escribe `eval/auto_scores.csv` y `eval/auto_summary.csv`; `--examples` genera ejemplos antes/después en `eval/examples.md`.
 - `uv run python -m eval.ablation` mide solo la recuperación (sin LLM): ver `05`.
 
 ## 5. Resultados (puntuación automática, `eval/auto_summary.csv`)
@@ -114,7 +114,7 @@ Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada
 1. **14 preguntas** (12 de recuperación con fuentes de referencia): sirve como demostración y diagnóstico, no como estadística. Con 12 preguntas una vale 0,083.
 2. **Una ejecución por pregunta** y Gemini 3.5 ignora `temperature`: hay variabilidad no medida (por ejemplo, una cita que cambia entre ejecuciones con la misma recuperación).
 3. El **prompt sin RAG permite abstenerse**: es una línea base honesta, pero un modelo obligado a responder alucinaría más.
-4. Las referencias de **L1/L2** son borradores pendientes de verificación humana y **la puntuación manual no está hecha**.
+4. Las referencias de **L1/L2** son borradores pendientes de verificación humana, y **no hay puntuación manual** (decisión del equipo): todas las métricas son automáticas.
 5. Groq no se ha probado con llamadas reales. Las cifras de la evaluación son de Gemini; con DeepSeek la línea base sin RAG sería más fuerte en las preguntas D.
 6. No se mide el consumo de tokens (`LLMClient` devuelve solo texto).
 

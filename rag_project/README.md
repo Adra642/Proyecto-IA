@@ -162,8 +162,7 @@ Fourteen questions (`eval/questions.json`) are answered in two modes with the **
 ```bash
 uv run python -m eval.generate_gold   # fills gold numbers/answers from stats.json and the ingested texts
 uv run python -m eval.run_eval        # answers every question in both modes -> eval/results.csv/.json
-uv run python -m eval.score           # automatic scores + eval/manual_scoring.csv for the team
-uv run python -m eval.score --summary # after scoring by hand: mean score per category and mode
+uv run python -m eval.score           # automatic scores -> eval/auto_scores.csv, eval/auto_summary.csv
 uv run python -m eval.score --examples --example-ids D1,R3   # before/after examples for the memoir
 ```
 
@@ -174,11 +173,11 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
 - There is no answer cache: every run calls the LLM again and overwrites `eval/results.json`, so small
   differences between runs are expected (see the `temperature` note below). Client-side throttling and retry
   with backoff handle rate limits.
-- Manual scoring (`score_0_1_2` in `eval/manual_scoring.csv`): 0 = wrong or hallucinated, 1 = partly
-  right or vague, 2 = correct and specific; plus `citation_correct_Y_N` for RAG. Re-exporting keeps
-  what you already filled in.
+- Scoring is **automatic only** (hit@k, numeric match against the generated gold, citation check,
+  abstention and PII-leak checks); there is no manual scoring step, so differences are read as
+  indicative (14 questions, one run).
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
-  (drafted from abstracts): a human must tick them.
+  (drafted from abstracts): a human must tick them (pending).
 
 Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one run):
 
