@@ -25,7 +25,7 @@ flowchart LR
 
 Solo se exige la clave del proveedor elegido. Las claves van en `.env` o en variables de entorno (en Cloud Run, desde Secret Manager) y son `SecretStr`: no salen en logs.
 
-**Modelo en uso:** `gemini-3.5-flash-lite`, unos 1 s por respuesta con respuestas correctas (los modelos Gemini más grandes tardaban 5-13 s y `gemini-2.5-flash` está retirado). Groq y DeepSeek están implementados y comprobados contra su documentación, pero **no se han llamado con claves reales**.
+**Modelo en uso:** `gemini-3.5-flash-lite`, unos 1 s por respuesta con respuestas correctas (los modelos Gemini más grandes tardaban 5-13 s y `gemini-2.5-flash` está retirado). **DeepSeek (`deepseek-flash`) está probado en vivo** (prueba de humo, cadena completa en los tres modos, y como alternativa: con la clave de Gemini inválida y `fallback_order: [gemini, deepseek]` la respuesta salió por DeepSeek). Groq está implementado y comprobado solo contra su documentación. Un dato curioso: DeepSeek **sin RAG** acierta la tasa de churn de Alemania (32,44 %), así que ese dataset parece estar en sus datos de entrenamiento; Gemini sin RAG no lo conoce.
 
 **Advertencia técnica:** los modelos Gemini 3.5 **ignoran `temperature`**, así que `temperature = 0` no se puede garantizar. Por eso una ejecución puede diferir ligeramente de otra, y se acepta (no hay caché de respuestas).
 
@@ -85,25 +85,25 @@ Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer C
 
 ## 5. Resultados (puntuación automática, `eval/auto_summary.csv`)
 
-Ejecución con `gemini-3.5-flash-lite`, una por pregunta (las respuestas guardadas son anteriores al cambio a respuestas en español; las cifras no dependen del idioma):
+Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya en español (ejecución del 25 de noviembre de 2026):
 
 | Categoría | Modo | Cifras correctas | hit@4 | Cita correcta | Comportamiento |
 |---|---|---|---|---|---|
 | D (6) | sin RAG | **0,00** | | | |
-| D (6) | RAG | **0,83** | 0,83 | 0,83 | |
-| D (6) | RAG avanzado | **1,00** | 1,00 | 0,67 | |
+| D (6) | RAG | **0,83** | 0,83 | 0,50 | |
+| D (6) | RAG avanzado | **1,00** | 1,00 | 0,83 | |
 | L (2) | RAG / avanzado | | 1,00 | 1,00 | |
 | R (4) | sin RAG | 0,25 | | | |
 | R (4) | RAG | 0,75 | 1,00 | 0,50 | |
 | R (4) | RAG avanzado | 0,62 | 1,00 | 1,00 | |
 | U (2) | los tres modos | | | | 1,00 |
 
-Latencia mediana: unos 1,0 s en los tres modos.
+Latencia mediana: 1,2 s sin RAG, 1,0 s con RAG y 1,8 s con RAG avanzado.
 
 Cómo leerlo:
 - **D:** sin RAG el modelo no conoce las cifras (responde "no lo sé", que es una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
 - **L:** con RAG recupera y cita el paper correcto; sin RAG dice que no puede verificarlo.
-- **R3 (tipo actual del BCE):** sin RAG no puede conocerlo (fecha de corte anterior); con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
+- **R3 (tipo actual del BCE):** sin RAG contesta con un dato **desfasado** (3,25 % «desde el 23 de octubre de 2024»), es decir, una respuesta segura pero equivocada; con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
 - **U1 y U2:** los tres modos se portan bien (el RAG se niega por la guarda de privacidad; el modelo sin RAG dice que no lo sabe). U **no discrimina** entre sistemas con este prompt de línea base.
 - **R:** el modo avanzado acierta la cita más a menudo (1,00 frente a 0,50) pero su acierto numérico baja de 0,75 a 0,62 por R4 (la misma pregunta varía entre ejecuciones; con 4 preguntas es ruido). R1 y R4 siguen imperfectas: la cifra de R1 está en el trozo *siguiente* al recuperado.
 
@@ -115,9 +115,8 @@ Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada
 2. **Una ejecución por pregunta** y Gemini 3.5 ignora `temperature`: hay variabilidad no medida (por ejemplo, una cita que cambia entre ejecuciones con la misma recuperación).
 3. El **prompt sin RAG permite abstenerse**: es una línea base honesta, pero un modelo obligado a responder alucinaría más.
 4. Las referencias de **L1/L2** son borradores pendientes de verificación humana y **la puntuación manual no está hecha**.
-5. Groq y DeepSeek no se han probado con llamadas reales.
+5. Groq no se ha probado con llamadas reales. Las cifras de la evaluación son de Gemini; con DeepSeek la línea base sin RAG sería más fuerte en las preguntas D.
 6. No se mide el consumo de tokens (`LLMClient` devuelve solo texto).
-7. Ahora las respuestas son en español; las guardadas en `eval/results.json` son de una ejecución anterior (en inglés).
 
 ## 7. Preguntas probables
 

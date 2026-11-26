@@ -185,7 +185,7 @@ Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
 | D dataset (6) | No RAG | 0.00 | | | |
-| D dataset (6) | RAG | 0.83 | 0.83 | 0.83 | |
+| D dataset (6) | RAG | 0.83 | 0.83 | 0.50 | |
 | L literature (2) | No RAG | n/a | | | |
 | L literature (2) | RAG | n/a | 1.00 | 1.00 | |
 | R regulatory/current (4) | No RAG | 0.25 | | | |
@@ -194,8 +194,9 @@ Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one 
 | U behavioural (2) | RAG | | | | 1.00 |
 
 How to read it: RAG answers the dataset, literature and current-data questions with exact, cited
-figures; the plain model says "I do not know" (its prompt allows it, so it does not hallucinate
-numbers, and the behavioural questions do not separate the two modes). Failures are kept on purpose
+figures; the plain model mostly says "no lo sé" (its prompt allows it, and the behavioural questions do not
+separate the two modes); when it does answer without context it can be wrong, e.g. R3, where it gave an
+out-of-date ECB rate (3.25%, "since 23 October 2024") instead of the current one. Failures are kept on purpose
 as diagnostics for the advanced techniques: **D6** (the plain question "churn rate in Germany":
 the phrase "Kaggle Bank Customer Churn dataset" matches every card, so the Germany card ranks 4th),
 **R1** (the answer sits in the chunk after the one retrieved) and **R4** (the model already knows

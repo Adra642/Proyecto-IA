@@ -17,7 +17,7 @@ Son las dos tareas que **solo puede hacer una persona**. El código ya hace la p
 
 ## 2. Orden correcto (importante)
 
-1. **Decidir la ejecución final** de la evaluación. Las respuestas guardadas son de antes del cambio a respuestas en español. Si se quiere puntuar respuestas en español, ejecutar ahora:
+1. **Tener la ejecución final de la evaluación.** `eval/results.json` ya contiene la ejecución del 25 de noviembre con respuestas en español. Solo si cambia el código, los prompts o el índice hay que repetirla, **antes de puntuar**:
    ```bash
    uv run python -m eval.run_eval        # 14 preguntas × 3 modos = 42 respuestas; gasta llamadas al LLM
    uv run python -m eval.score           # actualiza la puntuación automática y la hoja manual

@@ -42,13 +42,15 @@ class Question(BaseModel):
 
     ``gold_numbers_from`` maps a name to a ``stats.json`` key and ``gold_numbers_from_text``
     to a regex over a processed document; ``generate_gold.py`` fills ``gold_numbers``,
-    ``gold_facts`` and ``gold_answer`` (from ``gold_answer_template``).
+    ``gold_facts`` and ``gold_answer`` (from ``gold_answer_template``). ``question_es`` is a
+    Spanish rendering for the app's example buttons; evaluation always uses ``question``.
     """
 
     id: str
     category: Literal["D", "L", "R", "U"]
     behavior: Literal["answer", "abstain", "refuse_pii"]
     question: str
+    question_es: str = ""  # Spanish wording shown as an example button in the app only
     gold_answer: str
     gold_source_ids: list[str] = Field(default_factory=list)
     gold_answer_template: str | None = None

@@ -25,7 +25,7 @@ llm:
   models:                       # verify current names in each provider's docs
     gemini: gemini-3.5-flash-lite   # verified live with a key on 2026-11-19; 2.5-* are retired (404)
     groq: llama-3.3-70b-versatile   # listed as production model in Groq docs (not called: no key)
-    deepseek: deepseek-flash        # per DeepSeek docs 2026-11-19 (deepseek-chat no longer listed; not called: no key)
+    deepseek: deepseek-flash        # per DeepSeek docs; tested live 2026-11-26 (smoke test, full chain, fallback)
 
 embeddings:
   model: intfloat/multilingual-e5-small

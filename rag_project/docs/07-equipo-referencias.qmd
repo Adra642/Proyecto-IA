@@ -4,16 +4,12 @@ title: "Equipo y referencias"
 
 ## Equipo
 
-::: {.callout-warning}
-## Pendiente de completar por el equipo
-Esta tabla debe rellenarla el equipo: el código no sabe quién hizo cada parte.
-:::
-
-| Persona | Rol | Contribuciones |
-|---|---|---|
-| *[nombre]* | *[rol]* | *[p. ej. pipeline de datos, evaluación, aplicación y despliegue, documentación]* |
-| *[nombre]* | *[rol]* | *[...]* |
-| *[nombre]* | *[rol]* | *[...]* |
+| Integrante |
+|---|
+| Carlos Rabines Sanchez |
+| Carlos Rojas |
+| Arlie Rivas |
+| Juan Pérez |
 
 ## Tecnologías
 

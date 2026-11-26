@@ -218,3 +218,10 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 - **Answers in Spanish:** the No-RAG and RAG prompts now say "always answer in Spanish"; the fixed `REFUSAL_PII` and `NO_CONTEXT` messages are in Spanish; `eval/score.py` recognises Spanish abstentions. Tests updated (223 pass). The saved `eval/results.json` is from before this change (English answers); re-run `eval.run_eval` to refresh it (spends LLM calls).
 - **Quarto navbar:** a *Contenido* dropdown holds the seven parts. Anterior / Siguiente buttons come from `page-navigation`; Quarto only builds them from a sidebar, so a sidebar with the page order is declared and hidden in `styles.css`.
 - **Presentation guide:** `guia_presentacion/` moved to `documentacion/` (separate from the Quarto `docs/`), rewritten for the current state, with new files for advanced RAG and for the app, deployment and site.
+
+### Final QA round (2026-11-26, branch `stage-7-final-qa`)
+- Re-ran `eval.run_eval` (42 answers, 0 failed, all in Spanish) and `eval.score`. Numeric match unchanged (D 0.00 / 0.83 / 1.00, R 0.25 / 0.75 / 0.62); citation OK moved with run-to-run noise (D: RAG 0.83 to 0.50, advanced 0.67 to 0.83). Median latency 1.2 / 1.0 / 1.8 s. R3 without RAG now answers a wrong, out-of-date ECB rate (3.25% since 2024-10-23): the baseline is confidently wrong there, not silent.
+- Example buttons in the app are in Spanish: `eval/questions.json` has a `question_es` field (used only by `app/ui.py`; evaluation still uses the English `question`, so results stay comparable).
+- DeepSeek key tested: smoke test passes, `deepseek-flash` answers the three modes in Spanish through the chain, and the fallback works (gemini with an invalid key and `fallback_order: [gemini, deepseek]` answered through DeepSeek). Note: DeepSeek without RAG answered the Germany churn rate correctly (32.44%), so the dataset appears in its training data; Gemini's baseline does not know it.
+- Quarto: removed the CSS that squeezed the "En esta página" table of contents; team names in `docs/07` formatted.
+- Still pending: manual scoring and L1/L2 verification (team).

@@ -39,7 +39,7 @@ Demo: abrir la app, preguntar «¿Cuál es la tasa de churn en Alemania?» en lo
 ### Parte 4: evaluación y técnicas avanzadas (fases C y E) · ~7 min
 Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recuperación. Y mostramos también dónde falla."*
 1. Diseño: 14 preguntas (D, L, R, U), gold generado, puntuación automática y manual 0/1/2.
-2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,83 → 1,00**; R **0,25 → 0,75 → 0,62** (con citas 0,50 → 1,00 en avanzado); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
+2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,83 → 1,00**; R **0,25 → 0,75 → 0,62** (citas R 0,50 → 1,00 en avanzado); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
 3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,794 → 0,903; hit@4 0,917 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
 4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la puntuación manual y L1/L2 son trabajo humano pendiente; 12 preguntas son pocas.
 

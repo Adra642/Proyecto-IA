@@ -48,7 +48,6 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 2. **Verificar L1 y L2** (respuestas de referencia de los papers) con `eval/literature_verification.md`.
 3. Rellenar la **tabla del equipo** (`docs/07-equipo-referencias.qmd`) y la **URL de Loop** en `docs/index.qmd`; publicar la URL del sitio en Loop.
 4. Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app; un vídeo corto de respaldo de la demo.
-5. Reejecutar `uv run python -m eval.run_eval` si se quieren los resultados con respuestas en español (los guardados son de una ejecución anterior en inglés).
 
 ## Cifras clave para memorizar
 

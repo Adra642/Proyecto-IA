@@ -43,9 +43,9 @@ LANGUAGES = ["en", "es", "fr", "de"]
 
 
 def load_example_questions(path: Path) -> list[str]:
-    """Return the evaluation questions to use as example buttons."""
+    """Return the example-button questions: the Spanish wording when the file has one."""
     data = json.loads(path.read_text(encoding="utf-8"))
-    return [str(q["question"]) for q in data]
+    return [str(q.get("question_es") or q["question"]) for q in data]
 
 
 def build_demo(service: AppService, examples: list[str]) -> gr.Blocks:
