@@ -108,6 +108,6 @@ pequeño para ejecutarse en CPU. El modelo e5 exige prefijos: `"passage: "` para
 `"query: "` para las preguntas, y el código los aplica en un único lugar.
 La distancia es coseno.
 
-El índice resultante tiene **174 documentos y 4 473 *chunks****; construirlo en frío tarda unos 200 s en CPU y se
+El índice resultante tiene **174 documentos y 4 473 *chunks***; construirlo en frío tarda unos 200 s en CPU y se
 sincroniza de forma incremental (cada documento guarda una huella de su contenido y de la configuración, y solo
 se reindexa lo que cambia).
