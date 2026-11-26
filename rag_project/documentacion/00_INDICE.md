@@ -35,7 +35,7 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 
 | Fase del enunciado | Qué hay | Estado |
 |---|---|---|
-| A. Corpus automatizado | 13 fuentes, 178 documentos, un solo comando, idempotente | Hecho |
+| A. Corpus automatizado | 13 fuentes, 174 documentos, un solo comando, idempotente | Hecho |
 | B. RAG, base vectorial y chunking | LangChain + ChromaDB + e5; chunking por tipo de documento; experimento de tamaño | Hecho |
 | C. Sin RAG frente a con RAG | 14 preguntas, tres modos, puntuación automática | Hecho (puntuación automática; sin puntuación manual) |
 | D. App web pública | Gradio en Cloud Run, interfaz en español, respuestas siempre en español | Hecho y desplegada |
@@ -49,7 +49,7 @@ Nada de código. El equipo ensaya la defensa por su cuenta (guion y preguntas en
 ## Cifras clave para memorizar
 
 - **Dataset:** Kaggle *Bank Customer Churn*, 10.000 clientes, Francia / Alemania / España. Churn global **20,4 %**; Alemania **32,4 %**, Francia 16,2 %, España 16,7 %.
-- **Corpus:** 13 fuentes, **178 documentos**, unas 399.000 palabras, 4 idiomas (EN, ES, FR, DE), 5 formatos.
+- **Corpus:** 13 fuentes, **174 documentos**, unas 282.000 palabras, 4 idiomas (EN, ES, FR, DE), 5 formatos.
 - **Índice:** **6.309 trozos** de 600 caracteres con 90 de solapamiento; 384 dimensiones; construcción en frío unos 5 minutos en CPU, 1 segundo sin cambios.
 - **Modelos:** embeddings `intfloat/multilingual-e5-small`; LLM `gemini-3.5-flash-lite` (el mismo en todos los modos).
 - **Resultados (cifras correctas):** datos D **0,00 → 0,83 → 1,00** y regulatorio/actual R **0,25 → 0,75 → 0,62** (sin RAG → RAG → RAG avanzado).

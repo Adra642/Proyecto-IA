@@ -240,3 +240,10 @@ Hugging Face Spaces is no longer part of the project: removed the "why not Space
 - Refreshed A5, B2, B3, B4 (dates now 2026-11-26). The ECB RSS feed rotated: two older press releases left the corpus, two new ones (23 and 25 Nov) entered.
 - Re-indexed: 6,431 chunks. 216 unit tests pass.
 - Open: EUR-Lex is about 80% of the corpus bytes (AI Act and GDPR are only loosely related); `eval/results.csv` was not re-run after this change.
+
+### Data quality, round 2 (2026-11-26)
+- EUR-Lex fetcher: new `keep_articles` / `keep_matching` options (`select_articles`). The AI Act keeps Articles 5, 6, 10, 13, 14, 26, 50, 86 plus the creditworthiness recital and Annex III item 5(b) (47 KB instead of about 480 KB); GDPR keeps Articles 5, 6, 7, 12, 13, 15, 17, 20, 21, 22 (profiling, portability, erasure).
+- `Complain` is target leakage (99.8% of churners complained): its three segment cards were removed, the data dictionary flags it, and the leakage check in `kaggle_findings` stays (it answers eval question D6 and documents why the first project dropped the column).
+- New sources: Banque de France *aide a la mobilite bancaire*, Verbraucherzentrale *Kontowechselservice* (b8), Commission report on the Payment Accounts Directive COM(2023) 249 (a6). Rejected: the 2012 EC bank-switching study (HTTP 403 for our crawler, not circumvented), the BdF opinion page (only a PDF link), commercial finance sites.
+- Corpus: 174 documents, 282k words. Index: 4,473 chunks (was 6,431). Evaluation re-run (42 answers, 0 failed): D rag hit@1 0.50 to 0.67, D advanced 0.67 to 0.83, numeric match unchanged for RAG modes.
+- The chunk-size experiment in the README was measured on the earlier 6,309-chunk corpus and was not repeated.

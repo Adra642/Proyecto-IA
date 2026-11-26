@@ -46,7 +46,7 @@ Personal identifiers (row number, customer id and surname) were removed before a
 | IsActiveMember | integer | 0 to 1 | 1 if the customer is an active member, otherwise 0. |
 | EstimatedSalary | decimal | 11.58 to 199,992.48 | Estimated annual salary. |
 | Exited | integer | 0 to 1 | Target: 1 if the customer left the bank (churned), otherwise 0. |
-| Complain | integer | 0 to 1 | 1 if the customer filed a complaint, otherwise 0. |
+| Complain | integer | 0 to 1 | 1 if the customer filed a complaint, otherwise 0. Warning: it almost perfectly mirrors Exited (target leakage), so no segment cards are built for it. |
 | Satisfaction Score | integer | 1 to 5 | Satisfaction score given by the customer, 1 (low) to 5 (high). |
 | Card Type | category | DIAMOND, GOLD, PLATINUM, SILVER | Credit card tier: DIAMOND, GOLD, PLATINUM or SILVER. |
 | Point Earned | integer | 119 to 1,000 | Loyalty points earned by the customer. |

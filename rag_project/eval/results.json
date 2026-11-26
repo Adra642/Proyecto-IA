@@ -5,12 +5,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "No lo sé con exactitud, ya que no tengo acceso directo a los datos en tiempo real de esa versión específica del dataset de Kaggle, pero en el conjunto de datos estándar sobre abandono de clientes (Bank Customer Churn), la tasa de abandono (churn rate) en **Alemania** es significativamente más alta (aproximadamente del **32% al 40%**) en comparación con **Francia y España** (ambas rondando el **16% al 18%**).",
+    "answer": "En el conjunto de datos de abandono de clientes bancarios de Kaggle, la tasa de abandono de los clientes en Alemania es significativamente mayor (aproximadamente un 32%) en comparación con Francia y España (ambas rondan el 16%).",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.83,
+    "latency_s": 0.83,
     "error": "",
     "retrieved_chunks": []
   },
@@ -20,7 +20,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "La tasa de churn (pérdida de clientes) en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography]. Esto sitúa a Alemania con la tasa de churn más alta en comparación con Francia y España [kaggle_summary_geography].",
+    "answer": "La tasa de cancelación (churn rate) de los clientes en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography].",
     "retrieved_doc_ids": [
       "kaggle_summary_geography_x_is_active_member",
       "kaggle_overview",
@@ -32,7 +32,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 0.89,
+    "latency_s": 5.53,
     "error": "",
     "retrieved_chunks": [
       {
@@ -67,24 +67,24 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "La tasa de abandono de los clientes en Alemania es del 32.4%, siendo la más alta entre los tres países [kaggle_summary_geography]. En comparación, la tasa de abandono en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography].",
+    "answer": "En el conjunto de datos de desercion de clientes de bancos de Kaggle, la tasa de baja (churn rate) en Alemania es del 32.4% (la más alta), mientras que en Francia es del 16.2% (la más baja) y en España es del 16.7% [kaggle_summary_geography].",
     "retrieved_doc_ids": [
       "kaggle_summary_geography",
       "kaggle_segment_geography_spain",
       "kaggle_segment_geography_germany",
-      "kaggle_segment_geography_x_num_of_products_germany_2"
+      "kaggle_segment_geography_x_num_of_products_spain_3"
     ],
     "cited_ids": [
       "kaggle_summary_geography"
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 2.63,
+    "latency_s": 1.25,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "kaggle_summary_geography#0000",
-        "score": 0.0156,
+        "score": 0.0153,
         "header_path": "",
         "text": "# Churn rate by Geography\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France | 5,014 | 811 | 16.2% | 62,092.64 | 607.2 |\n| Germany | 2,509 | 814 | 32.4% | 119,730.12 | 610.2 |\n| Spain | 2,477 | 413 | 16.7% | 61,818.15 | 601.4 |\n\nIn plain language: by geography, the highest churn rate is 32.4% (Germany) and the lowest is 16.2% (France)."
       },
@@ -96,15 +96,15 @@
       },
       {
         "chunk_id": "kaggle_segment_geography_germany#0000",
-        "score": 0.0149,
+        "score": 0.015,
         "header_path": "",
         "text": "# Churn segment card: Geography = Germany\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Germany.\n\n- Customers in segment: 2,509 (25.1% of 10,000 customers)\n- Churned customers (Exited = 1): 814\n- Churn rate: 32.4% (overall churn rate: 20.4%)\n- Mean balance: 119,730.12\n- Mean estimated salary: 101,113.44\n- Mean credit score: 651.5\n- Mean age: 39.8\n- Mean loyalty points earned: 610.2\n\nIn plain language: customers with Geography = Germany left the bank at a rate of 32.4%, which is 1.59 times the overall churn rate (higher)."
       },
       {
-        "chunk_id": "kaggle_segment_geography_x_num_of_products_germany_2#0000",
+        "chunk_id": "kaggle_segment_geography_x_num_of_products_spain_3#0000",
         "score": 0.0146,
         "header_path": "",
-        "text": "# Churn segment card: Geography = Germany and NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Germany and NumOfProducts = 2.\n\n- Customers in segment: 1,040 (10.4% of 10,000 customers)\n- Churned customers (Exited = 1): 126\n- Churn rate: 12.1% (overall churn rate: 20.4%)\n- Mean balance: 119,341.25\n- Mean estimated salary: 100,832.06\n- Mean credit score: 651.5\n- Mean age: 38.3\n- Mean loyalty points earned: 606.2\n\nIn plain language: customers with Geography = Germany and NumOfProducts = 2 left the bank at a rate of 12.1%, which is 0.59 times the overall churn rate (lower)."
+        "text": "# Churn segment card: Geography = Spain and NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Spain and NumOfProducts = 3.\n\n- Customers in segment: 66 (0.7% of 10,000 customers)\n- Churned customers (Exited = 1): 52\n- Churn rate: 78.8% (overall churn rate: 20.4%)\n- Mean balance: 48,385.90\n- Mean estimated salary: 103,223.66\n- Mean credit score: 647.0\n- Mean age: 40.9\n- Mean loyalty points earned: 583.4\n\nIn plain language: customers with Geography = Spain and NumOfProducts = 3 left the bank at a rate of 78.8%, which is 3.87 times the overall churn rate (higher)."
       }
     ]
   },
@@ -114,12 +114,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "No puedo verificar esta información con precisión ya que los datos exactos varían según la versión específica del conjunto de datos de Kaggle sobre la deserción de clientes bancarios (Bank Customer Churn).",
+    "answer": "No tengo suficiente información verificable para proporcionar la tasa exacta de abandono (churn rate) para los clientes con 4 productos en comparación con los que tienen 2 productos en ese conjunto de datos específico.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.02,
+    "latency_s": 0.92,
     "error": "",
     "retrieved_chunks": []
   },
@@ -129,7 +129,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "Los clientes que tienen 4 productos presentan una tasa de deserción del 100.0% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_4]. En comparación, los clientes que tienen 2 productos tienen una tasa de deserción del 7.6% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_2].",
+    "answer": "La tasa de cancelación (churn rate) de los clientes que tienen 4 productos es del 100.0% (lo que representa 4,91 veces la tasa de cancelación general), mientras que la tasa de cancelación de los clientes que tienen 2 productos es del 7.6% (lo que representa 0,37 veces la tasa de cancelación general) [kaggle_summary_num_of_products, kaggle_segment_num_of_products_4, kaggle_segment_num_of_products_2].",
     "retrieved_doc_ids": [
       "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
@@ -139,7 +139,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.0,
+    "latency_s": 5.07,
     "error": "",
     "retrieved_chunks": [
       {
@@ -174,7 +174,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "La tasa de abandono de los clientes que tienen 4 productos es del 100,0%, lo que representa 4,91 veces la tasa de abandono general [kaggle_segment_num_of_products_4]. En comparación, la tasa de abandono de los clientes que tienen 2 productos es del 7,6%, lo que representa 0,37 veces la tasa de abandono general [kaggle_segment_num_of_products_2].",
+    "answer": "La tasa de cancelación (churn rate) de los clientes que tienen 4 productos es del 100,0%, lo que representa 4,91 veces la tasa de cancelación general [kaggle_segment_num_of_products_4]. En comparación, los clientes que tienen 2 productos tienen una tasa de cancelación del 7,6%, lo que representa 0,37 veces la tasa de cancelación general [kaggle_segment_num_of_products_2].",
     "retrieved_doc_ids": [
       "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
@@ -187,7 +187,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.31,
+    "latency_s": 1.17,
     "error": "",
     "retrieved_chunks": [
       {
@@ -222,12 +222,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "No tengo la respuesta verificada para estos porcentajes específicos dentro del conjunto de datos mencionado.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.7,
+    "latency_s": 0.8,
     "error": "",
     "retrieved_chunks": []
   },
@@ -237,27 +237,21 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "El 99,8% de los clientes que abandonaron el banco (clientes con churn) habían presentado una queja [kaggle_findings]. \n\nEntre los clientes que presentaron una queja, la tasa de abandono (churn rate) fue del 99,5%, mientras que entre los clientes que no presentaron ninguna queja fue del 0,1% [kaggle_findings].",
+    "answer": "El 99,8% de los clientes que se dieron de baja habían presentado una queja [kaggle_findings]. La tasa de baja entre los clientes que presentaron una queja es del 99,5%, mientras que entre los clientes que no se quejaron es del 0,1% [kaggle_findings].",
     "retrieved_doc_ids": [
-      "kaggle_summary_complain",
       "kaggle_findings",
-      "kaggle_segment_complain_1",
-      "kaggle_segment_complain_0"
+      "kaggle_overview",
+      "kaggle_summary_satisfaction_score",
+      "kaggle_summary_num_of_products"
     ],
     "cited_ids": [
       "kaggle_findings"
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.01,
+    "latency_s": 1.42,
     "error": "",
     "retrieved_chunks": [
-      {
-        "chunk_id": "kaggle_summary_complain#0000",
-        "score": 0.8973,
-        "header_path": "",
-        "text": "# Churn rate by Complaint filed\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 0 | 7,956 | 4 | 0.1% | 72,718.52 | 606.8 |\n| 1 | 2,044 | 2,034 | 99.5% | 91,149.87 | 605.2 |\n\nIn plain language: by complaint filed, the highest churn rate is 99.5% (1) and the lowest is 0.1% (0)."
-      },
       {
         "chunk_id": "kaggle_findings#0000",
         "score": 0.8957,
@@ -265,16 +259,22 @@
         "text": "# Findings: churn drivers in the Kaggle \"Bank Customer Churn\" dataset\n\nOverall churn rate: 20.4%.\n\n## Top churn drivers (excluding Complain, see the leakage check)\n\nBy absolute correlation with Exited:\n\n1. Age (correlation +0.285)\n2. IsActiveMember (correlation -0.156)\n3. Balance (correlation +0.119)\n4. Gender (correlation -0.106)\n5. NumOfProducts (correlation -0.048)\n\nBy mutual information with Exited:\n\n1. NumOfProducts (mutual information 0.0698)\n2. Age (mutual information 0.0667)\n3. Geography (mutual information 0.0140)\n4. IsActiveMember (mutual information 0.0123)\n5. Gender (mutual information 0.0056)\n\n## Leakage check: Complain versus Exited\n\n- Churn rate among customers who complained: 99.5%\n- Churn rate among customers who did not complain: 0.1%\n- Share of churned customers who had complained: 99.8%\n- Correlation between Complain and Exited: 0.996\n\nConclusion: Complain almost perfectly mirrors Exited, so it is very likely target leakage (the complaint is probably recorded as part of the departure). A churn model should not use Complain as a predictor.\n\n## Satisfaction score versus churn\n\nChurn rate ranges from 19.6% to 21.8% across the five satisfaction scores (correlation with Exited: -0.006).\n\nConclusion: satisfaction score alone does not track churn in this dataset; the churn rate is almost flat across scores."
       },
       {
-        "chunk_id": "kaggle_segment_complain_1#0000",
-        "score": 0.8909,
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.8801,
         "header_path": "",
-        "text": "# Churn segment card: Complain = 1\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Complaint filed. Segment: Complain = 1.\n\n- Customers in segment: 2,044 (20.4% of 10,000 customers)\n- Churned customers (Exited = 1): 2,034\n- Churn rate: 99.5% (overall churn rate: 20.4%)\n- Mean balance: 91,149.87\n- Mean estimated salary: 101,507.77\n- Mean credit score: 645.4\n- Mean age: 44.8\n- Mean loyalty points earned: 605.2\n\nIn plain language: customers with Complain = 1 left the bank at a rate of 99.5%, which is 4.88 times the overall churn rate (higher)."
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
       },
       {
-        "chunk_id": "kaggle_segment_complain_0#0000",
-        "score": 0.8903,
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "score": 0.8697,
         "header_path": "",
-        "text": "# Churn segment card: Complain = 0\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Complaint filed. Segment: Complain = 0.\n\n- Customers in segment: 7,956 (79.6% of 10,000 customers)\n- Churned customers (Exited = 1): 4\n- Churn rate: 0.1% (overall churn rate: 20.4%)\n- Mean balance: 72,718.52\n- Mean estimated salary: 99,726.06\n- Mean credit score: 651.9\n- Mean age: 37.4\n- Mean loyalty points earned: 606.8\n\nIn plain language: customers with Complain = 0 left the bank at a rate of 0.1%, which is 0.00 times the overall churn rate (lower)."
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3)."
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8685,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
       }
     ]
   },
@@ -284,44 +284,44 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "El 99,8% de los clientes que abandonaron el banco (clientes churned) habían presentado una queja [kaggle_findings]. \n\nLa tasa de cancelación (churn rate) entre los clientes que presentaron una queja es del 99,5%, mientras que entre los clientes que no presentaron ninguna queja es del 0,1% [kaggle_findings].",
+    "answer": "El 99,8% de los clientes que abandonaron el banco (clientes dados de baja) habían presentado una queja [kaggle_findings]. \n\nLa tasa de cancelación (churn rate) entre los clientes que presentaron una queja es del 99,5%, mientras que entre los clientes que no se quejaron es del 0,1% [kaggle_findings].",
     "retrieved_doc_ids": [
-      "kaggle_summary_complain",
       "kaggle_findings",
-      "kaggle_segment_complain_1",
-      "kaggle_segment_complain_0"
+      "kaggle_overview",
+      "kaggle_segment_satisfaction_score_1",
+      "kaggle_segment_satisfaction_score_5"
     ],
     "cited_ids": [
       "kaggle_findings"
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.6,
+    "latency_s": 1.56,
     "error": "",
     "retrieved_chunks": [
       {
-        "chunk_id": "kaggle_summary_complain#0000",
-        "score": 0.0163,
-        "header_path": "",
-        "text": "# Churn rate by Complaint filed\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 0 | 7,956 | 4 | 0.1% | 72,718.52 | 606.8 |\n| 1 | 2,044 | 2,034 | 99.5% | 91,149.87 | 605.2 |\n\nIn plain language: by complaint filed, the highest churn rate is 99.5% (1) and the lowest is 0.1% (0)."
-      },
-      {
         "chunk_id": "kaggle_findings#0000",
-        "score": 0.0163,
+        "score": 0.0164,
         "header_path": "",
         "text": "# Findings: churn drivers in the Kaggle \"Bank Customer Churn\" dataset\n\nOverall churn rate: 20.4%.\n\n## Top churn drivers (excluding Complain, see the leakage check)\n\nBy absolute correlation with Exited:\n\n1. Age (correlation +0.285)\n2. IsActiveMember (correlation -0.156)\n3. Balance (correlation +0.119)\n4. Gender (correlation -0.106)\n5. NumOfProducts (correlation -0.048)\n\nBy mutual information with Exited:\n\n1. NumOfProducts (mutual information 0.0698)\n2. Age (mutual information 0.0667)\n3. Geography (mutual information 0.0140)\n4. IsActiveMember (mutual information 0.0123)\n5. Gender (mutual information 0.0056)\n\n## Leakage check: Complain versus Exited\n\n- Churn rate among customers who complained: 99.5%\n- Churn rate among customers who did not complain: 0.1%\n- Share of churned customers who had complained: 99.8%\n- Correlation between Complain and Exited: 0.996\n\nConclusion: Complain almost perfectly mirrors Exited, so it is very likely target leakage (the complaint is probably recorded as part of the departure). A churn model should not use Complain as a predictor.\n\n## Satisfaction score versus churn\n\nChurn rate ranges from 19.6% to 21.8% across the five satisfaction scores (correlation with Exited: -0.006).\n\nConclusion: satisfaction score alone does not track churn in this dataset; the churn rate is almost flat across scores."
       },
       {
-        "chunk_id": "kaggle_segment_complain_1#0000",
-        "score": 0.0157,
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.0161,
         "header_path": "",
-        "text": "# Churn segment card: Complain = 1\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Complaint filed. Segment: Complain = 1.\n\n- Customers in segment: 2,044 (20.4% of 10,000 customers)\n- Churned customers (Exited = 1): 2,034\n- Churn rate: 99.5% (overall churn rate: 20.4%)\n- Mean balance: 91,149.87\n- Mean estimated salary: 101,507.77\n- Mean credit score: 645.4\n- Mean age: 44.8\n- Mean loyalty points earned: 605.2\n\nIn plain language: customers with Complain = 1 left the bank at a rate of 99.5%, which is 4.88 times the overall churn rate (higher)."
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
       },
       {
-        "chunk_id": "kaggle_segment_complain_0#0000",
-        "score": 0.0157,
+        "chunk_id": "kaggle_segment_satisfaction_score_1#0000",
+        "score": 0.0142,
         "header_path": "",
-        "text": "# Churn segment card: Complain = 0\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Complaint filed. Segment: Complain = 0.\n\n- Customers in segment: 7,956 (79.6% of 10,000 customers)\n- Churned customers (Exited = 1): 4\n- Churn rate: 0.1% (overall churn rate: 20.4%)\n- Mean balance: 72,718.52\n- Mean estimated salary: 99,726.06\n- Mean credit score: 651.9\n- Mean age: 37.4\n- Mean loyalty points earned: 606.8\n\nIn plain language: customers with Complain = 0 left the bank at a rate of 0.1%, which is 0.00 times the overall churn rate (lower)."
+        "text": "# Churn segment card: Satisfaction Score = 1\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 1.\n\n- Customers in segment: 1,932 (19.3% of 10,000 customers)\n- Churned customers (Exited = 1): 387\n- Churn rate: 20.0% (overall churn rate: 20.4%)\n- Mean balance: 77,707.53\n- Mean estimated salary: 100,226.04\n- Mean credit score: 652.4\n- Mean age: 39.2\n- Mean loyalty points earned: 608.6\n\nIn plain language: customers with Satisfaction Score = 1 left the bank at a rate of 20.0%, which is about the same as the overall churn rate."
+      },
+      {
+        "chunk_id": "kaggle_segment_satisfaction_score_5#0000",
+        "score": 0.014,
+        "header_path": "",
+        "text": "# Churn segment card: Satisfaction Score = 5\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 5.\n\n- Customers in segment: 2,004 (20.0% of 10,000 customers)\n- Churned customers (Exited = 1): 397\n- Churn rate: 19.8% (overall churn rate: 20.4%)\n- Mean balance: 77,134.30\n- Mean estimated salary: 98,301.33\n- Mean credit score: 650.0\n- Mean age: 39.1\n- Mean loyalty points earned: 599.7\n\nIn plain language: customers with Satisfaction Score = 5 left the bank at a rate of 19.8%, which is about the same as the overall churn rate."
       }
     ]
   },
@@ -331,12 +331,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "answer": "No lo sé.",
+    "answer": "No lo sé y no puedo verificarlo.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.53,
+    "latency_s": 0.69,
     "error": "",
     "retrieved_chunks": []
   },
@@ -346,7 +346,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "answer": "El tipo de tarjeta con la tasa de cancelación (*churn rate*) más alta es el DIAMOND, con un 21.8% [kaggle_summary_card_type]. \n\nEl tipo de tarjeta con la mayor cantidad media de puntos de fidelidad ganados (*mean points*) es el PLATINUM, con 608.8 puntos [kaggle_summary_card_type].",
+    "answer": "Basándonos en el conjunto de datos de Kaggle \"Bank Customer Churn\":\n\n* El tipo de tarjeta con la **tasa de abandono (churn rate) más alta** es **DIAMOND**, con un 21.8% [kaggle_summary_card_type].\n* El tipo de tarjeta con el **mayor promedio de puntos de fidelidad ganados** (mean loyalty points) es **PLATINUM**, con 608.8 puntos [kaggle_summary_card_type].",
     "retrieved_doc_ids": [
       "kaggle_summary_card_type",
       "kaggle_segment_card_type_silver",
@@ -358,7 +358,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 0.89,
+    "latency_s": 2.4,
     "error": "",
     "retrieved_chunks": [
       {
@@ -393,7 +393,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "answer": "Basándonos en el contexto proporcionado:\n\n* El tipo de tarjeta con la mayor tasa de deserción (churn rate) es **DIAMOND**, con un 21.8% [kaggle_summary_card_type].\n* El tipo de tarjeta con la mayor media de puntos de fidelidad obtenidos (mean loyalty points earned / mean points) es **PLATINUM**, con un promedio de 608.8 puntos [kaggle_segment_card_type_platinum, kaggle_summary_card_type].",
+    "answer": "El tipo de tarjeta con la tasa de cancelación (*churn rate*) más alta es **DIAMOND**, con un 21.8% [kaggle_summary_card_type].\n\nEl tipo de tarjeta con la mayor cantidad media de puntos de fidelidad ganados es **PLATINUM**, con una media de 608.8 puntos [kaggle_segment_card_type_platinum].",
     "retrieved_doc_ids": [
       "kaggle_segment_card_type_silver",
       "kaggle_segment_card_type_platinum",
@@ -401,11 +401,12 @@
       "kaggle_segment_card_type_gold"
     ],
     "cited_ids": [
-      "kaggle_summary_card_type"
+      "kaggle_summary_card_type",
+      "kaggle_segment_card_type_platinum"
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.42,
+    "latency_s": 17.16,
     "error": "",
     "retrieved_chunks": [
       {
@@ -440,12 +441,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "answer": "No tengo información suficiente para verificar qué grupo de edad tiene la tasa de abandono más alta en el conjunto de datos de Kaggle sobre la deserción de clientes bancarios.",
+    "answer": "No lo sé o no se puede verificar.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.54,
+    "latency_s": 0.49,
     "error": "",
     "retrieved_chunks": []
   },
@@ -455,7 +456,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "answer": "El grupo de edad con la tasa de cancelación (*churn rate*) más alta es el de 50-59 años, con una tasa del 56.0% [kaggle_summary_age_band, kaggle_segment_age_band_50-59].",
+    "answer": "El grupo de edad con la tasa de cancelación (churn) más alta es el de 50-59 años, con una tasa del 56,0% [kaggle_summary_age_band, kaggle_segment_age_band_50-59].",
     "retrieved_doc_ids": [
       "kaggle_summary_age_band",
       "kaggle_segment_age_band_60plus",
@@ -465,7 +466,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 9.72,
+    "latency_s": 1.36,
     "error": "",
     "retrieved_chunks": [
       {
@@ -500,7 +501,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "answer": "El grupo de edad con la tasa de abandono (*churn rate*) más alta es el de **50-59** años, con una tasa del 56.0% [kaggle_summary_age_band].",
+    "answer": "El grupo de edad (age band) con la tasa de cancelación (churn rate) más alta es el de 50 a 59 años (50-59), con una tasa del 56.0% [kaggle_summary_age_band].",
     "retrieved_doc_ids": [
       "kaggle_summary_age_band",
       "kaggle_segment_age_band_60plus",
@@ -512,7 +513,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 12.45,
+    "latency_s": 13.64,
     "error": "",
     "retrieved_chunks": [
       {
@@ -547,12 +548,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
-    "answer": "No sé la respuesta y no puedo verificarla.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.85,
+    "latency_s": 9.84,
     "error": "",
     "retrieved_chunks": []
   },
@@ -562,19 +563,17 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
-    "answer": "No lo sé porque el contexto es insuficiente [kaggle_overview, kaggle_summary_geography_x_is_active_member, kaggle_summary_num_of_products, kaggle_summary_satisfaction_score]. El contexto proporciona la tasa de churn segmentada por geografía y miembro activo (Alemania / 0 con 41,1% y Alemania / 1 con 23,7%) [kaggle_summary_geography_x_is_active_member], pero no ofrece una cifra combinada o total exclusivamente para todos los clientes de Alemania.",
+    "answer": "No lo sé porque el contexto es insuficiente [kaggle_overview, kaggle_summary_geography_x_is_active_member, kaggle_summary_num_of_products, kaggle_summary_satisfaction_score]. El contexto proporciona la tasa de churn desglosada por país y miembro activo (Alemania / 0 con 41.1% y Alemania / 1 con 23.7%), pero no ofrece una cifra global combinada únicamente para el total de clientes de Alemania.",
     "retrieved_doc_ids": [
       "kaggle_overview",
       "kaggle_summary_geography_x_is_active_member",
       "kaggle_summary_num_of_products",
       "kaggle_summary_satisfaction_score"
     ],
-    "cited_ids": [
-      "kaggle_summary_geography_x_is_active_member"
-    ],
+    "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 33.83,
+    "latency_s": 0.74,
     "error": "",
     "retrieved_chunks": [
       {
@@ -613,13 +612,13 @@
     "retrieved_doc_ids": [
       "kaggle_segment_geography_germany",
       "kaggle_segment_geography_x_num_of_products_germany_3",
-      "kaggle_overview",
-      "kaggle_summary_geography"
+      "kaggle_summary_geography",
+      "kaggle_segment_geography_x_num_of_products_germany_2"
     ],
     "cited_ids": [],
     "refused": false,
     "route": "filter {'$and': [{'source_type': {'$in': ['dataset_stats']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
-    "latency_s": 0.95,
+    "latency_s": 3.41,
     "error": "",
     "retrieved_chunks": [
       {
@@ -635,16 +634,16 @@
         "text": "# Churn segment card: Geography = Germany and NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Germany and NumOfProducts = 3.\n\n- Customers in segment: 96 (1.0% of 10,000 customers)\n- Churned customers (Exited = 1): 86\n- Churn rate: 89.6% (overall churn rate: 20.4%)\n- Mean balance: 121,572.67\n- Mean estimated salary: 106,681.52\n- Mean credit score: 653.7\n- Mean age: 43.7\n- Mean loyalty points earned: 623.7\n\nIn plain language: customers with Geography = Germany and NumOfProducts = 3 left the bank at a rate of 89.6%, which is 4.40 times the overall churn rate (higher)."
       },
       {
-        "chunk_id": "kaggle_overview#0000",
-        "score": 0.0152,
-        "header_path": "",
-        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
-      },
-      {
         "chunk_id": "kaggle_summary_geography#0000",
         "score": 0.0152,
         "header_path": "",
         "text": "# Churn rate by Geography\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France | 5,014 | 811 | 16.2% | 62,092.64 | 607.2 |\n| Germany | 2,509 | 814 | 32.4% | 119,730.12 | 610.2 |\n| Spain | 2,477 | 413 | 16.7% | 61,818.15 | 601.4 |\n\nIn plain language: by geography, the highest churn rate is 32.4% (Germany) and the lowest is 16.2% (France)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_x_num_of_products_germany_2#0000",
+        "score": 0.0149,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Germany and NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Germany and NumOfProducts = 2.\n\n- Customers in segment: 1,040 (10.4% of 10,000 customers)\n- Churned customers (Exited = 1): 126\n- Churn rate: 12.1% (overall churn rate: 20.4%)\n- Mean balance: 119,341.25\n- Mean estimated salary: 100,832.06\n- Mean credit score: 651.5\n- Mean age: 38.3\n- Mean loyalty points earned: 606.2\n\nIn plain language: customers with Geography = Germany and NumOfProducts = 2 left the bank at a rate of 12.1%, which is 0.59 times the overall churn rate (lower)."
       }
     ]
   },
@@ -659,7 +658,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.71,
+    "latency_s": 1.01,
     "error": "",
     "retrieved_chunks": []
   },
@@ -669,7 +668,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "Basándose en el estudio de arXiv, los autores encontraron que la red neuronal artificial (ANN) fue el clasificador superior (junto con el bosque aleatorio en términos de rendimiento general, pero destacando por no presentar problemas graves de sobreajuste y ser robusto ante valores atípicos) [arxiv_2301_13099, arxiv_2301_13099]. En concreto, la estructura de la ANN que sobresale sobre otros clasificadores consiste en cinco nodos en una sola capa oculta [arxiv_2301_13099].",
+    "answer": "Basándose en el estudio de arXiv, los autores encontraron que la estructura de red neuronal artificial (ANN, por sus siglas en inglés) con cinco nodos en una sola capa oculta sobresale sobre los demás clasificadores para distinguir a los clientes que han abandonado el servicio [arxiv_2301_13099].",
     "retrieved_doc_ids": [
       "arxiv_2301_13099",
       "arxiv_2301_13099",
@@ -681,7 +680,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.78,
+    "latency_s": 4.33,
     "error": "",
     "retrieved_chunks": [
       {
@@ -716,7 +715,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "Según el estudio, la red neuronal artificial (ANN) con una estructura de cinco nodos en una sola capa oculta fue el modelo que destacó sobre los demás clasificadores para distinguir a los clientes que abandonan el banco [arxiv_2301_13099].",
+    "answer": "Basándonos en el estudio, la red neuronal artificial (ANN) demostró ser uno de los modelos superiores en términos de rendimiento general [arxiv_2301_13099], y la estructura de ANN con cinco nodos en una sola capa oculta sobresale sobre los demás clasificadores para distinguir a los clientes que han abandonado el banco [arxiv_2301_13099].",
     "retrieved_doc_ids": [
       "arxiv_2301_13099",
       "arxiv_2301_13099",
@@ -728,7 +727,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['paper']}}",
-    "latency_s": 1.99,
+    "latency_s": 5.64,
     "error": "",
     "retrieved_chunks": [
       {
@@ -751,7 +750,7 @@
       },
       {
         "chunk_id": "arxiv_2301_13099#0015",
-        "score": 0.0146,
+        "score": 0.0148,
         "header_path": "Discussion (excerpt)",
         "text": ". 1, A. 2) to distinguish churned customers. Accordingly, decision trees can be considered as the second best model because it doesn’t reveal overfitting issues which random forest is facing. One advantage of decision trees is that unlike ANN it enables us to rank variables in terms of their contribution to the classification procedure (Figure A. 2). Depending on the context of application, banks might also be interested in this piece of information, making decision trees a better candidate for the prediction"
       }
@@ -763,12 +762,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "El artículo propone una arquitectura basada en **FT-Transformer (Feature Tokenizer Transformer)** combinada con **conjuntos de apilamiento (stacking ensembles)**. \n\nRespecto a los problemas de investigaciones anteriores, el artículo señala que estas solían depender de modelos tradicionales basados en árboles (como XGBoost o Random Forest) que no aprovechan adecuadamente las representaciones de características profundas, o bien utilizaban redes neuronales estándar que no manejan de forma óptima los datos tabulares estructurados heterogéneos.",
+    "answer": "No sé la respuesta o no puedo verificarla.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.42,
+    "latency_s": 14.85,
     "error": "",
     "retrieved_chunks": []
   },
@@ -778,7 +777,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "El contexto proporcionado no contiene información sobre la arquitectura propuesta ni sobre los problemas de investigaciones anteriores que dice abordar [arxiv_2606_07582]. Por lo tanto, no lo sé porque el contexto es insuficiente.",
+    "answer": "No lo sé porque el contexto es insuficiente [arxiv_2606_07582].",
     "retrieved_doc_ids": [
       "arxiv_2606_07582",
       "arxiv_2606_07582",
@@ -790,7 +789,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.12,
+    "latency_s": 0.91,
     "error": "",
     "retrieved_chunks": [
       {
@@ -825,7 +824,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "El artículo propone una arquitectura híbrida validada que integra transformadores tokenizados por características (FT-Transformer) con árboles impulsados por gradiente mediante un ensamblaje consciente de la calibración [arxiv_2606_07582]. Esta estructura aborda brechas persistentes en la validación estadística, la calibración de probabilidades y la reproducibilidad encontradas en investigaciones anteriores [arxiv_2606_07582].",
+    "answer": "El artículo propone una arquitectura híbrida validada que integra transformadores tokenizados por características (FT-Transformer) con árboles impulsados por gradiente mediante apilamiento consciente de la calibración [arxiv_2606_07582]. Esta propuesta aborda las brechas persistentes en la validación estadística, la calibración de probabilidades y la reproducibilidad encontradas en investigaciones anteriores [arxiv_2606_07582].",
     "retrieved_doc_ids": [
       "arxiv_2606_07582",
       "arxiv_2606_07582",
@@ -837,12 +836,12 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['paper']}}",
-    "latency_s": 4.36,
+    "latency_s": 2.56,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "arxiv_2606_07582#0033",
-        "score": 0.0163,
+        "score": 0.016,
         "header_path": "CONCLUSION (excerpt)",
         "text": "Full paper: https://arxiv.org/abs/2606.07582"
       },
@@ -854,7 +853,7 @@
       },
       {
         "chunk_id": "arxiv_2606_07582#0003",
-        "score": 0.0153,
+        "score": 0.0154,
         "header_path": "Abstract",
         "text": ". This study introduces a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking. The proposed framework addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research. The FT-Transformer captures higher-order feature interactions using self-attention, while XGBoost captures gradient-boosted decision boundaries with complementary inductive biases"
       },
@@ -872,12 +871,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "answer": "No lo sé.",
+    "answer": "Bajo el Reglamento (UE) 2015/751, los Estados miembros pueden permitir un límite máximo fijo de **0,05 euros** (5 céntimos de euro) por transacción para las operaciones nacionales con tarjeta de débito, en lugar del límite porcentual.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.42,
+    "latency_s": 8.29,
     "error": "",
     "retrieved_chunks": []
   },
@@ -897,7 +896,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.7,
+    "latency_s": 1.02,
     "error": "",
     "retrieved_chunks": [
       {
@@ -944,7 +943,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['regulation', 'regulator_guide']}}",
-    "latency_s": 1.01,
+    "latency_s": 0.72,
     "error": "",
     "retrieved_chunks": [
       {
@@ -955,7 +954,7 @@
       },
       {
         "chunk_id": "eurlex_32015r0751#0032",
-        "score": 0.0156,
+        "score": 0.0157,
         "header_path": "",
         "text": ". It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level within each payment card scheme. Furthermore it should be possible to define a lower per transaction percentage interchange fee cap, and to impose a fixed maximum fee amount as a limit to the fee amount resulting from the applicable per transaction percentage rate."
       },
@@ -966,10 +965,10 @@
         "text": ". This per transaction interchange fee may also be combined with a maximum percentage rate of no more than 0,2 %, provided always that the sum of interchange fees of the payment card scheme does not exceed 0,2 % of the total annual transaction value of the domestic debit card transactions within each payment card scheme."
       },
       {
-        "chunk_id": "eurlex_32015r0751#0041",
-        "score": 0.015,
+        "chunk_id": "eurlex_32015r0751#0034",
+        "score": 0.0152,
         "header_path": "",
-        "text": ". Therefore, by way of exception and during a transition period of 18 months after the entry into force of this Regulation, Member States should be able to define a maximum share of domestic ‘universal cards’ payment transactions which are considered as being equivalent to credit card transactions. For example, the credit card cap could be applied to the defined share of the total value of the transactions for merchants or acquirers"
+        "text": ". Therefore, during a reasonable transition period, in relation to domestic debit card transactions, Member States should be able to apply to all domestic debit card transactions within each payment card scheme a weighted average interchange fee of no more than the 0,2 % of the annual average transaction value of all domestic debit card transactions within each payment card scheme"
       }
     ]
   },
@@ -979,12 +978,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "No sé la respuesta.",
+    "answer": "No dispongo de datos actualizados de Eurostat para proporcionar esta información de manera precisa.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.36,
+    "latency_s": 4.61,
     "error": "",
     "retrieved_chunks": []
   },
@@ -994,7 +993,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "Según Eurostat, el porcentaje de personas que utilizaron la banca por internet en Alemania en el último año disponible (2025) fue del 70.71%, y el valor del año anterior (2024) fue del 66.92% [eurostat_isoc_ci_ac_i_de].",
+    "answer": "Según Eurostat, el porcentaje de personas que utilizaron la banca por internet en Alemania en el último año disponible (2025) fue del 70,71%, y el valor del año anterior (2024) fue del 66,92% [eurostat_isoc_ci_ac_i_de].",
     "retrieved_doc_ids": [
       "eurostat_isoc_ci_ac_i_de",
       "eurostat_isoc_ci_ac_i_fr",
@@ -1006,7 +1005,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 0.6,
+    "latency_s": 5.73,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1041,11 +1040,11 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "Según Eurostat, en el último año disponible (2025), el porcentaje de personas que utilizaron la banca por internet en Alemania fue del 70.71%, y el año anterior (2024) fue del 66.92% [eurostat_isoc_ci_ac_i_de].",
+    "answer": "Según Eurostat, en el último año disponible (2025), el porcentaje de personas que utilizaron la banca por internet en Alemania fue del 70,71% [eurostat_isoc_ci_ac_i_de]. El año anterior (2024), el valor fue del 66,92% [eurostat_isoc_ci_ac_i_de].",
     "retrieved_doc_ids": [
       "eurostat_isoc_ci_ac_i_de",
-      "ecb_germany_household_deposit_rate_up_to_1_year",
       "eurostat_earn_nt_net_de",
+      "ecb_germany_household_deposit_rate_up_to_1_year",
       "eurostat_ilc_di03_de"
     ],
     "cited_ids": [
@@ -1053,7 +1052,7 @@
     ],
     "refused": false,
     "route": "filter {'$and': [{'source_type': {'$in': ['macro_data', 'press']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
-    "latency_s": 1.16,
+    "latency_s": 0.82,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1063,16 +1062,16 @@
         "text": "# Share of individuals using internet banking in Germany (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Germany, for 2025, is 70.71%.\n\nRecent observations:\n- 2025: 70.71%\n- 2024: 66.92%\n- 2023: 57.22%\n- 2022: 48.58%"
       },
       {
+        "chunk_id": "eurostat_earn_nt_net_de#0000",
+        "score": 0.0158,
+        "header_path": "",
+        "text": "# Annual net earnings of a single person at average earnings in Germany (Eurostat)\n\nSource: Eurostat dataset earn_nt_net (Annual net earnings).\n\nThe latest available value of annual net earnings of a single person at average earnings in Germany, for 2025, is 36,535 EUR.\n\nRecent observations:\n- 2025: 36,535 EUR\n- 2024: 35,483 EUR\n- 2023: 37,908 EUR"
+      },
+      {
         "chunk_id": "ecb_germany_household_deposit_rate_up_to_1_year#0000",
         "score": 0.0157,
         "header_path": "",
         "text": "# Germany household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.DE.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in Germany (new business), for 2026-09, is 2.39%.\n\nRecent observations:\n- 2026-09: 2.39%\n- 2026-08: 2.28%\n- 2026-07: 2.22%\n- 2026-06: 2.16%\n- 2026-05: 2.00%\n- 2026-04: 1.94%"
-      },
-      {
-        "chunk_id": "eurostat_earn_nt_net_de#0000",
-        "score": 0.0155,
-        "header_path": "",
-        "text": "# Annual net earnings of a single person at average earnings in Germany (Eurostat)\n\nSource: Eurostat dataset earn_nt_net (Annual net earnings).\n\nThe latest available value of annual net earnings of a single person at average earnings in Germany, for 2025, is 36,535 EUR.\n\nRecent observations:\n- 2025: 36,535 EUR\n- 2024: 35,483 EUR\n- 2023: 37,908 EUR"
       },
       {
         "chunk_id": "eurostat_ilc_di03_de#0000",
@@ -1088,12 +1087,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "answer": "El tipo de facilidad de depósito del Banco Central Europeo (BCE) es del **3,25%**, y está en vigor desde el **23 de octubre de 2024**.",
+    "answer": "No puedo proporcionar esta información ya que es un dato financiero que cambia frecuentemente y no dispongo de datos en tiempo real para verificar el tipo de interés actual de la facilidad de depósito del BCE.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 2.5,
+    "latency_s": 1.64,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1103,44 +1102,44 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "answer": "A partir del 19 de noviembre de 2026, la tasa de facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16 de septiembre de 2026 [ecb_ecb_deposit_facility_rate].",
+    "answer": "A partir del 26-11-2026, la tasa de la facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].",
     "retrieved_doc_ids": [
       "ecb_ecb_deposit_facility_rate",
       "ecb_ecb_marginal_lending_facility_rate",
-      "ecb_press_ecb_pr261106",
-      "ecb_press_ecb_pr261106"
+      "ecb_ecb_main_refinancing_operations_rate",
+      "ecb_france_household_deposit_rate_up_to_1_year"
     ],
     "cited_ids": [
       "ecb_ecb_deposit_facility_rate"
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.48,
+    "latency_s": 4.84,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
-        "score": 0.9098,
+        "score": 0.9101,
         "header_path": "",
-        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
       },
       {
         "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
         "score": 0.8872,
         "header_path": "",
-        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
       },
       {
-        "chunk_id": "ecb_press_ecb_pr261106#0001",
-        "score": 0.8679,
+        "chunk_id": "ecb_ecb_main_refinancing_operations_rate#0000",
+        "score": 0.857,
         "header_path": "",
-        "text": "* EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%"
+        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-26, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%"
       },
       {
-        "chunk_id": "ecb_press_ecb_pr261106#0000",
-        "score": 0.8588,
+        "chunk_id": "ecb_france_household_deposit_rate_up_to_1_year#0000",
+        "score": 0.8519,
         "header_path": "",
-        "text": "# ECB publishes consolidated banking data for end-June 2026  \n* PRESS RELEASE  \n# ECB publishes consolidated banking data for end-June 2026  \n6 November 2026  \n* The aggregate of total assets of EU-headquartered credit institutions increased by 5.18%, from €33.27 trillion in June 2025 to €34.99 trillion in June 2026\n* During the same period, EU credit institutions’ aggregate non-performing loans ratio[1] increased by 0.03 percentage points year on year to stand at 1.99% in June 2026"
+        "text": "# France household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.FR.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in France (new business), for 2026-09, is 2.54%.\n\nRecent observations:\n- 2026-09: 2.54%\n- 2026-08: 2.36%\n- 2026-07: 2.38%\n- 2026-06: 2.28%\n- 2026-05: 2.22%\n- 2026-04: 2.18%"
       }
     ]
   },
@@ -1150,7 +1149,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "answer": "A fecha de 19 de noviembre de 2026, el tipo de facilidad de depósito del BCE es del 2.50% y está en vigor desde el 16 de septiembre de 2026 [ecb_ecb_deposit_facility_rate].",
+    "answer": "A fecha de 2026-11-26, el tipo de la facilidad de depósito del BCE es del 2,50% y está en vigor desde el 2026-09-16 [ecb_ecb_deposit_facility_rate].",
     "retrieved_doc_ids": [
       "ecb_ecb_deposit_facility_rate",
       "ecb_ecb_marginal_lending_facility_rate",
@@ -1162,30 +1161,30 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['macro_data', 'press']}}",
-    "latency_s": 2.05,
+    "latency_s": 0.74,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
         "score": 0.0164,
         "header_path": "",
-        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
       },
       {
         "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
         "score": 0.0161,
         "header_path": "",
-        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
       },
       {
         "chunk_id": "ecb_ecb_main_refinancing_operations_rate#0000",
-        "score": 0.0156,
+        "score": 0.0159,
         "header_path": "",
-        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-19, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%"
+        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-26, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%"
       },
       {
         "chunk_id": "ecb_france_household_deposit_rate_up_to_1_year#0000",
-        "score": 0.0142,
+        "score": 0.015,
         "header_path": "",
         "text": "# France household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.FR.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in France (new business), for 2026-09, is 2.54%.\n\nRecent observations:\n- 2026-09: 2.54%\n- 2026-08: 2.36%\n- 2026-07: 2.38%\n- 2026-06: 2.28%\n- 2026-05: 2.22%\n- 2026-04: 2.18%"
       }
@@ -1197,12 +1196,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "answer": "El Reglamento (UE) 2015/751 fija los siguientes límites a las tasas de intercambio para operaciones de pago con tarjeta de consumo: un máximo del **0,2 %** del valor de la operación para las tarjetas de débito y del **0,3 %** para las tarjetas de crédito.",
+    "answer": "El Reglamento (UE) 2015/751 sobre las tasas de intercambio limita estas tasas al **0,2 %** del valor de la operación para las tarjetas de débito de los consumidores y al **0,3 %** para las tarjetas de crédito de los consumidores.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 35.08,
+    "latency_s": 4.91,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1212,7 +1211,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "answer": "El Reglamento (UE) 2015/751 sobre las tasas de intercambio fija los siguientes límites máximos para las transacciones con tarjetas de pago personales: un 0,3% para las tarjetas de crédito y un 0,2% para las tarjetas de débito [wiki_interchange_fee].",
+    "answer": "No sé la respuesta porque el contexto es insuficiente para explicar las tasas específicas aplicadas a las transacciones de tarjetas de débito y crédito de los consumidores en el Reglamento (UE) 2015/751 [eurlex_32015r0751], a pesar de que el documento [wiki_interchange_fee] menciona límites generales del 0,3% para tarjetas de crédito y del 0,2% para tarjetas de débito [wiki_interchange_fee].",
     "retrieved_doc_ids": [
       "wiki_interchange_fee",
       "eurlex_32015r0751",
@@ -1220,11 +1219,12 @@
       "eurlex_32015r0751"
     ],
     "cited_ids": [
+      "eurlex_32015r0751",
       "wiki_interchange_fee"
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.03,
+    "latency_s": 15.41,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1259,7 +1259,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "answer": "Los proveedores de servicios de pago no deben ofrecer ni solicitar una tasa de intercambio por transacción superior al 0,2 % del valor de la operación para cualquier transacción con tarjeta de débito [eurlex_32015r0751]. \n\nEl contexto no contiene información sobre las tasas de intercambio para las transacciones con tarjeta de crédito, por lo que no lo sé debido a que el contexto es insuficiente.",
+    "answer": "No lo sé porque el contexto es insuficiente para responder sobre los límites de las tasas de intercambio para las transacciones con tarjeta de crédito, y el contexto solo menciona que los proveedores de servicios de pago no deben ofrecer ni solicitar una tasa de intercambio por transacción superior al 0,2 % del valor de la transacción para cualquier transacción con tarjeta de débito [eurlex_32015r0751].",
     "retrieved_doc_ids": [
       "eurlex_32015r0751",
       "eurlex_32015r0751",
@@ -1271,12 +1271,12 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['regulation', 'regulator_guide']}}",
-    "latency_s": 1.93,
+    "latency_s": 0.82,
     "error": "",
     "retrieved_chunks": [
       {
         "chunk_id": "eurlex_32015r0751#0104",
-        "score": 0.0161,
+        "score": 0.016,
         "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
         "text": "## CHAPTER II - INTERCHANGE FEES  \n### Article 3 - Interchange fees for consumer debit card transactions  \n1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transaction for any debit card transaction.  \n2. For domestic debit card transactions Member States may either:  \n(a) define a per transaction percentage interchange fee cap lower than the one provided for in paragraph 1 and may impose a fixed maximum fee amount as a limit on the fee amount resulting from the applicable percentage rate; or"
       },
@@ -1294,7 +1294,7 @@
       },
       {
         "chunk_id": "eurlex_32015r0751#0025",
-        "score": 0.015,
+        "score": 0.0151,
         "header_path": "",
         "text": "(19) The impact assessment shows that a prohibition of interchange fees for debit card transactions would be beneficial for card acceptance, card usage, the development of the single market and generate more benefits to merchants and consumers than a cap set at any higher level. Moreover, it would avoid negative effects resulting from a higher cap in those national schemes that have very low or zero interchange fees for debit transactions due to cross-border expansion or new market entrants increasing fee levels to the level of the cap"
       }
@@ -1306,12 +1306,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No lo sé, ya que el conjunto de datos \"Kaggle Bank Customer Churn\" incluye típicamente a clientes de Francia, España y Alemania, pero no de Portugal.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.03,
+    "latency_s": 1.12,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1321,7 +1321,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No lo sé porque el contexto es insuficiente (el contexto solo cubre Francia, Alemania y España) [kaggle_overview].",
+    "answer": "No sé la respuesta porque el contexto no contiene información sobre clientes en Portugal; solo cubre Francia, Alemania y España [kaggle_overview].",
     "retrieved_doc_ids": [
       "kaggle_overview",
       "kaggle_summary_geography_x_is_active_member",
@@ -1333,7 +1333,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 0.73,
+    "latency_s": 1.16,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1368,19 +1368,17 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No lo sé porque el contexto no contiene información sobre Portugal y es insuficiente [kaggle_overview].",
+    "answer": "No lo sé porque el contexto es insuficiente [kaggle_segment_geography_spain, kaggle_overview, kaggle_segment_has_cr_card_0, kaggle_summary_geography_x_is_active_member].",
     "retrieved_doc_ids": [
       "kaggle_segment_geography_spain",
       "kaggle_overview",
       "kaggle_segment_has_cr_card_0",
       "kaggle_summary_geography_x_is_active_member"
     ],
-    "cited_ids": [
-      "kaggle_overview"
-    ],
+    "cited_ids": [],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 16.04,
+    "latency_s": 0.62,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1415,12 +1413,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
-    "answer": "No tengo información suficiente para responder a esta pregunta.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.67,
+    "latency_s": 3.14,
     "error": "",
     "retrieved_chunks": []
   },

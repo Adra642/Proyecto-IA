@@ -7,7 +7,7 @@ Presentación: **viernes 27 de noviembre de 2026**. Según el plan, son **cuatro
 ### Parte 1: captura de datos y pipeline (fase A) · ~6 min
 Idea fuerza: *"Un comando reconstruye un corpus multifuente, multiformato y multilingüe, y convierte el CSV en conocimiento."*
 1. El problema: un LLM no conoce nuestras cifras ni datos recientes. (Ejemplo D1: sin RAG "no lo sé", con RAG 32,4 %.)
-2. Las 13 fuentes (tabla de `02`), 5 formatos, 4 idiomas, 178 documentos.
+2. Las 13 fuentes (tabla de `02`), 5 formatos, 4 idiomas, 174 documentos.
 3. Robustez: caché, reintentos, `robots.txt`, límite de ritmo, fallo aislado, idempotencia (`diff -r` vacío).
 4. **La decisión clave**: no indexar filas; pandas calcula estadísticas y las escribe como fichas; `stats.json`.
 5. Privacidad: PII eliminada antes de crear documentos; verificación automática.
@@ -119,7 +119,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 ## 5. Tarjetas de cifras (una por persona)
 
 - **Datos**: 10.000 clientes · 20,4 % de churn · Alemania 32,4 % · 4 productos 100 % · 99,8 % de quienes se fueron se habían quejado.
-- **Corpus**: 13 fuentes · 178 documentos · 399.000 palabras · 4 idiomas.
+- **Corpus**: 13 fuentes · 174 documentos · 282.000 palabras · 4 idiomas.
 - **Índice**: 6.309 trozos · 600/90 · 384 dimensiones · 5 min en frío · 1 s sin cambios.
 - **Experimento de tamaño**: MRR 0,781 (300), 0,794 (600), 0,836 (1000 y fijo) · contexto top-5 2.128 / 2.568 / 2.975 caracteres.
 - **Evaluación**: 14 preguntas · D: 0,00 → 0,83 → 1,00 de cifras correctas · R: 0,25 → 0,75 → 0,62.
