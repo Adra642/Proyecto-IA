@@ -100,6 +100,12 @@ Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya 
 
 Latencia mediana: 1,6 s sin RAG, 1,9 s con RAG y 1,8 s con RAG avanzado.
 
+Qué significa cada columna:
+- **Cifras correctas:** la respuesta contiene la cifra de referencia, con una tolerancia pequeña.
+- **hit@4:** de los 4 trozos que el buscador entrega al modelo, ¿al menos uno es de un documento de referencia (el que contiene la respuesta)? Vale 1,00 si siempre ocurre y 0,00 si nunca. Mide solo la **búsqueda**, no la respuesta del modelo; por eso no aplica a *sin RAG*, que no recupera nada.
+- **Cita correcta:** la respuesta cita (`[doc_id]`) al menos un documento de referencia.
+- **Comportamiento:** en las preguntas U, el modelo se abstiene o rechaza cuando toca.
+
 Cómo leerlo:
 - **D:** sin RAG el modelo apenas conoce las cifras (responde "no lo sé"; el 0,12 es una cifra suelta acertada en D2, una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
 - **L:** con RAG recupera y cita el paper correcto; sin RAG dice que no puede verificarlo.
@@ -110,16 +116,7 @@ Cómo leerlo:
 
 Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada país"; con RAG, "Alemania 32,4 %, Francia 16,2 %, España 16,7 % [kaggle_summary_geography]".
 
-## 6. Limitaciones (decirlas antes de que las pregunten)
-
-1. **15 preguntas** (13 de recuperación con fuentes de referencia): sirve como demostración y diagnóstico, no como estadística. Con 13 preguntas una vale 0,077.
-2. **Una ejecución por pregunta** y Gemini 3.5 ignora `temperature`: hay variabilidad no medida (por ejemplo, una cita que cambia entre ejecuciones con la misma recuperación).
-3. El **prompt sin RAG permite abstenerse**: es una línea base honesta, pero un modelo obligado a responder alucinaría más.
-4. **No hay puntuación manual** (decisión del equipo): todas las métricas son automáticas. Las referencias de L1/L2 sí están verificadas por una persona.
-5. Groq no se ha probado con llamadas reales. Las cifras de la evaluación son de Gemini; con DeepSeek la línea base sin RAG sería más fuerte en las preguntas D.
-6. No se mide el consumo de tokens (`LLMClient` devuelve solo texto).
-
-## 7. Preguntas probables
+## 6. Preguntas probables
 
 - *¿Cómo sabéis que la mejora es del RAG y no del modelo?* Mismo modelo y mismas preguntas; lo único que cambia es el contexto recuperado.
 - *¿Y si el modelo ya sabía la respuesta?* Las preguntas que la línea base respondía bien (R1 y R2 originales, y los topes de intercambio) se sustituyeron por otras más específicas; las nuevas (R4 a R6) son datos que el modelo no puede conocer.

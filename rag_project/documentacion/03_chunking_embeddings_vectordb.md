@@ -49,7 +49,7 @@ Métricas (a nivel de chunk):
 - **hit@k**: ¿alguno de los k primeros trozos pertenece a un documento correcto?
 - **MRR** (*mean reciprocal rank*): media de 1/posición del primer trozo correcto. Vale 1 si siempre es el primero.
 
-Resultados (13 preguntas con fuentes de referencia, corpus final de 176 documentos; `eval/chunking_results.csv`):
+Resultados (13 preguntas con fuentes de referencia, corpus final de 177 documentos; `eval/chunking_results.csv`):
 
 | Variante | Chunks | Caracteres medios | hit@1 | hit@3 | hit@5 | MRR | Contexto top-5 (caracteres) |
 |---|---|---|---|---|---|---|---|
