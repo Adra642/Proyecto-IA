@@ -247,3 +247,10 @@ Hugging Face Spaces is no longer part of the project: removed the "why not Space
 - New sources: Banque de France *aide a la mobilite bancaire*, Verbraucherzentrale *Kontowechselservice* (b8), Commission report on the Payment Accounts Directive COM(2023) 249 (a6). Rejected: the 2012 EC bank-switching study (HTTP 403 for our crawler, not circumvented), the BdF opinion page (only a PDF link), commercial finance sites.
 - Corpus: 174 documents, 282k words. Index: 4,473 chunks (was 6,431). Evaluation re-run (42 answers, 0 failed): D rag hit@1 0.50 to 0.67, D advanced 0.67 to 0.83, numeric match unchanged for RAG modes.
 - The chunk-size experiment in the README was measured on the earlier 6,309-chunk corpus and was not repeated.
+
+### Data quality, round 3 (2026-11-26)
+- Added: EBA Consumer Trends Report 2024/25 (b6; the page that could not be found at Stage 1 is now located), ECB SPACE 2024 payment-attitudes study (b5), Bundesbank *Zahlungsverhalten in Deutschland 2023* (b8, German), CCSF *bilan de la reforme de la mobilite bancaire* 2018 (b8, French), World Bank bank-branch density and internet use (b3), arXiv *Beyond Churn* 2608.30364 (a3).
+- arXiv curated with the new `exclude_ids` / `include_ids` options: 9 off-topic papers removed (lending sectors, bank-marketing, generic XAI, synthetic data, telecom federated learning); 11 remain.
+- Cleaning: PDF dot leaders (table-of-contents `.....` and `.�.�`) are removed in `normalize_text` (test added).
+- Not added: Flash Eurobarometer 509 (no official PDF reachable; only a third-party copy), the 2012 EC bank-switching study (HTTP 403 for our crawler), Banco de Espana stability reports (macroprudential, not customer behaviour).
+- Corpus: 176 documents, 311k words, 4,499 chunks, 4 languages. Evaluation re-run: 42 answers, 0 failed; scores unchanged versus round 2 (the 14 questions do not exercise the new sources).

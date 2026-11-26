@@ -76,7 +76,7 @@ class BdeFetcher(HtmlPageFetcher):
 
 @register_fetcher("b5")
 class HfcsFetcher(HtmlPageFetcher):
-    """ECB Household Finance and Consumption Survey pages and reports."""
+    """ECB household surveys: HFCS (wealth) and SPACE (payment attitudes)."""
 
     source_name = "ecb_hfcs"
     default_source_type = "macro_data"

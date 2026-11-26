@@ -133,23 +133,34 @@ class ArxivFetcher(BaseFetcher):
     source_name = "arxiv"
 
     def _search(self, query: str, per_query: int) -> bytes:
-        params = {
-            "search_query": query,
-            "max_results": per_query,
-            "sortBy": "relevance",
-            "sortOrder": "descending",
-        }
+        params: dict[str, str | int]
+        if query.startswith("id:"):  # explicit papers chosen by the team (``include_ids``)
+            params = {"id_list": query[3:], "max_results": per_query}
+        else:
+            params = {
+                "search_query": query,
+                "max_results": per_query,
+                "sortBy": "relevance",
+                "sortOrder": "descending",
+            }
         interval = float(self.options.get("api_interval_seconds", 3.0))
         return self.get(API, params=params, check_robots=False, min_interval=interval).content
 
     def _items(self) -> list[FetchItem]:
         per_query = int(self.option("per_query"))
         groups: list[list[ArxivEntry]] = []
-        for query in self.option("queries"):
+        extra = (
+            [f"id:{','.join(self.options['include_ids'])}"]
+            if self.options.get("include_ids")
+            else []
+        )
+        for query in [*self.option("queries"), *extra]:
             payload = self.cache.get_or_fetch(
                 f"arxiv-search:{query}:{per_query}", "xml", partial(self._search, query, per_query)
             )
             groups.append(parse_atom(payload.text()))
+        excluded = {str(i) for i in self.options.get("exclude_ids", [])}
+        groups = [[e for e in g if e.arxiv_id not in excluded] for g in groups]
         papers = round_robin(groups, int(self.option("max_papers")))
         return [FetchItem(f"arxiv:{p.arxiv_id}", "pdf", params=asdict(p)) for p in papers]
 

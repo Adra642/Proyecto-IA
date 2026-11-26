@@ -99,10 +99,16 @@ def strip_html_and_convert(doc: Document) -> Document:
     return doc.model_copy(update={"text": html_to_markdown(doc.text, doc.metadata.title)})
 
 
+# PDF tables of contents: runs of dot leaders, sometimes extracted as ".\ufffd.\ufffd" (replacement
+# characters). They carry no information and waste embedding tokens.
+_LEADERS = re.compile(r"(?:[.\u2026\u00b7\ufffd][ ]?){5,}")
+
+
 def normalize_text(text: str) -> str:
     """Normalize unicode and whitespace (idempotent), keeping Markdown structure."""
     text = unicodedata.normalize("NFC", text).translate(_ZERO_WIDTH)
     text = text.replace("\u00a0", " ").replace("\r\n", "\n").replace("\r", "\n")
+    text = _LEADERS.sub(" ", text)
     lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.split("\n")]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip() + "\n"
 

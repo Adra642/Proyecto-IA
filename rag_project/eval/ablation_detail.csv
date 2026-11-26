@@ -1,7 +1,7 @@
 config,id,gold_rank
 vector,D1,3
 vector,D2,1
-vector,D3,2
+vector,D3,1
 vector,D4,1
 vector,D5,1
 vector,D6,5
@@ -13,7 +13,7 @@ vector,R3,1
 vector,R4,2
 +hybrid,D1,1
 +hybrid,D2,1
-+hybrid,D3,2
++hybrid,D3,1
 +hybrid,D4,3
 +hybrid,D5,1
 +hybrid,D6,1
@@ -25,7 +25,7 @@ vector,R4,2
 +hybrid,R4,1
 +rerank (TinyBERT),D1,1
 +rerank (TinyBERT),D2,1
-+rerank (TinyBERT),D3,4
++rerank (TinyBERT),D3,1
 +rerank (TinyBERT),D4,1
 +rerank (TinyBERT),D5,1
 +rerank (TinyBERT),D6,2
@@ -37,7 +37,7 @@ vector,R4,2
 +rerank (TinyBERT),R4,1
 +filters (hybrid),D1,1
 +filters (hybrid),D2,1
-+filters (hybrid),D3,2
++filters (hybrid),D3,1
 +filters (hybrid),D4,3
 +filters (hybrid),D5,1
 +filters (hybrid),D6,1
@@ -49,7 +49,7 @@ vector,R4,2
 +filters (hybrid),R4,1
 +filters+rerank (TinyBERT),D1,1
 +filters+rerank (TinyBERT),D2,1
-+filters+rerank (TinyBERT),D3,4
++filters+rerank (TinyBERT),D3,1
 +filters+rerank (TinyBERT),D4,1
 +filters+rerank (TinyBERT),D5,1
 +filters+rerank (TinyBERT),D6,2
@@ -61,8 +61,8 @@ vector,R4,2
 +filters+rerank (TinyBERT),R4,1
 rerank MiniLM-L-12,D1,2
 rerank MiniLM-L-12,D2,2
-rerank MiniLM-L-12,D3,2
-rerank MiniLM-L-12,D4,1
+rerank MiniLM-L-12,D3,1
+rerank MiniLM-L-12,D4,3
 rerank MiniLM-L-12,D5,1
 rerank MiniLM-L-12,D6,4
 rerank MiniLM-L-12,L1,1
@@ -73,13 +73,13 @@ rerank MiniLM-L-12,R3,1
 rerank MiniLM-L-12,R4,1
 rerank MultiBERT-L-12,D1,
 rerank MultiBERT-L-12,D2,4
-rerank MultiBERT-L-12,D3,5
-rerank MultiBERT-L-12,D4,
+rerank MultiBERT-L-12,D3,
+rerank MultiBERT-L-12,D4,5
 rerank MultiBERT-L-12,D5,
-rerank MultiBERT-L-12,D6,
+rerank MultiBERT-L-12,D6,3
 rerank MultiBERT-L-12,L1,1
 rerank MultiBERT-L-12,L2,1
 rerank MultiBERT-L-12,R1,1
-rerank MultiBERT-L-12,R2,1
+rerank MultiBERT-L-12,R2,2
 rerank MultiBERT-L-12,R3,
 rerank MultiBERT-L-12,R4,1

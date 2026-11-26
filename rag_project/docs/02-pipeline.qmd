@@ -23,7 +23,7 @@ flowchart LR
   D --> W
   C --> W[Escritura<br/>Markdown con front matter]
   W --> V[Comprobación de PII]
-  V --> O[(data/processed<br/>174 documentos)]
+  V --> O[(data/processed<br/>176 documentos)]
 ```
 
 ## Diseño de los *fetchers*

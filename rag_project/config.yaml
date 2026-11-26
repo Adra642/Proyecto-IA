@@ -68,6 +68,8 @@ sources:
       - "all:customer AND all:attrition AND all:banking"
       - "all:explainable AND all:churn AND all:SHAP"
       - "all:complaints AND all:churn AND all:bank"
+    include_ids: ["2608.30364"]   # Beyond Churn: partial outflows in retail banking
+    exclude_ids: ["1504.02018", "2011.13429", "2412.13350", "2511.17590", "2512.19557", "2607.11269", "1503.04344", "2603.05024", "2609.12470"]   # off-topic: lending sectors, generic XAI/ML, telecom, marketing
     per_query: 10
     max_papers: 25
     section_max_chars: 3000
@@ -128,6 +130,8 @@ sources:
       - {id: FP.CPI.TOTL.ZG, name: "Inflation, consumer prices", unit: "%", last: 5, topic: inflation, columns: [Balance]}
       - {id: NY.GDP.PCAP.CD, name: "GDP per capita (current US$)", unit: "US$", last: 5, topic: macro, columns: [EstimatedSalary, Balance]}
       - {id: FS.AST.PRVT.GD.ZS, name: "Domestic credit to private sector (% of GDP)", unit: "% of GDP", last: 5, topic: deposits_rates, columns: [Balance, CreditScore]}
+      - {id: FB.CBK.BRCH.P5, name: "Commercial bank branches (per 100,000 adults)", unit: "per 100,000 adults", last: 5, topic: digital_banking, columns: [IsActiveMember, Geography]}
+      - {id: IT.NET.USER.ZS, name: "Individuals using the Internet", unit: "% of population", last: 5, topic: digital_banking, columns: [IsActiveMember, Age]}
       - {id: FX.OWN.TOTL.ZS, name: "Account ownership (% of adults, Global Findex)", unit: "% of adults", last: 5, topic: banking_products, columns: [NumOfProducts, Geography]}
 
   a6:  # EU legal texts by CELEX id (EUR-Lex HTML, Cellar XHTML/PDF fallback)
@@ -158,6 +162,7 @@ sources:
     pages:
       - {url: "https://www.ecb.europa.eu/stats/ecb_surveys/hfcs/html/index.en.html", title: "Household Finance and Consumption Survey overview", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
       - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/201903_Research_Report_HFCS.pdf", format: pdf, max_chars: 60000, title: "HFCS research report", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
+      - {url: "https://www.ecb.europa.eu/stats/ecb_surveys/space/shared/pdf/ecb.space2024~19d46f0f17.en.pdf", format: pdf, max_chars: 60000, title: "ECB SPACE 2024: study on the payment attitudes of consumers in the euro area", language: en, geography: EU, topic: cards, columns: [HasCrCard, Card Type, Age]}
 
   b7:  # Credit reporting systems: CIRBE (ES), SCHUFA (DE), FICP (FR)
     enabled: true
@@ -176,6 +181,8 @@ sources:
       - {url: "https://www.bafin.de/DE/verbraucherinnen-verbraucher/themen-finanzprodukte/kredite-immobilienfinanzierung/kredite/verbraucherkreditrichtlinie/verbraucherkreditrichtlinie_node.html", title: "BaFin Verbraucherkreditrichtlinie", language: de, geography: DE, topic: credit_score, columns: [CreditScore]}
       - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/connaitre-pratiques-bancaires-assurance/compte-frais/mobilite-bancaire", title: "Banque de France aide a la mobilite bancaire", language: fr, geography: FR, topic: switching, columns: [Exited, NumOfProducts]}
       - {url: "https://www.verbraucherzentrale.de/wissen/geld-versicherungen/sparen-und-anlegen/banken-muessen-beim-kontowechsel-helfen-13051", title: "Verbraucherzentrale Kontowechselservice", language: de, geography: DE, topic: switching, columns: [Exited, NumOfProducts]}
+      - {url: "https://publikationen.bundesbank.de/caas/v1/media/934826/data/6312cbec2224e9c59bab014ccafa12ae", format: pdf, max_chars: 80000, source_type: macro_data, title: "Bundesbank Zahlungsverhalten in Deutschland 2023", language: de, geography: DE, topic: cards, columns: [HasCrCard, Card Type, Age]}
+      - {url: "https://www.banque-france.fr/system/files/import/ccsf/media/2018/09/25/ccsf_reforme_de_la_mobilite_bancaire_le_bilan_11juillet2018.pdf", format: pdf, max_chars: 60000, title: "CCSF bilan de la reforme de la mobilite bancaire (2018)", language: fr, geography: FR, topic: switching, columns: [Exited, NumOfProducts]}
       - {url: "https://www.bundesbank.de/de/service/schlichtungsstelle/schlichtungsverfahren", title: "Bundesbank Schlichtungsverfahren", language: de, geography: DE, topic: complaints, columns: [Complain]}
 
   b4:  # ECB press releases from the RSS feed (only the latest items are in the feed)
@@ -192,3 +199,4 @@ sources:
       - {url: "https://www.eba.europa.eu/activities/information-consumers", title: "EBA information for consumers", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
       - {url: "https://www.eba.europa.eu/regulation-and-policy/consumer-protection", title: "EBA consumer protection overview", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
       - {url: "https://www.eba.europa.eu/sites/default/files/document_library/Publications/Guidelines/2020/Guidelines%20on%20loan%20origination%20and%20monitoring/884283/EBA%20GL%202020%2006%20Final%20Report%20on%20GL%20on%20loan%20origination%20and%20monitoring.pdf", format: pdf, max_chars: 60000, title: "EBA final report on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}
+      - {url: "https://www.eba.europa.eu/sites/default/files/2025-03/514b651f-091b-42d3-b738-1fae79264044/Consumer%20Trends%20Report%202024-2025.pdf", format: pdf, max_chars: 80000, title: "EBA Consumer Trends Report 2024/25", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts, IsActiveMember]}
