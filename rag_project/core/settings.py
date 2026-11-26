@@ -101,6 +101,8 @@ class RetrievalSettings(BaseModel):
     rerank_enabled: bool = False  # advanced mode reranks only if true (see PROGRESS, Stage 5)
     rerank_model: str = "ms-marco-TinyBERT-L-2-v2"  # FlashRank model name
     rerank_cache_dir: Path = Path(".flashrank_cache")
+    rerank_weight: float = Field(default=1.0, ge=0.0, le=1.0)  # cross-encoder share (1 = only it)
+    rerank_with_title: bool = True  # show title and header path to the cross-encoder
 
     @model_validator(mode="after")
     def _some_weight(self) -> RetrievalSettings:

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from core.settings import Provider, Settings
+from core.settings import Provider, RetrievalSettings, Settings
 from rag.chain import RagChain
 from rag.chunking import Chunker, build_chunker
 from rag.embeddings import Embedder, build_embedder
 from rag.lexical import BM25Retriever
 from rag.llm import LLMClient, build_llm
-from rag.rerank import FlashRankReranker
+from rag.rerank import BlendedReranker, FlashRankReranker, Reranker
 from rag.retrievers import (
     HybridRetriever,
     RerankingRetriever,
@@ -28,7 +28,7 @@ class Container:
         self._embedder: Embedder | None = None
         self._store: VectorStoreRepository | None = None
         self._bm25: BM25Retriever | None = None
-        self._rerankers: dict[str, FlashRankReranker] = {}
+        self._rerankers: dict[tuple[str, bool], FlashRankReranker] = {}
 
     def llm(self, provider: Provider | None = None) -> LLMClient:
         """Return the configured LLM client, or the one of ``provider`` (no fallbacks)."""
@@ -63,20 +63,27 @@ class Container:
             )
         return self._store
 
-    def retriever(self, kind: str = "vector", rerank_model: str | None = None) -> Retriever:
+    def retriever(
+        self,
+        kind: str = "vector",
+        rerank_model: str | None = None,
+        *,
+        cfg: RetrievalSettings | None = None,
+    ) -> Retriever:
         """Build a retriever.
 
         Args:
             kind: ``vector``, ``hybrid`` (+BM25), ``hybrid_rerank`` (+FlashRank) or ``advanced``
                 (hybrid, plus reranking only when ``retrieval.rerank_enabled`` is true).
             rerank_model: FlashRank model for ``hybrid_rerank`` (default: the configured one).
+            cfg: retrieval settings to use instead of the configured ones (experiments).
 
         The BM25 index is shared between calls on the same container (it is slow to build).
         """
         vector = VectorRetriever(self.vector_store())
         if kind == "vector":
             return vector
-        cfg = self.settings.retrieval
+        cfg = cfg or self.settings.retrieval
         hybrid = HybridRetriever(
             vector,
             self._lexical(),
@@ -90,7 +97,11 @@ class Container:
         if kind == "hybrid":
             return hybrid
         if kind == "hybrid_rerank":
-            reranker = self._reranker(rerank_model or cfg.rerank_model)
+            reranker: Reranker = self._reranker(
+                rerank_model or cfg.rerank_model, cfg.rerank_with_title
+            )
+            if cfg.rerank_weight < 1.0:
+                reranker = BlendedReranker(reranker, cfg.rerank_weight, cfg.rrf_k)
             return RerankingRetriever(hybrid, reranker, cfg.candidates)
         raise ValueError(f"unknown retriever kind: {kind}")
 
@@ -99,11 +110,12 @@ class Container:
             self._bm25 = BM25Retriever(self.vector_store().all_chunks)
         return self._bm25
 
-    def _reranker(self, model_name: str) -> FlashRankReranker:
-        if model_name not in self._rerankers:
+    def _reranker(self, model_name: str, with_title: bool) -> FlashRankReranker:
+        key = (model_name, with_title)
+        if key not in self._rerankers:
             cache = self.settings.resolve(self.settings.retrieval.rerank_cache_dir)
-            self._rerankers[model_name] = FlashRankReranker(model_name, cache)
-        return self._rerankers[model_name]
+            self._rerankers[key] = FlashRankReranker(model_name, cache, with_title)
+        return self._rerankers[key]
 
     def model_id(self, provider: Provider | None = None) -> str:
         """``provider:model`` of the primary LLM (used in logs)."""

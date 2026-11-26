@@ -14,8 +14,15 @@ from eval.chunking_experiment import (
     plot,
     write_csv,
 )
-from eval.questions import Question, load_questions, retrieval_questions
-from eval.retrieval_metrics import first_gold_rank, hit_at_k, mean, reciprocal_rank
+from eval.questions import GoldNumber, Question, load_questions, retrieval_questions
+from eval.retrieval_metrics import (
+    chunk_has_fact,
+    first_gold_rank,
+    first_true_rank,
+    hit_at_k,
+    mean,
+    reciprocal_rank,
+)
 from tests.fakes import FakeEmbedder
 from tests.unit.test_index import FRANCE, GERMANY, LAW
 
@@ -109,3 +116,16 @@ def test_experiment_end_to_end_with_fakes(tmp_path: Path) -> None:
         assert [r["chunk_size"] for r in csv.DictReader(fh)] == ["200", "400"]
     assert (tmp_path / "p.png").stat().st_size > 5000
     assert ChunkingSettings(chunk_size=200, chunk_overlap=30).chunk_size == 200
+
+
+def test_first_true_rank() -> None:
+    assert first_true_rank([False, True, True]) == 2
+    assert first_true_rank([False, False]) is None and first_true_rank([]) is None
+
+
+def test_chunk_has_fact_needs_a_gold_document_and_a_gold_number() -> None:
+    nums = [GoldNumber(value=32.4, tolerance=0.05, display="32.4", percent=True)]
+    gold = {"geo"}
+    assert chunk_has_fact("geo", "Germany churn rate: 32.4%", gold, nums)
+    assert not chunk_has_fact("geo", "Germany churn rate is the highest", gold, nums)
+    assert not chunk_has_fact("other", "Germany churn rate: 32.4%", gold, nums)
