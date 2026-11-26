@@ -225,3 +225,7 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 - DeepSeek key tested: smoke test passes, `deepseek-flash` answers the three modes in Spanish through the chain, and the fallback works (gemini with an invalid key and `fallback_order: [gemini, deepseek]` answered through DeepSeek). Note: DeepSeek without RAG answered the Germany churn rate correctly (32.44%), so the dataset appears in its training data; Gemini's baseline does not know it.
 - Quarto: removed the CSS that squeezed the "En esta página" table of contents; team names in `docs/07` formatted.
 - Manual scoring removed by decision of the team (2026-11-26): `eval/manual_scoring.csv`, `export_manual`/`read_manual`/`summarize_manual`, `--summary`, the site section and the guide were deleted; evaluation is automatic only. L1/L2 verification stays pending.
+
+### Stage 7 wrap-up (2026-11-26)
+- L1 and L2 gold answers verified against the PDFs by a team member (ADRA, 2026-11-26); the `DRAFT` prefix was removed from `eval/questions.json`. The two last supporting sentences of L2 changed and both now cite p.20 (the conclusion) in `eval/literature_verification.md` (checked in the downloaded PDF).
+- The Loop URL step was dropped by the team (row removed from `docs/index.qmd`), the defence rehearsal is run by the team, and the backup demo is no longer needed. README, guide and site updated accordingly.

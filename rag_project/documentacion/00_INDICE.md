@@ -1,6 +1,6 @@
 # Guía de presentación: proyecto RAG sobre churn en banca europea
 
-> Estado: **25 de noviembre de 2026**. El sistema está completo y publicado: pipeline de datos, índice vectorial, cadena RAG con modo avanzado, evaluación, app Gradio desplegada en Google Cloud Run y sitio Quarto en GitHub Pages. Lo único pendiente es trabajo humano del equipo (ver "Pendiente del equipo").
+> Estado: **26 de noviembre de 2026**. El sistema está completo y publicado: pipeline de datos, índice vectorial, cadena RAG con modo avanzado, evaluación, app Gradio desplegada en Google Cloud Run y sitio Quarto en GitHub Pages. Las referencias L1 y L2 están verificadas contra el PDF. Solo queda el ensayo de la defensa, que hace el equipo.
 > Presentación: **viernes 27 de noviembre de 2026**.
 
 ## Enlaces
@@ -29,7 +29,7 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 | [08_decisiones_y_lecciones.md](08_decisiones_y_lecciones.md) | Decisiones con su motivo, lecciones y limitaciones | Todos |
 | [09_guion_y_preguntas_defensa.md](09_guion_y_preguntas_defensa.md) | Reparto en 4 partes, demo en vivo y preguntas probables con respuesta | Todos |
 | [10_glosario.md](10_glosario.md) | Términos técnicos en lenguaje sencillo | Todos |
-| [11_verificacion_L1_L2.md](11_verificacion_L1_L2.md) | Por qué y cómo verificar las referencias L1 y L2 | Parte 4 (con ayuda de otra persona) |
+| [11_verificacion_L1_L2.md](11_verificacion_L1_L2.md) | Por qué y cómo se verificaron las referencias L1 y L2 | Parte 4 |
 
 ## Estado del proyecto
 
@@ -43,10 +43,8 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 | Documentación | Sitio Quarto en español, publicado en GitHub Pages, con menú desplegable y navegación Anterior/Siguiente | Hecho |
 | Calidad | 223 tests unitarios, cobertura 95 %, ruff y mypy estrictos limpios | Hecho |
 
-### Pendiente del equipo (no lo puede hacer el código)
-1. **Verificar L1 y L2** (respuestas de referencia de los papers) con `eval/literature_verification.md`; guía paso a paso en [11](11_verificacion_L1_L2.md).
-2. Rellenar la **tabla del equipo** (`docs/07-equipo-referencias.qmd`) y la **URL de Loop** en `docs/index.qmd`; publicar la URL del sitio en Loop.
-3. Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app; un vídeo corto de respaldo de la demo.
+### Pendiente
+Nada de código. El equipo ensaya la defensa por su cuenta (guion y preguntas en [09](09_guion_y_preguntas_defensa.md)). Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app.
 
 ## Cifras clave para memorizar
 

@@ -220,7 +220,7 @@
     "behavior": "answer",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
     "question_es": "En el estudio de arXiv «Prediction of Customer Churn in Banking Industry», ¿qué clasificador resultó el mejor según los autores y qué estructura tenía?",
-    "gold_answer": "DRAFT, human must verify against the PDF: the study compares six supervised classifiers on 10 attributes of 10,000 European bank customers and concludes an ANN with five nodes in a single hidden layer performs best.",
+    "gold_answer": "The study compares six supervised classifiers on 10 attributes of 10,000 European bank customers and concludes an ANN with five nodes in a single hidden layer performs best.",
     "gold_source_ids": [
       "arxiv_2301_13099"
     ],
@@ -237,7 +237,7 @@
     "behavior": "answer",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
     "question_es": "¿Qué arquitectura de modelo propone el artículo de arXiv sobre predicción de churn con datos estructurados mediante FT-Transformer y ensamblados con stacking, y qué problemas de investigaciones anteriores dice abordar?",
-    "gold_answer": "DRAFT, human must verify against the PDF: a hybrid of feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking, addressing gaps in statistical validation, probability calibration and reproducibility.",
+    "gold_answer": "A hybrid of feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking, addressing gaps in statistical validation, probability calibration and reproducibility.",
     "gold_source_ids": [
       "arxiv_2606_07582"
     ],

@@ -74,7 +74,7 @@ Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer C
 - Valores de leyes y del BCE: se leen del **texto ingerido** con una expresión regular guardada en la propia pregunta, de modo que cualquiera la comprueba contra la fuente.
 - `best_segment()` calcula el máximo real en preguntas del tipo "¿qué tarjeta tiene más churn?".
 - Las respuestas de referencia salen de **plantillas**; la generación es idempotente.
-- **Excepción:** las de L1 y L2 son borradores desde los resúmenes de arXiv; una persona debe verificarlas contra el PDF (`eval/literature_verification.md`).
+- **Excepción:** las de L1 y L2 se redactaron a partir de los resúmenes de arXiv y **una persona las verificó contra el PDF el 26 de noviembre de 2026** (`eval/literature_verification.md`, con las frases y sus páginas).
 
 `eval/numbers.py` entiende formatos como `100,000`, `100 000`, `32,4 %`, `0.324`.
 
@@ -114,7 +114,7 @@ Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada
 1. **14 preguntas** (12 de recuperación con fuentes de referencia): sirve como demostración y diagnóstico, no como estadística. Con 12 preguntas una vale 0,083.
 2. **Una ejecución por pregunta** y Gemini 3.5 ignora `temperature`: hay variabilidad no medida (por ejemplo, una cita que cambia entre ejecuciones con la misma recuperación).
 3. El **prompt sin RAG permite abstenerse**: es una línea base honesta, pero un modelo obligado a responder alucinaría más.
-4. Las referencias de **L1/L2** son borradores pendientes de verificación humana, y **no hay puntuación manual** (decisión del equipo): todas las métricas son automáticas.
+4. **No hay puntuación manual** (decisión del equipo): todas las métricas son automáticas. Las referencias de L1/L2 sí están verificadas por una persona.
 5. Groq no se ha probado con llamadas reales. Las cifras de la evaluación son de Gemini; con DeepSeek la línea base sin RAG sería más fuerte en las preguntas D.
 6. No se mide el consumo de tokens (`LLMClient` devuelve solo texto).
 
@@ -122,7 +122,7 @@ Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada
 
 - *¿Cómo sabéis que la mejora es del RAG y no del modelo?* Mismo modelo y mismas preguntas; lo único que cambia es el contexto recuperado.
 - *¿Y si el modelo ya sabía la respuesta?* Las preguntas que la línea base respondía bien (R1 y R2 originales) se sustituyeron por otras más específicas; R4 se conserva como caso donde el modelo sin RAG ya acierta.
-- *¿Cómo evitáis un gold escrito a mano?* Se genera desde `stats.json` y desde el texto ingerido con regex verificables; solo L1/L2 son borradores revisados por una persona.
+- *¿Cómo evitáis un gold escrito a mano?* Se genera desde `stats.json` y desde el texto ingerido con regex verificables; solo L1/L2 se redactaron a mano y una persona las verificó contra el PDF.
 - *¿Qué pasa si no hay información?* Contexto vacío: respuesta fija "No lo sé" sin llamar al LLM. Con contexto irrelevante, el prompt obliga a decir que es insuficiente (U1).
 - *¿Qué hace la guarda de privacidad?* Rechaza antes de llamar al LLM las preguntas por apellidos o clientes concretos; además esos datos nunca se indexaron.
 - *¿Por qué fallan D6, R1 y R4 en el RAG básico?* Recupera el documento correcto pero no el trozo con la cifra, o la frase común del dataset diluye «Alemania». El modo avanzado (búsqueda híbrida) arregla D6; R1 y R4 siguen siendo imperfectas.

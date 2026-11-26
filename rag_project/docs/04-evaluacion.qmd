@@ -100,6 +100,6 @@ for qid in ("D6", "R3", "U2"):
 - **Una sola ejecución por pregunta**, y los modelos Gemini 3.5 ignoran `temperature`: una cita puede cambiar entre dos ejecuciones con la misma recuperación. Las diferencias pequeñas son ruido.
 - **El modelo base puede decir "no lo sé"**, lo que le favorece frente a uno que inventa; un *prompt* sin esa opción probablemente lo dejaría peor parado.
 - **R1** (importe fijo de la tasa de intercambio) sigue fallando: la respuesta está en el *chunk* siguiente al recuperado. **R4** a veces responde con Wikipedia en lugar del reglamento.
-- **La puntuación es solo automática** (cifras, citas, abstención y fugas de datos personales): no hay puntuación manual. Las referencias de L1 y L2 son borradores hechos a partir de los resúmenes de arXiv y están **pendientes de verificación humana** contra el PDF.
+- **La puntuación es solo automática** (cifras, citas, abstención y fugas de datos personales): no hay puntuación manual. Las referencias de L1 y L2 se redactaron a partir de los resúmenes de arXiv y una persona las **verificó contra el PDF** (`eval/literature_verification.md`).
 - Son **14 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
 :::

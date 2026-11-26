@@ -41,7 +41,7 @@ Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recupe
 1. Diseño: 14 preguntas (D, L, R, U), gold generado y puntuación automática (cifras, citas, abstención, fugas de datos personales).
 2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,83 → 1,00**; R **0,25 → 0,75 → 0,62** (citas R 0,50 → 1,00 en avanzado); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
 3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,794 → 0,903; hit@4 0,917 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
-4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática y L1/L2 están pendientes de verificación humana; 12 preguntas son pocas.
+4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática (L1/L2 verificadas por una persona); 12 preguntas son pocas.
 
 Demo: `uv run python -m eval.ablation` (sin LLM) y abrir `eval/ablation.csv`; `uv run python -m eval.score --examples` para ejemplos antes/después.
 
@@ -50,7 +50,6 @@ Demo: `uv run python -m eval.ablation` (sin LLM) y abrir `eval/ablation.csv`; `u
 - **Límite de la API gratuita:** cada pregunta gasta llamadas. Tener 2 o 3 preguntas ya respondidas y capturas.
 - **Arranque en frío de Cloud Run:** la primera petición tras un rato sin tráfico tarda; subir a 1 instancia mínima antes y lanzar una pregunta de prueba.
 - **Sin red:** `uv run pytest` (223 tests sin red) y `uv run python -m rag.index --query "..."` funcionan sin LLM; el sitio se puede abrir desde `docs/_site/`.
-- Tener grabado un **vídeo corto** y capturas de la demo (también lo pide el plan).
 
 ## 3. Cómo repartir las preguntas del tribunal
 
@@ -62,7 +61,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 1. **¿Qué aporta el proyecto?** Un RAG completo y automatizado sobre churn bancario europeo que demuestra con datos que el mismo LLM responde mejor con recuperación, y que documenta dónde falla.
 2. **¿Cuál es la idea más importante?** Convertir el CSV en documentos de estadísticas calculadas por código, porque RAG no puede responder preguntas agregadas desde filas sueltas.
 3. **¿Qué relación tiene con el proyecto 1?** Solo el dataset. No se reutiliza código ni el modelo; aquí no se predice churn.
-4. **¿Qué está terminado y qué no?** Todo el sistema está hecho y publicado (pipeline, índice, RAG y RAG avanzado, evaluación, app en Cloud Run y sitio en GitHub Pages). Falta el trabajo humano: verificar L1/L2 y publicar la URL en Loop. La evaluación es solo automática.
+4. **¿Qué está terminado y qué no?** Todo el sistema está hecho y publicado (pipeline, índice, RAG y RAG avanzado, evaluación, app en Cloud Run y sitio en GitHub Pages). Solo falta el ensayo del equipo. La evaluación es solo automática y las referencias L1/L2 están verificadas.
 5. **¿Qué haríais con más tiempo?** Más preguntas de evaluación y varias ejecuciones por pregunta, trozos vecinos para R1, chunking semántico, probar otros proveedores de LLM.
 
 ### Datos y pipeline
@@ -97,7 +96,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 29. **¿Cómo evitáis que el modelo invente fuentes?** El prompt exige citar `[doc_id]` y el código solo cuenta citas a documentos realmente recuperados.
 30. **¿Qué pasa con un tema que no está en el corpus?** Debe decir que no lo sabe (pregunta U1, Portugal); con contexto vacío, respuesta fija sin llamar al LLM.
 31. **¿Cómo se protege la privacidad en el sistema?** Los datos no están indexados y además una guarda determinista rechaza las peticiones de apellidos o clientes concretos antes de llamar al LLM.
-32. **¿Cómo generáis las respuestas correctas?** Desde `stats.json` y con regex sobre el texto ingerido; solo L1 y L2 son borradores que una persona verifica contra el PDF.
+32. **¿Cómo generáis las respuestas correctas?** Desde `stats.json` y con regex sobre el texto ingerido; solo L1 y L2 se redactaron a mano y una persona las verificó contra el PDF.
 33. **¿Por qué falla el RAG básico en D6 y R1?** Recupera el documento correcto pero no el trozo con la cifra, o la frase común del dataset diluye «Alemania». La búsqueda híbrida del modo avanzado arregla D6; R1 necesitaría trozos vecinos.
 34. **¿Por qué `hit@k` puede engañar?** Mide si el documento correcto aparece, no si el trozo contiene la respuesta.
 35. **¿Cómo gestionáis los límites de la API?** Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional.

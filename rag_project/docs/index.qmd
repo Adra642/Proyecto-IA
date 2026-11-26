@@ -28,7 +28,6 @@ especializados?** Se compara el mismo modelo (Gemini 3.5 Flash-Lite) en tres mod
 | **Aplicación (Google Cloud Run)** | <https://rag-churn-6lkxbo5a5a-ew.a.run.app/> |
 | **Repositorio** | <https://github.com/Adra642/Proyecto-IA/tree/main/rag_project> |
 | **Proyecto 1 (modelo de predicción de churn)** | <https://github.com/Adra642/Proyecto-IA/tree/main/bank-churn-prediction> |
-| **Loop (Teams)** | *[pegar aquí la URL del espacio de Loop]* |
 
 ## Resultado principal
 

@@ -177,7 +177,7 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
   abstention and PII-leak checks); there is no manual scoring step, so differences are read as
   indicative (14 questions, one run).
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
-  (drafted from abstracts): a human must tick them (pending).
+  (drafted from abstracts); a human verified them against the PDF on 2026-11-26.
 
 Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one run):
 
@@ -327,8 +327,6 @@ the site renders. One-time setup: *Settings, Pages, Source = GitHub Actions*. Th
 Cloudflare Pages is also possible (root directory `rag_project/docs`, build command `quarto render`, output
 `_site`) but is not set up.
 
-Before the presentation: fill in the team table in `docs/07-equipo-referencias.qmd`, paste the Loop URL in
-`docs/index.qmd`, and post the site URL in Loop.
 
 ## Project structure
 ```
