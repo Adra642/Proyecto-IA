@@ -66,7 +66,7 @@ Una **Base de Datos Vectorial** no busca palabras exactas, sino que busca por **
 ## Justificación técnica
 *   **Persistencia y Ligereza:** ChromaDB se guarda en un archivo local. Es ideal para nuestro despliegue en **Google Cloud Run** (servidores en la nube que se apagan y encienden).
 *   **Filtros de metadatos:** Los **metadatos** son etiquetas (ej. `idioma: es`, `fuente: BCE`). ChromaDB permite filtrar por estas etiquetas **antes** de buscar, lo cual es crucial para no mezclar idiomas.
-*   **Escala adecuada:** Nuestro corpus genera **~6.300 trozos**. ChromaDB es el punto medio perfecto.
+*   **Escala adecuada:** Nuestro corpus genera **~4.700 trozos (4.663)**. ChromaDB es el punto medio perfecto.
 :::
 
 **¿Qué hace este código?** Este fragmento inicializa ChromaDB en modo persistente (guardando los datos en disco) y crea una colección llamada "banca". Luego, añade un documento de ejemplo junto con sus metadatos (etiquetas como el idioma y la fuente). Estos metadatos son clave porque permiten filtrar las búsquedas posteriormente (por ejemplo, buscar solo en documentos en español).
@@ -134,12 +134,18 @@ def obtener_chunker(tipo_documento):
 
 Para no elegir el tamaño "a ojo", ejecutamos un experimento. Medimos el **Hit@1**, que es la proporción de veces que la respuesta correcta aparece como el primer resultado recuperado. Un Hit@1 alto indica que el sistema de recuperación es muy preciso: la respuesta correcta suele ser el primer fragmento que devuelve.
 
-**¿Por qué los valores son `[0.80, 0.90, 0.90]`?**  
-Estos valores provienen de los resultados empíricos del experimento con tres tamaños de chunk:
+**¿Por qué los valores son `[0.846, 0.846, 0.846]`?**  
+Estos valores provienen de los resultados empíricos del experimento con tres tamaños de chunk, medido sobre el corpus final (176 documentos) y las 13 preguntas de recuperación con documento de referencia (cada pregunta pesa 0,077). Con el corpus y las preguntas finales **los tres tamaños empatan en todas las métricas** (Hit@1 0,846, Hit@5 1,00 y MRR 0,887); con un corpus anterior y más pequeño, 300 caracteres quedaba por detrás:
 
-*   **300 caracteres (con 45 de overlap):** Obtiene un **Hit@1 del 80%**. Al ser fragmentos muy pequeños, a veces la información se corta y el contexto se pierde, por lo que la respuesta correcta no siempre queda en primer lugar.
-*   **600 caracteres (con 90 de overlap):** Alcanza un **Hit@1 del 90%**. Este tamaño ofrece un equilibrio óptimo: los chunks son lo suficientemente grandes para contener la idea completa sin fragmentarla, pero lo bastante pequeños para ser precisos. El solapamiento del 15% evita cortes bruscos.
-*   **1000 caracteres:** También logra un **Hit@1 del 90%**. Aunque el rendimiento es igual al de 600 caracteres, este tamaño consume más contexto (más caracteres por consulta) sin una mejora adicional en la precisión. Por tanto, **600 caracteres es la elección ganadora** porque ofrece la misma precisión (90%) con un menor coste de contexto, lo que se traduce en menor latencia y menor coste por consulta.
+| Tamaño | Chunks | Caracteres medios | Hit@1 | Hit@5 | MRR | Contexto top-5 (caracteres) |
+|---|---|---|---|---|---|---|
+| 300 (45 de overlap) | 9.743 | 217 | 0,846 | 1,00 | 0,887 | 1.933 |
+| **600 (90 de overlap)** | 4.663 | 453 | 0,846 | 1,00 | 0,887 | 2.605 |
+| 1000 (150 de overlap) | 2.942 | 725 | 0,846 | 1,00 | 0,887 | 3.369 |
+
+*   **300 caracteres (con 45 de overlap):** Obtiene el mismo **Hit@1 del 84,6%**, pero genera más del doble de chunks (9.743 frente a 4.663): hay que calcular y guardar el doble de vectores sin ninguna mejora de precisión.
+*   **600 caracteres (con 90 de overlap):** Alcanza también un **Hit@1 del 84,6%**. Este tamaño ofrece un equilibrio razonable: los chunks son lo suficientemente grandes para contener la idea completa sin fragmentarla, pero lo bastante pequeños para ser precisos. El solapamiento del 15% evita cortes bruscos.
+*   **1000 caracteres:** También logra un **Hit@1 del 84,6%**. Como el rendimiento es igual al de 600 caracteres, este tamaño solo añade coste: consume más contexto (más caracteres por consulta) sin una mejora adicional en la precisión. Por tanto, **600 caracteres es la elección que mantenemos** porque ofrece la misma precisión con un menor coste de contexto (un 23% menos que 1000), lo que se traduce en menor latencia y menor coste por consulta. Es un compromiso razonado más que una victoria medida: con 13 preguntas el experimento ya no separa los tamaños.
 
 **¿Qué hace este código?** Este bloque utiliza `matplotlib` para generar un gráfico de barras que compara visualmente el Hit@1 de los tres tamaños de chunk. Define las etiquetas de los ejes, los colores de las barras y añade anotaciones con el porcentaje exacto sobre cada barra para facilitar la lectura. El gráfico resultante es la representación visual del experimento y justifica la elección de 600 caracteres.
 
@@ -152,7 +158,7 @@ Estos valores provienen de los resultados empíricos del experimento con tres ta
 import matplotlib.pyplot as plt
 
 tamanos = ["300 car.\n(45 overlap)", "600 car.\n(90 overlap)", "1000 car."]
-hit_at_1 = [0.80, 0.90, 0.90]
+hit_at_1 = [0.846, 0.846, 0.846]
 colores = ["#ff9999", "#66b3ff", "#99ff99"]
 
 fig, ax = plt.subplots(figsize=(8, 4))
@@ -160,7 +166,7 @@ bars = ax.bar(tamanos, hit_at_1, color=colores, edgecolor="black")
 
 for bar in bars:
     h = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width() / 2, h + 0.01, f"{h * 100:.0f} %",
+    ax.text(bar.get_x() + bar.get_width() / 2, h + 0.01, f"{h * 100:.1f} %",
             ha="center", va="bottom", fontweight="bold")
 
 ax.set_ylim(0, 1.1)
@@ -173,12 +179,12 @@ plt.show()
 ![Precisión de recuperación (Hit@1) según el tamaño del chunk.](hit_at_1_plot.png){#fig-hit1 width=80%}
 
 ::: {.callout-warning}
-### ¿Cómo se calcula el ahorro del 16% de contexto?
+### ¿Cómo se calcula el ahorro del 23% de contexto?
 El ahorro no se refiere al tamaño del chunk individual, sino al volumen total de texto enviado al LLM en una consulta.
 
-Si usamos chunks de 1000 caracteres, al recuperar los 5 fragmentos más relevantes, enviamos al modelo 5000 caracteres.
+En la medición, al recuperar los 5 fragmentos más relevantes con chunks de 1000 caracteres, enviamos al modelo de media 3.369 caracteres.
 
-Si usamos chunks de 600, enviamos 3000 caracteres.
+Con chunks de 600, enviamos 2.605 caracteres: un 23% menos (los chunks de 300 enviarían 1.933, pero duplican el número de chunks).
 
 Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma información, el volumen total sigue siendo menor. Este ahorro se traduce directamente en menor coste por consulta y menor latencia (el modelo responde más rápido).
 :::
@@ -221,7 +227,7 @@ resultados = db.similarity_search("¿Por qué se van los clientes?")
 ### Resumen de decisiones
 *   **LangChain:** Orquestador flexible para alternar entre modelos (Gemini/Groq) y herramientas.
 *   **ChromaDB:** Base vectorial ligera, persistente y con filtros por metadatos, ideal para la nube.
-*   **Chunking validado:** Corte de 600 caracteres / 90 overlap, respaldado por el experimento empírico (Hit@1 del 90%).
+*   **Chunking validado:** Corte de 600 caracteres / 90 overlap, respaldado por el experimento empírico (los tres tamaños empatan con un Hit@1 del 84,6%; se elige 600 por el menor contexto y el menor número de chunks).
 :::
 
 Con esta arquitectura preparada, el sistema está listo para la **Fase C: Evaluación comparativa (Sin RAG vs. Con RAG)**.
