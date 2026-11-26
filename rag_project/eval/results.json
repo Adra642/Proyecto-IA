@@ -5,12 +5,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "En el conjunto de datos de abandono de clientes bancarios de Kaggle, la tasa de abandono de los clientes en Alemania es significativamente mayor (aproximadamente un 32%) en comparación con Francia y España, donde la tasa de abandono ronda el 16% en ambos países.",
+    "answer": "No sé la respuesta exacta, ya que no puedo verificar los datos estadísticos precisos del conjunto de datos de Kaggle en este momento. Sin embargo, en análisis comunes de este conjunto de datos, la tasa de abandono (*churn rate*) de los clientes en Alemania suele ser significativamente más alta (alrededor del 32%) en comparación con la de Francia y España (que rondan el 16% cada una).",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.13,
+    "latency_s": 3.23,
     "error": "",
     "retrieved_chunks": []
   },
@@ -20,7 +20,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "La tasa de rotación (churn rate) en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography].",
+    "answer": "La tasa de churn general en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography]. \n\nAlemania registra la tasa de churn más alta por geografía, seguida por España y finalmente Francia [kaggle_summary_geography].",
     "retrieved_doc_ids": [
       "kaggle_summary_geography_x_is_active_member",
       "kaggle_overview",
@@ -32,7 +32,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 3.51,
+    "latency_s": 0.92,
     "error": "",
     "retrieved_chunks": [
       {
@@ -67,7 +67,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
-    "answer": "En el conjunto de datos de la banca minorista, Alemania registra la tasa de churn (abandono) más alta, con un 32.4%, lo que es superior a Francia, que tiene la tasa más baja, con un 16.2% [kaggle_summary_geography]. Por su parte, España cuenta con una tasa de churn del 16.7% [kaggle_summary_geography, kaggle_segment_geography_spain].",
+    "answer": "En el conjunto de datos de la banca minorista, Alemania registra la tasa de abandono (*churn rate*) más alta, con un 32.4% [kaggle_summary_geography]. En comparación, la tasa de abandono de Francia es del 16.2% (la más baja) y la de España es del 16.7% [kaggle_summary_geography].",
     "retrieved_doc_ids": [
       "kaggle_summary_geography",
       "kaggle_segment_geography_spain",
@@ -79,7 +79,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.69,
+    "latency_s": 1.43,
     "error": "",
     "retrieved_chunks": [
       {
@@ -114,12 +114,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "No tengo información verificable para responder con precisión sobre la tasa de rotación específica de los clientes con 4 productos en comparación con los que tienen 2 productos en ese conjunto de datos en este momento.",
+    "answer": "No lo sé o no se puede verificar.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 2.56,
+    "latency_s": 0.55,
     "error": "",
     "retrieved_chunks": []
   },
@@ -129,7 +129,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "Los clientes que tienen 4 productos presentan una tasa de abandono del 100,0% [kaggle_summary_num_of_products], lo que equivale a 4,91 veces la tasa de abandono general [kaggle_segment_num_of_products_4]. En comparación, los clientes que tienen 2 productos tienen una tasa de abandono del 7,6% [kaggle_summary_num_of_products], lo que representa 0,37 veces la tasa de abandono general [kaggle_segment_num_of_products_2].",
+    "answer": "La tasa de abandono (churn rate) de los clientes que tienen 4 productos es del 100,0% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_4], lo que representa 4,91 veces la tasa de abandono general [kaggle_segment_num_of_products_4]. En comparación, los clientes que tienen 2 productos tienen una tasa de abandono del 7,6% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_2], lo que representa 0,37 veces la tasa de abandono general [kaggle_segment_num_of_products_2].",
     "retrieved_doc_ids": [
       "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
@@ -137,13 +137,12 @@
       "kaggle_overview"
     ],
     "cited_ids": [
-      "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
       "kaggle_segment_num_of_products_2"
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.03,
+    "latency_s": 1.25,
     "error": "",
     "retrieved_chunks": [
       {
@@ -178,7 +177,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
-    "answer": "La tasa de cancelación (churn rate) de los clientes que tienen 4 productos es del 100.0%, lo que equivale a 4,91 veces la tasa de cancelación general (20.4%) [kaggle_segment_num_of_products_4]. En comparación, los clientes que tienen 2 productos tienen una tasa de cancelación del 7.6%, lo que representa 0,37 veces la tasa de cancelación general [kaggle_segment_num_of_products_2].",
+    "answer": "La tasa de cancelación (churn rate) de los clientes que tienen 4 productos es del 100,0% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_4], lo que representa 4,91 veces la tasa de cancelación general [kaggle_segment_num_of_products_4]. Por otro lado, la tasa de cancelación de los clientes que tienen 2 productos es del 7,6% [kaggle_summary_num_of_products, kaggle_segment_num_of_products_2], lo que equivale a 0,37 veces la tasa de cancelación general [kaggle_segment_num_of_products_2].",
     "retrieved_doc_ids": [
       "kaggle_summary_num_of_products",
       "kaggle_segment_num_of_products_4",
@@ -191,7 +190,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 0.79,
+    "latency_s": 1.15,
     "error": "",
     "retrieved_chunks": [
       {
@@ -226,12 +225,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "No lo sé.",
+    "answer": "No tengo suficiente información verificada sobre los porcentajes exactos de ese conjunto de datos específico para dar una respuesta numérica precisa.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.76,
+    "latency_s": 0.94,
     "error": "",
     "retrieved_chunks": []
   },
@@ -241,7 +240,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "El 99,8% de los clientes que se dieron de baja habían presentado una queja [kaggle_findings]. La tasa de baja entre los clientes que presentaron una queja es del 99,5%, mientras que entre los clientes que no se quejaron es del 0,1% [kaggle_findings].",
+    "answer": "El 99,8% de los clientes que se dieron de baja habían presentado una queja [kaggle_findings]. La tasa de cambio (churn rate) entre los clientes que presentaron una queja es del 99,5%, mientras que entre los que no se quejaron es del 0,1% [kaggle_findings].",
     "retrieved_doc_ids": [
       "kaggle_findings",
       "kaggle_overview",
@@ -253,7 +252,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.3,
+    "latency_s": 5.08,
     "error": "",
     "retrieved_chunks": [
       {
@@ -288,7 +287,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
-    "answer": "En el conjunto de datos de deserciones bancarias de Kaggle, el porcentaje de clientes dados de baja que presentaron una queja es del 99.8% [kaggle_findings]. La tasa de deserción entre los clientes que presentaron una queja es del 99.5%, mientras que entre los clientes que no presentaron una queja es del 0.1% [kaggle_findings].",
+    "answer": "El porcentaje de clientes dados de baja que habían presentado una queja es del 99,8% [kaggle_findings]. \n\nLa tasa de cancelación entre los clientes que presentaron una queja es del 99,5%, mientras que la tasa de cancelación entre los clientes que no presentaron ninguna queja es del 0,1% [kaggle_findings].",
     "retrieved_doc_ids": [
       "kaggle_findings",
       "kaggle_overview",
@@ -300,7 +299,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.32,
+    "latency_s": 0.98,
     "error": "",
     "retrieved_chunks": [
       {
@@ -335,12 +334,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
-    "answer": "No sé la respuesta y no puedo verificarla.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.55,
+    "latency_s": 4.82,
     "error": "",
     "retrieved_chunks": []
   },
@@ -350,7 +349,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
-    "answer": "No lo sé porque el contexto es insuficiente [kaggle_overview, kaggle_summary_geography_x_is_active_member, kaggle_summary_num_of_products, kaggle_summary_satisfaction_score]. El contexto proporciona la tasa de churn desglosada por geografía y miembro activo (Alemania / 0 con un 41.1% y Alemania / 1 con un 23.7%) [kaggle_summary_geography_x_is_active_member], pero no ofrece una cifra combinada o total única para todos los clientes en Alemania en su conjunto.",
+    "answer": "El contexto proporcionado no contiene la tasa de churn específica para todo el país de Alemania, ya que solo desglosa la información por geografía combinada con el estado de miembro activo (Alemania / 0 y Alemania / 1) [kaggle_summary_geography_x_is_active_member]. Por lo tanto, no lo sé porque el contexto es insuficiente.",
     "retrieved_doc_ids": [
       "kaggle_overview",
       "kaggle_summary_geography_x_is_active_member",
@@ -362,7 +361,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.11,
+    "latency_s": 1.53,
     "error": "",
     "retrieved_chunks": [
       {
@@ -407,7 +406,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "filter {'$and': [{'source_type': {'$in': ['dataset_stats']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
-    "latency_s": 0.63,
+    "latency_s": 1.48,
     "error": "",
     "retrieved_chunks": [
       {
@@ -442,12 +441,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "No lo sé o no puedo verificarlo.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.36,
+    "latency_s": 2.64,
     "error": "",
     "retrieved_chunks": []
   },
@@ -457,7 +456,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "Según el estudio de arXiv, los autores determinaron que la estructura de red neuronal artificial (ANN) con cinco nodos en una sola capa oculta sobresale sobre los demás clasificadores para distinguir a los clientes que se han dado de baja [arxiv_2301_13099].",
+    "answer": "Basándose en el estudio de arXiv, los autores encontraron que la red neuronal artificial (ANN) fue el clasificador superior (junto con random forest en rendimiento general, pero destacando por no presentar problemas graves de sobreajuste y ser robusta a los valores atípicos) para distinguir a los clientes que abandonan el banco [arxiv_2301_13099]. En cuanto a su estructura, la ANN contaba con cinco nodos en una sola capa oculta [arxiv_2301_13099].",
     "retrieved_doc_ids": [
       "arxiv_2301_13099",
       "arxiv_2301_13099",
@@ -469,7 +468,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 2.54,
+    "latency_s": 6.82,
     "error": "",
     "retrieved_chunks": [
       {
@@ -504,7 +503,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
-    "answer": "Basándonos en el estudio, la estructura de ANN (red neuronal artificial) con cinco nodos en una sola capa oculta sobresale sobre los otros clasificadores para distinguir a los clientes que han abandonado el banco [arxiv_2301_13099].",
+    "answer": "Según el estudio, la estructura de red neuronal artificial (ANN) con cinco nodos en una capa oculta sobresale sobre los demás clasificadores para distinguir a los clientes que se han dado de baja [arxiv_2301_13099]. Además, junto con el bosque aleatorio (random forest), la ANN resultó ser uno de los modelos superiores en términos de rendimiento general [arxiv_2301_13099].",
     "retrieved_doc_ids": [
       "arxiv_2301_13099",
       "arxiv_2301_13099",
@@ -516,7 +515,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['paper']}}",
-    "latency_s": 0.68,
+    "latency_s": 0.8,
     "error": "",
     "retrieved_chunks": [
       {
@@ -551,12 +550,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "No sé la respuesta o no puedo verificarla.",
+    "answer": "El artículo propone una arquitectura basada en **FT-Transformer** (Feature Tokenizer Transformer) combinada con **ensamblajes de apilamiento (stacking ensembles)**. \n\nRespecto a los problemas de investigaciones anteriores, el documento señala que aborda la dificultad de los modelos tradicionales de aprendizaje profundo para tabular/estructurados (como el manejo deficiente de variables categóricas de alta cardinalidad y relaciones no lineales complejas en datos tabulares), superando las limitaciones de los modelos basados en árboles (como XGBoost o Random Forest) al aprovechar la capacidad de atención de los Transformers para mejorar la precisión predictiva en la predicción de la pérdida de clientes (*customer churn*).",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 12.21,
+    "latency_s": 1.3,
     "error": "",
     "retrieved_chunks": []
   },
@@ -578,7 +577,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 34.68,
+    "latency_s": 1.23,
     "error": "",
     "retrieved_chunks": [
       {
@@ -613,7 +612,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
-    "answer": "El artículo propone una arquitectura híbrida validada que integra transformadores tokenizados por características (FT-Transformer) con árboles impulsados por gradiente mediante un ensamblaje consciente de la calibración [arxiv_2606_07582]. La estructura propuesta aborda las brechas persistentes en la validación estadística, la calibración de probabilidades y la reproducibilidad encontradas en investigaciones anteriores [arxiv_2606_07582].",
+    "answer": "El artículo de arXiv propone una arquitectura híbrida validada que integra transformadores tokenizados por características (FT-Transformer) con árboles impulsados por gradiente mediante un apilamiento consciente de la calibración [arxiv_2606_07582]. Esta propuesta aborda las brechas persistentes en la validación estadística, la calibración de probabilidades y la reproducibilidad encontradas en investigaciones anteriores [arxiv_2606_07582].",
     "retrieved_doc_ids": [
       "arxiv_2606_07582",
       "arxiv_2606_07582",
@@ -625,7 +624,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['paper']}}",
-    "latency_s": 1.03,
+    "latency_s": 2.47,
     "error": "",
     "retrieved_chunks": [
       {
@@ -659,13 +658,13 @@
     "category": "R",
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
-    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
     "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.17,
+    "latency_s": 39.94,
     "error": "",
     "retrieved_chunks": []
   },
@@ -674,43 +673,43 @@
     "category": "R",
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
-    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "answer": "No lo sé porque el contexto es insuficiente [eurlex_32015r0751, wiki_interchange_fee].",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "answer": "No lo sé porque el contexto es insuficiente para responder a esa pregunta exacta (el contexto proporciona los porcentajes de los que abrieron cuenta con éxito y de los que no pudieron cambiar su orden permanente, pero no detalla el porcentaje global de los que no pudieron realizar *ambas* cosas simultáneamente según el total inicial de compradores).",
     "retrieved_doc_ids": [
-      "eurlex_32015r0751",
-      "eurlex_32015r0751",
-      "wiki_interchange_fee",
-      "eurlex_32015r0751"
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012"
     ],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 2.12,
+    "latency_s": 0.66,
     "error": "",
     "retrieved_chunks": [
       {
-        "chunk_id": "eurlex_32015r0751#0041",
-        "score": 0.9127,
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0077",
+        "score": 0.9396,
         "header_path": "",
-        "text": ". Therefore, by way of exception and during a transition period of 18 months after the entry into force of this Regulation, Member States should be able to define a maximum share of domestic ‘universal cards’ payment transactions which are considered as being equivalent to credit card transactions. For example, the credit card cap could be applied to the defined share of the total value of the transactions for merchants or acquirers"
+        "text": "6.2.\nTherefore, 275 mystery shoppers of the 403 in total (68%) successfully opened a bank account.\nHowever, of the 275 who did successfully open their ‘new’ bank account, 197 (72%) were unable to\nsuccessfully switch their standing order for the following reasons :  \n181 were told that the bank could not help with the switch or they were instructed to\nundertake the switch themselves  \n16 were unable to complete the switch within 14 working days of the original application and\nhad not completed the transfer by the time of writing the report; including one who was"
       },
       {
-        "chunk_id": "eurlex_32015r0751#0104",
-        "score": 0.9114,
-        "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
-        "text": "## CHAPTER II - INTERCHANGE FEES  \n### Article 3 - Interchange fees for consumer debit card transactions  \n1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transaction for any debit card transaction.  \n2. For domestic debit card transactions Member States may either:  \n(a) define a per transaction percentage interchange fee cap lower than the one provided for in paragraph 1 and may impose a fixed maximum fee amount as a limit on the fee amount resulting from the applicable percentage rate; or"
-      },
-      {
-        "chunk_id": "wiki_interchange_fee#0041",
-        "score": 0.9077,
-        "header_path": "By region > European Union",
-        "text": "In March 2015, the European Parliament voted to cap interchange fees to 0.3% for credit cards and to 0.2% for debit cards, which was subsequently enacted under Regulation (EU) 2015/751 with effect from 8 June 2015. The caps apply only to personal cards where there is an intermediary, not to cards issued to businesses or to cards issued by American Express.\nThat same year, the Revised Payment Services Directive banned merchant surcharges, although it did not enter into force until 2018."
-      },
-      {
-        "chunk_id": "eurlex_32015r0751#0032",
-        "score": 0.9028,
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0066",
+        "score": 0.9364,
         "header_path": "",
-        "text": ". It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level within each payment card scheme. Furthermore it should be possible to define a lower per transaction percentage interchange fee cap, and to impose a fixed maximum fee amount as a limit to the fee amount resulting from the applicable per transaction percentage rate."
+        "text": "successfully open a bank account with a new bank and switch their standing order. This figure\nincludes shoppers who were unsucessful in their task because of failures in the processes described\nin the Common Principles; and shoppers who were unsuccessful because of other reasons. A\ndistinction as been made between the two throughout this report.\nA failure of the Common Principles included those assessments where shoppers were told by the\n‘new’ bank that either the bank did not have the relevant switching processes in place, was unwilling"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0036",
+        "score": 0.9309,
+        "header_path": "",
+        "text": "those regulations are met. Instead, mystery shoppers undertake their enquiry as a ‘normal’ customer\nand complete a questionnaire, which allows the analysts of the data to decide whether organisations\nare compliant or not.\nIn the case of this study, all shoppers undertaking the ‘switching’ scenario were instructed to switch\nat least one standing order from an ‘old’ bank account to a ‘new’ bank account; and provide an\noverview of their experience using the detailed questionnaire.\nThe reasons given by those who were unable to complete the switch (either because they were"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0079",
+        "score": 0.9249,
+        "header_path": "",
+        "text": "provided in Chapter 6.3.\nIn total therefore, 78 mystery shoppers were firstly, able open a new bank account successfully and\nsecondly, able to switch their standing order to that account in line with the Common Principles. This\nequates to 19% of all those who were instructed to undertake the switch and who passed a credit\ncheck.  \nFinal Report Produced by GfK\nPage 27  \nTherefore, aside from measuring the clarity and completeness of the information they received it can\nbe concluded that 81% of the banks assessed did not carry out the account opening and switch as\nfollows :"
       }
     ]
   },
@@ -719,45 +718,45 @@
     "category": "R",
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
-    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "answer": "No lo sé porque el contexto es insuficiente [eurlex_32015r0751].",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "answer": "No lo sé porque el contexto es insuficiente para determinar qué proporción exacta de compradores no pudo abrir una cuenta con éxito y cambiar su orden permanente, ya que los datos proporcionados se limitan a que 275 de 403 compradores (68%) abrieron con éxito una cuenta [regulators_ec_study_on_bank_account_switching_2012], y que de esos 275, 197 (72%) no pudieron cambiar con éxito su orden permanente [regulators_ec_study_on_bank_account_switching_2012], pero no se especifica la cifra o el porcentaje global de los que fracasaron en ambas tareas combinadas.",
     "retrieved_doc_ids": [
-      "eurlex_32015r0751",
-      "eurlex_32015r0751",
-      "eurlex_32015r0751",
-      "eurlex_32015r0751"
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012"
     ],
     "cited_ids": [
-      "eurlex_32015r0751"
+      "regulators_ec_study_on_bank_account_switching_2012"
     ],
     "refused": false,
-    "route": "filter {'source_type': {'$in': ['regulation', 'regulator_guide']}}",
-    "latency_s": 0.55,
+    "route": "no filter: searching the whole corpus",
+    "latency_s": 1.61,
     "error": "",
     "retrieved_chunks": [
       {
-        "chunk_id": "eurlex_32015r0751#0104",
-        "score": 0.0163,
-        "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
-        "text": "## CHAPTER II - INTERCHANGE FEES  \n### Article 3 - Interchange fees for consumer debit card transactions  \n1. Payment service providers shall not offer or request a per transaction interchange fee of more than 0,2 % of the value of the transaction for any debit card transaction.  \n2. For domestic debit card transactions Member States may either:  \n(a) define a per transaction percentage interchange fee cap lower than the one provided for in paragraph 1 and may impose a fixed maximum fee amount as a limit on the fee amount resulting from the applicable percentage rate; or"
-      },
-      {
-        "chunk_id": "eurlex_32015r0751#0032",
-        "score": 0.0157,
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0077",
+        "score": 0.0164,
         "header_path": "",
-        "text": ". It should also be possible to apply such a flat rate in combination with a percentage rate, provided that the sum of such interchange fees does not exceed the specified percentage of the total annual transaction value at domestic level within each payment card scheme. Furthermore it should be possible to define a lower per transaction percentage interchange fee cap, and to impose a fixed maximum fee amount as a limit to the fee amount resulting from the applicable per transaction percentage rate."
+        "text": "6.2.\nTherefore, 275 mystery shoppers of the 403 in total (68%) successfully opened a bank account.\nHowever, of the 275 who did successfully open their ‘new’ bank account, 197 (72%) were unable to\nsuccessfully switch their standing order for the following reasons :  \n181 were told that the bank could not help with the switch or they were instructed to\nundertake the switch themselves  \n16 were unable to complete the switch within 14 working days of the original application and\nhad not completed the transfer by the time of writing the report; including one who was"
       },
       {
-        "chunk_id": "eurlex_32015r0751#0106",
-        "score": 0.0153,
-        "header_path": "CHAPTER II - INTERCHANGE FEES > Article 3 - Interchange fees for consumer debit card transactions",
-        "text": ". This per transaction interchange fee may also be combined with a maximum percentage rate of no more than 0,2 %, provided always that the sum of interchange fees of the payment card scheme does not exceed 0,2 % of the total annual transaction value of the domestic debit card transactions within each payment card scheme."
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0066",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "successfully open a bank account with a new bank and switch their standing order. This figure\nincludes shoppers who were unsucessful in their task because of failures in the processes described\nin the Common Principles; and shoppers who were unsuccessful because of other reasons. A\ndistinction as been made between the two throughout this report.\nA failure of the Common Principles included those assessments where shoppers were told by the\n‘new’ bank that either the bank did not have the relevant switching processes in place, was unwilling"
       },
       {
-        "chunk_id": "eurlex_32015r0751#0034",
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0064",
+        "score": 0.0154,
+        "header_path": "",
+        "text": "The extent to which the ‘new’ bank supports the switching process.\nThis objective was dealt with by examining whether shoppers were successfully able to open a new\nbank account and switch at least one standing order, to measure whether the bank supported this\nprocess by undertaking the transfer in line with the Common Principles and by understanding what\ninformation was provided to the shoppers.\nIn summary, based on this data, a significant number of banks across the Member States do not\nsupport the switching process outlined in the Common Principles because information is generally"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0043",
         "score": 0.0152,
         "header_path": "",
-        "text": ". Therefore, during a reasonable transition period, in relation to domestic debit card transactions, Member States should be able to apply to all domestic debit card transactions within each payment card scheme a weighted average interchange fee of no more than the 0,2 % of the annual average transaction value of all domestic debit card transactions within each payment card scheme"
+        "text": "Three ‘channel’ approaches’ (in branch, telephone and web) were taken in terms of how the\nshoppers applied for the ‘new’ bank account. In this report 319 account ‘switching’ assessments were\nundertaken initially in the branch, 53 were undertaken over the telephone and 33 via the website. Of\nthe 33 making an application online, 4 were unable to do so and consequently approached a branch.\nAlthough 405 mystery shoppers began the process to open an account with a ‘new’ bank and switch\nat least one standing order, two groups of mystery shoppers were unable to undertake the switch"
       }
     ]
   },
@@ -767,12 +766,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "No dispongo de esa información verificada actualmente.",
+    "answer": "No dispongo de datos actualizados de Eurostat sobre el porcentaje de uso de la banca por internet en Alemania para el último año ni para el año anterior.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 1.23,
+    "latency_s": 9.18,
     "error": "",
     "retrieved_chunks": []
   },
@@ -782,7 +781,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "Según Eurostat, en Alemania el porcentaje de individuos que utilizaron la banca por internet en el último año disponible (2025) fue del 70,71% [eurostat_isoc_ci_ac_i_de], y el valor del año anterior (2024) fue del 66,92% [eurostat_isoc_ci_ac_i_de].",
+    "answer": "Según Eurostat, en Alemania la proporción de personas que utilizaron la banca por internet en el último año disponible (2025) fue del 70.71%, y el año anterior (2024) fue del 66.92% [eurostat_isoc_ci_ac_i_de].",
     "retrieved_doc_ids": [
       "eurostat_isoc_ci_ac_i_de",
       "worldbank_it_net_user_zs_deu",
@@ -794,7 +793,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.65,
+    "latency_s": 1.35,
     "error": "",
     "retrieved_chunks": [
       {
@@ -829,7 +828,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
-    "answer": "Según Eurostat, el porcentaje de personas que utilizaron la banca por internet en Alemania en el último año disponible (2025) fue del 70,71%, y el valor del año anterior (2024) fue del 66,92% [eurostat_isoc_ci_ac_i_de].",
+    "answer": "Según Eurostat, el porcentaje de personas que utilizaron la banca por internet en Alemania en el último año disponible (2025) fue del 70.71%, y el año anterior (2024) fue del 66.92% [eurostat_isoc_ci_ac_i_de].",
     "retrieved_doc_ids": [
       "eurostat_isoc_ci_ac_i_de",
       "worldbank_it_net_user_zs_deu",
@@ -841,7 +840,7 @@
     ],
     "refused": false,
     "route": "filter {'$and': [{'source_type': {'$in': ['macro_data', 'press']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
-    "latency_s": 1.08,
+    "latency_s": 3.58,
     "error": "",
     "retrieved_chunks": [
       {
@@ -876,12 +875,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "answer": "No lo sé, ya que no tengo acceso a datos en tiempo real para verificar la tasa actual del Banco Central Europeo.",
+    "answer": "Lo siento, no puedo proporcionar la tasa actual ni la fecha de entrada en vigor de la facilidad de depósito del BCE, ya que no tengo acceso a información en tiempo real.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.78,
+    "latency_s": 0.69,
     "error": "",
     "retrieved_chunks": []
   },
@@ -903,7 +902,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 2.16,
+    "latency_s": 2.03,
     "error": "",
     "retrieved_chunks": [
       {
@@ -938,7 +937,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
-    "answer": "A partir del 26-11-2026, la tasa de facilidad de depósito del BCE es del 2.50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].",
+    "answer": "A partir del 26 de noviembre de 2026, el tipo de facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16 de septiembre de 2026 [ecb_ecb_deposit_facility_rate].",
     "retrieved_doc_ids": [
       "ecb_ecb_deposit_facility_rate",
       "ecb_ecb_marginal_lending_facility_rate",
@@ -950,7 +949,7 @@
     ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['macro_data', 'press']}}",
-    "latency_s": 0.94,
+    "latency_s": 0.81,
     "error": "",
     "retrieved_chunks": [
       {
@@ -985,12 +984,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "How many complaints from users of the financial system did the Banco de España receive in 2025?",
-    "answer": "No lo sé, ya que el año 2025 aún no ha ocurrido y no dispongo de esos datos.",
+    "answer": "No lo sé, ya que el año 2025 aún no ha ocurrido y no dispongo de datos al respecto.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.67,
+    "latency_s": 0.72,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1012,7 +1011,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 1.98,
+    "latency_s": 1.36,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1059,7 +1058,7 @@
     ],
     "refused": false,
     "route": "no filter: searching the whole corpus",
-    "latency_s": 1.18,
+    "latency_s": 1.63,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1094,12 +1093,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
-    "answer": "No sé la respuesta.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 6.75,
+    "latency_s": 0.59,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1109,7 +1108,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
-    "answer": "Según el informe del CCSF de 2018, el 17 % de los franceses tuvo ganas de cambiar de banco pero no se atrevió a dar el paso [regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018].",
+    "answer": "Según el informe, el 17 % de los franceses tuvo ganas de cambiar de banco pero no se atrevió a dar el paso [regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018].",
     "retrieved_doc_ids": [
       "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
       "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
@@ -1121,7 +1120,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 14.26,
+    "latency_s": 7.29,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1156,7 +1155,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
-    "answer": "Según la revisión de 2018 de la reforma de la movilidad bancaria del CCSF, el 17 % de los franceses tuvo ganas de cambiar de banco pero no se atrevió a dar el paso [regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018].",
+    "answer": "Según la revisión de 2018 del CCSF sobre la reforma de la movilidad bancaria en Francia, el 17 % de los franceses tuvo ganas de cambiar de banco pero no se atrevió a dar el paso [regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018].",
     "retrieved_doc_ids": [
       "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
       "regulators_ec_study_on_bank_account_switching_2012",
@@ -1168,7 +1167,7 @@
     ],
     "refused": false,
     "route": "no filter: searching the whole corpus",
-    "latency_s": 0.68,
+    "latency_s": 19.17,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1203,12 +1202,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
-    "answer": "No dispongo de esa información verificada.",
+    "answer": "No tengo información para verificar este dato actualizado según el Banco Mundial.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.86,
+    "latency_s": 3.26,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1218,7 +1217,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
-    "answer": "Según el Banco Mundial, Alemania tuvo 6.66 sucursales de bancos comerciales por cada 100,000 adultos en el último año disponible (2023) [worldbank_fb_cbk_brch_p5_deu].",
+    "answer": "Según el Banco Mundial, Alemania tuvo 6,66 sucursales de bancos comerciales por cada 100.000 adultos en el último año disponible (2023) [worldbank_fb_cbk_brch_p5_deu].",
     "retrieved_doc_ids": [
       "worldbank_fb_cbk_brch_p5_deu",
       "worldbank_fb_cbk_brch_p5_fra",
@@ -1230,7 +1229,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 3.64,
+    "latency_s": 0.62,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1265,7 +1264,7 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
-    "answer": "Según el Banco Mundial, Alemania tenía 6,66 sucursales de bancos comerciales por cada 100.000 adultos en el último año disponible (2023) [worldbank_fb_cbk_brch_p5_deu].",
+    "answer": "Según el Banco Mundial, en el último año disponible (2023), Alemania tenía 6,66 sucursales de bancos comerciales por cada 100.000 adultos [worldbank_fb_cbk_brch_p5_deu].",
     "retrieved_doc_ids": [
       "worldbank_fb_cbk_brch_p5_deu",
       "worldbank_fx_own_totl_zs_deu",
@@ -1277,7 +1276,7 @@
     ],
     "refused": false,
     "route": "filter {'$and': [{'source_type': {'$in': ['macro_data', 'press']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
-    "latency_s": 12.16,
+    "latency_s": 4.48,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1312,12 +1311,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
-    "answer": "No sé la respuesta o no puedo verificarla.",
+    "answer": "No lo sé, ya que no puedo verificar la información específica del EBA Consumer Trends Report 2024/25.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.92,
+    "latency_s": 1.84,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1327,7 +1326,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
-    "answer": "No lo sé porque el contexto es insuficiente [eba_eba_consumer_trends_report_2024_25]. El contexto menciona tres cuestiones relevantes (\"payment fraud\", \"indebtedness\" y \"de-risking\", o el endeudamiento y el fraude en los pagos), pero no proporciona un orden de importancia explícito para las tres juntas que permita numerarlas secuencialmente tal como se solicita.",
+    "answer": "No lo sé porque el contexto es insuficiente para determinar los tres problemas principales en orden de importancia, ya que el texto solo menciona que los tres problemas más relevantes son «fraude en los pagos» (*payment fraud*), «endeudamiento» (*indebtedness*) y «reducción de riesgos» (*de-risking*), sin establecer un orden de importancia exacto entre ellos, salvo señalar que el fraude en los pagos sigue siendo el más significativo y que el endeudamiento surge como el segundo [eba_eba_consumer_trends_report_2024_25].",
     "retrieved_doc_ids": [
       "eba_eba_consumer_trends_report_2024_25",
       "eba_eba_consumer_trends_report_2024_25",
@@ -1339,7 +1338,7 @@
     ],
     "refused": false,
     "route": "",
-    "latency_s": 5.14,
+    "latency_s": 4.41,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1374,17 +1373,19 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
-    "answer": "No lo sé porque el contexto es insuficiente para determinar el orden de importancia de los tres temas principales, ya que solo menciona que el fraude en los pagos es el más significativo y el endeudamiento surge como el segundo, pero no especifica el orden para el tercero (`eba_eba_consumer_trends_report_2024_25`).",
+    "answer": "No lo sé porque el contexto es insuficiente para determinar el orden de importancia de los tres temas principales, ya que solo menciona que el fraude en los pagos sigue siendo el más significativo y que el endeudamiento surge como el segundo, pero no detalla un orden completo basado en cifras o jerarquía estricta para todos ellos [eba_eba_consumer_trends_report_2024_25].",
     "retrieved_doc_ids": [
       "eba_eba_consumer_trends_report_2024_25",
       "eba_eba_consumer_trends_report_2024_25",
       "eba_eba_consumer_trends_report_2024_25",
       "eba_eba_consumer_trends_report_2024_25"
     ],
-    "cited_ids": [],
+    "cited_ids": [
+      "eba_eba_consumer_trends_report_2024_25"
+    ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['regulation', 'regulator_guide']}}",
-    "latency_s": 0.96,
+    "latency_s": 2.89,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1419,12 +1420,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No lo sé, ya que el conjunto de datos \"Kaggle Bank Customer Churn\" incluye típicamente solo a clientes de Francia, España y Alemania, y no contiene datos de Portugal.",
+    "answer": "No lo sé, ya que el conjunto de datos de Kaggle sobre la deserción de clientes bancarios (Bank Customer Churn) generalmente incluye datos de clientes de Francia, España y Alemania, pero no de Portugal.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.82,
+    "latency_s": 1.48,
     "error": "",
     "retrieved_chunks": []
   },
@@ -1434,7 +1435,7 @@
     "mode": "rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No sé la respuesta porque el contexto no contiene información sobre Portugal y es insuficiente [Portugal no se menciona en el contexto, que solo cubre Francia, Alemania y España].",
+    "answer": "No lo sé porque el contexto no contiene la información sobre Portugal; los países cubiertos son únicamente Francia, Alemania y España [kaggle_overview, kaggle_summary_geography_x_is_active_member].",
     "retrieved_doc_ids": [
       "kaggle_overview",
       "kaggle_summary_geography_x_is_active_member",
@@ -1444,7 +1445,7 @@
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.99,
+    "latency_s": 0.93,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1479,17 +1480,19 @@
     "mode": "rag_advanced",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
-    "answer": "No lo sé porque el contexto es insuficiente [kaggle_overview, kaggle_segment_geography_spain, kaggle_segment_has_cr_card_0, kaggle_summary_geography_x_is_active_member].",
+    "answer": "No lo sé porque el contexto no contiene información sobre Portugal y es insuficiente [kaggle_overview].",
     "retrieved_doc_ids": [
       "kaggle_segment_geography_spain",
       "kaggle_overview",
       "kaggle_segment_has_cr_card_0",
       "kaggle_summary_geography_x_is_active_member"
     ],
-    "cited_ids": [],
+    "cited_ids": [
+      "kaggle_overview"
+    ],
     "refused": false,
     "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
-    "latency_s": 1.12,
+    "latency_s": 0.68,
     "error": "",
     "retrieved_chunks": [
       {
@@ -1524,12 +1527,12 @@
     "mode": "no_rag",
     "model": "gemini:gemini-3.5-flash-lite",
     "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
-    "answer": "No sé la respuesta, ya que no tengo acceso al conjunto de datos específico mencionado.",
+    "answer": "No lo sé.",
     "retrieved_doc_ids": [],
     "cited_ids": [],
     "refused": false,
     "route": "",
-    "latency_s": 0.72,
+    "latency_s": 2.3,
     "error": "",
     "retrieved_chunks": []
   },

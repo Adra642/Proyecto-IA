@@ -7,7 +7,7 @@ L,rag,2,,1.0,1.0,1.0,
 L,rag_advanced,2,,1.0,1.0,1.0,
 R,no_rag,7,0.0,,,,
 R,rag,7,0.83,1.0,1.0,0.86,
-R,rag_advanced,7,0.83,1.0,1.0,0.86,
+R,rag_advanced,7,0.83,1.0,1.0,1.0,
 U,no_rag,2,,,,,1.0
 U,rag,2,,,,,1.0
 U,rag_advanced,2,,,,,1.0

@@ -103,7 +103,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 36. **¿Por qué Gemini 3.5 flash lite?** Se probaron los modelos disponibles: este responde en torno a 1 s con respuestas correctas; el 2.5 está retirado.
 36b. **¿En qué idioma responde?** Siempre en español, también si la pregunta está en inglés, francés o alemán; las instrucciones del prompt están en inglés y los tres modos las reciben igual.
 37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso es una ejecución por pregunta y se aceptan pequeñas diferencias entre ejecuciones.
-38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 14 (12 de recuperación más 2 diagnósticos); R1 y R2 originales las sabía el modelo sin RAG y el plan pide sustituirlas por preguntas más específicas.
+38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 15 (13 de recuperación más 2 de comportamiento); R1 y R2 originales, D4, D5 y los topes de intercambio los sabía el modelo o repetían otras preguntas, y se sustituyeron por preguntas sobre las fuentes nuevas (Banco de España, CCSF, Banco Mundial, EBA y el estudio de la Comisión de 2012).
 39. **¿Quién puntúa las respuestas?** Se puntúan automáticamente: cifras de referencia generadas desde `stats.json`, verificación de citas contra los trozos recuperados, abstención y fugas de datos personales. No hay puntuación manual; es una limitación que reconocemos (14 preguntas, una ejecución).
 39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,887 a 1,000 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
 39c. **¿Por qué Cloud Run?** Ejecuta el contenedor con el modelo y el índice incluidos, escala a cero y tiene cuota gratuita.
@@ -121,7 +121,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 - **Datos**: 10.000 clientes · 20,4 % de churn · Alemania 32,4 % · 4 productos 100 % · 99,8 % de quienes se fueron se habían quejado.
 - **Corpus**: 13 fuentes · 177 documentos · 325.000 palabras · 4 idiomas.
 - **Índice**: 4.663 trozos · 600/90 · 384 dimensiones · 5 min en frío · 1 s sin cambios.
-- **Experimento de tamaño**: MRR 0,887 en las tres variantes (empate) · contexto top-5 1.941 / 2.571 / 3.289 caracteres.
+- **Experimento de tamaño**: MRR 0,887 en las tres variantes (empate) · contexto top-5 1.933 / 2.605 / 3.369 caracteres.
 - **Evaluación**: 15 preguntas · D: 0,00 → 0,75 → 1,00 de cifras correctas · R: 0,00 → 0,83 → 0,83.
 - **Recuperación**: vectorial MRR 0,887 → híbrida 1,000 · hit@1 0,846 → 1,000 · reranking sin mejora.
 - **Despliegue**: Cloud Run, 2 GiB / 2 CPU, imagen de 2,76 GB · sitio en GitHub Pages.

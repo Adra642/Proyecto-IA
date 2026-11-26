@@ -179,27 +179,27 @@
     "id": "R1",
     "category": "R",
     "behavior": "answer",
-    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "question_es": "Según el Reglamento (UE) 2015/751 sobre tasas de intercambio, ¿qué importe fijo máximo por transacción, en euros, pueden permitir los Estados miembros para operaciones nacionales con tarjeta de débito en lugar del límite porcentual?",
-    "gold_answer": "EUR 0.05 per transaction (Article 3(2)(b)).",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "question_es": "En el estudio de la Comisión Europea de 2012 sobre el cambio de cuenta bancaria (clientes misteriosos), ¿qué porcentaje de los participantes no pudo abrir una cuenta en un banco nuevo y trasladar su orden permanente?",
+    "gold_answer": "81%.",
     "gold_source_ids": [
-      "eurlex_32015r0751"
+      "regulators_ec_study_on_bank_account_switching_2012"
     ],
-    "gold_answer_template": "EUR {fixed_fee_eur} per transaction (Article 3(2)(b)).",
+    "gold_answer_template": "{failed}%.",
     "gold_numbers_from": {},
     "gold_numbers_from_text": {
-      "fixed_fee_eur": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "no more than EUR (\\d,\\d{2}), or, in the Member States whose currency"
+      "failed": {
+        "doc_id": "regulators_ec_study_on_bank_account_switching_2012",
+        "pattern": "\\(i\\.e\\. (\\d+)%\\) were unable to"
       }
     },
     "gold_best_from": {},
     "gold_numbers": {
-      "fixed_fee_eur": {
-        "value": 0.05,
-        "tolerance": 0.0005,
-        "display": "0.05",
-        "percent": false
+      "failed": {
+        "value": 81.0,
+        "tolerance": 0.405,
+        "display": "81",
+        "percent": true
       }
     },
     "gold_facts": {}

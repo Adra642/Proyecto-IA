@@ -101,8 +101,7 @@ def test_missing_stats_key_fails_clearly(tmp_path: Path) -> None:
 def test_generated_questions_in_the_repo_are_consistent(settings: Settings, tmp_path: Path) -> None:
     qs = {q.id: q for q in load_questions()}
     assert qs["D1"].gold_numbers["germany"].value == pytest.approx(32.4)
-    assert qs["R1"].gold_numbers["fixed_fee_eur"].value == 0.05
-    assert qs["R1"].gold_answer == "EUR 0.05 per transaction (Article 3(2)(b))."
+    assert qs["R1"].gold_numbers["failed"].value == 81 and qs["R1"].gold_answer == "81%."
     assert qs["R2"].gold_facts["latest_year"].isdigit()
     assert "2.50" in qs["R3"].gold_answer or "2.5" in qs["R3"].gold_answer
     assert qs["R4"].gold_numbers["complaints_2025"].value == 30970  # "30.970": Spanish thousands

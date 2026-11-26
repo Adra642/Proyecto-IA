@@ -53,13 +53,13 @@ Resultados (13 preguntas con fuentes de referencia, corpus final de 176 document
 
 | Variante | Chunks | Caracteres medios | hit@1 | hit@3 | hit@5 | MRR | Contexto top-5 (caracteres) |
 |---|---|---|---|---|---|---|---|
-| 300 / solape 45 | 9.743 | 217 | 0,846 | 0,923 | 1,00 | 0,887 | 1.941 |
-| **600 / solape 90** | 4.663 | 453 | 0,846 | 0,923 | 1,00 | 0,887 | 2.571 |
-| 1000 / solape 150 | 2.942 | 725 | 0,846 | 0,923 | 1,00 | 0,887 | 3.289 |
+| 300 / solape 45 | 9.743 | 217 | 0,846 | 0,923 | 1,00 | 0,887 | 1.933 |
+| **600 / solape 90** | 4.663 | 453 | 0,846 | 0,923 | 1,00 | 0,887 | 2.605 |
+| 1000 / solape 150 | 2.942 | 725 | 0,846 | 0,923 | 1,00 | 0,887 | 3.369 |
 
 **Tamaño en uso: 600 caracteres con 90 de solapamiento (15 %).** Con el corpus final **las tres variantes empatan en todas las métricas** (una pregunta pesa 0,077); con un corpus anterior y más pequeño 300 quedaba por detrás. Argumentos para mantener 600:
 1. 300 duplica los trozos (9.743 frente a 4.663) sin mejorar la recuperación: más cosas que embeber y guardar.
-2. 1000 empata en calidad pero envía un 22 % más de texto al LLM (3.289 frente a 2.571 caracteres en el top 5).
+2. 1000 empata en calidad pero envía un 23 % más de texto al LLM (3.369 frente a 2.605 caracteres en el top 5).
 3. Es un valor razonable para texto estructurado y encaja con el límite del modelo de embeddings.
 4. La recuperación híbrida del modo avanzado (ver `05_rag_avanzado.md`) aporta mucho más que el tamaño del trozo.
 

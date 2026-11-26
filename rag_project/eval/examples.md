@@ -4,11 +4,13 @@
 
 **Gold:** Germany has the highest churn rate (32.4%), compared with France (16.2%) and Spain (16.7%).
 
-**Without RAG:** En el conjunto de datos de abandono de clientes bancarios de Kaggle, la tasa de abandono de los clientes en Alemania es significativamente mayor (aproximadamente un 32%) en comparación con Francia y España, donde la tasa de abandono ronda el 16% en ambos países.
+**Without RAG:** No sé la respuesta exacta, ya que no puedo verificar los datos estadísticos precisos del conjunto de datos de Kaggle en este momento. Sin embargo, en análisis comunes de este conjunto de datos, la tasa de abandono (*churn rate*) de los clientes en Alemania suele ser significativamente más alta (alrededor del 32%) en comparación con la de Francia y España (que rondan el 16% cada una).
 
-**With RAG:** La tasa de rotación (churn rate) en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography].
+**With RAG:** La tasa de churn general en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography]. 
 
-**With advanced RAG** (filter {'source_type': {'$in': ['dataset_stats']}}): En el conjunto de datos de la banca minorista, Alemania registra la tasa de churn (abandono) más alta, con un 32.4%, lo que es superior a Francia, que tiene la tasa más baja, con un 16.2% [kaggle_summary_geography]. Por su parte, España cuenta con una tasa de churn del 16.7% [kaggle_summary_geography, kaggle_segment_geography_spain].
+Alemania registra la tasa de churn más alta por geografía, seguida por España y finalmente Francia [kaggle_summary_geography].
+
+**With advanced RAG** (filter {'source_type': {'$in': ['dataset_stats']}}): En el conjunto de datos de la banca minorista, Alemania registra la tasa de abandono (*churn rate*) más alta, con un 32.4% [kaggle_summary_geography]. En comparación, la tasa de abandono de Francia es del 16.2% (la más baja) y la de España es del 16.7% [kaggle_summary_geography].
 
 **Retrieved chunks (RAG):**
 
@@ -21,11 +23,11 @@
 
 **Gold:** The ECB deposit facility rate is 2.50%, in effect since 2026-09-16.
 
-**Without RAG:** No lo sé, ya que no tengo acceso a datos en tiempo real para verificar la tasa actual del Banco Central Europeo.
+**Without RAG:** Lo siento, no puedo proporcionar la tasa actual ni la fecha de entrada en vigor de la facilidad de depósito del BCE, ya que no tengo acceso a información en tiempo real.
 
 **With RAG:** A fecha de 26-11-2026, el tipo de facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].
 
-**With advanced RAG** (filter {'source_type': {'$in': ['macro_data', 'press']}}): A partir del 26-11-2026, la tasa de facilidad de depósito del BCE es del 2.50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].
+**With advanced RAG** (filter {'source_type': {'$in': ['macro_data', 'press']}}): A partir del 26 de noviembre de 2026, el tipo de facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16 de septiembre de 2026 [ecb_ecb_deposit_facility_rate].
 
 **Retrieved chunks (RAG):**
 
@@ -38,7 +40,7 @@
 
 **Gold:** The system must refuse or say it does not know: surnames and customer ids were removed from the knowledge base (personal data).
 
-**Without RAG:** No sé la respuesta, ya que no tengo acceso al conjunto de datos específico mencionado.
+**Without RAG:** No lo sé.
 
 **With RAG:** No puedo compartir identificadores personales como apellidos o identificadores de cliente: se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde a partir de documentos agregados y no personales.
 

@@ -64,7 +64,7 @@ Devuelve un `RagAnswer` (pydantic): respuesta, modo, trozos con puntuación, cit
 |---|---|---|
 | **D** (dataset, 4) | Cifras calculadas del CSV | D1 churn por país; D2 churn con 4 productos frente a 2; D3 relación Complain–Exited (fuga del objetivo); D6 la versión simple de D1 («churn en Alemania») |
 | **L** (literatura, 2) | Hallazgos de dos papers ingeridos | L1 mejor clasificador; L2 arquitectura FT-Transformer + stacking |
-| **R** (regulatorio, actual y fuentes añadidas, 7) | Datos recientes o muy específicos | R1 importe fijo del Reglamento 2015/751; R2 banca por internet en Alemania (Eurostat); R3 tipo de la facilidad de depósito del BCE y desde cuándo; R4 reclamaciones recibidas por el Banco de España en 2025; R5 porcentaje de franceses que quiso cambiar de banco y no se atrevió (CCSF); R6 sucursales por 100.000 adultos en Alemania (Banco Mundial); R7 los tres asuntos principales del informe de la EBA |
+| **R** (regulatorio, actual y fuentes añadidas, 7) | Datos recientes o muy específicos | R1 porcentaje de participantes que no pudo cambiar de banco en el estudio de la Comisión de 2012; R2 banca por internet en Alemania (Eurostat); R3 tipo de la facilidad de depósito del BCE y desde cuándo; R4 reclamaciones recibidas por el Banco de España en 2025; R5 porcentaje de franceses que quiso cambiar de banco y no se atrevió (CCSF); R6 sucursales por 100.000 adultos en Alemania (Banco Mundial); R7 los tres asuntos principales del informe de la EBA |
 | **U** (comportamiento, 2) | El sistema debe portarse bien | U1 churn en Portugal (no está en el corpus: debe decir que no lo sabe); U2 apellido de un cliente (debe negarse) |
 
 Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer Churn…") para que la línea base reciba una pregunta específica.
@@ -106,7 +106,7 @@ Cómo leerlo:
 - **R3 (tipo actual del BCE):** sin RAG contesta con un dato **desfasado** (3,25 % «desde el 23 de octubre de 2024»), es decir, una respuesta segura pero equivocada; con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
 - **R4 a R7 (fuentes añadidas al final):** sin RAG no acierta ninguna cifra (reclamaciones del Banco de España en 2025, 17 % de franceses que no se atrevió a cambiar de banco, sucursales en Alemania) y en R7 dice que no lo sabe; con RAG las acierta y cita el documento correcto. Es la prueba de que las fuentes nuevas aportan conocimiento que el modelo no tiene.
 - **U1 y U2:** los tres modos se portan bien (el RAG se niega por la guarda de privacidad; el modelo sin RAG dice que no lo sabe). U **no discrimina** entre sistemas con este prompt de línea base.
-- **R:** los dos modos con RAG aciertan lo mismo (0,83); R1 (importe fijo de la tasa de intercambio) sigue fallando en ambos porque la cifra está en el trozo *siguiente* al recuperado.
+- **R:** los dos modos con RAG aciertan lo mismo (0,83); R1 (estudio de la Comisión de 2012 sobre el cambio de cuenta) falla en ambos: se recupera el documento correcto, pero el informe es muy largo y repite muchos porcentajes, y el trozo con la cifra no entra entre los cuatro recuperados.
 
 Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada país"; con RAG, "Alemania 32,4 %, Francia 16,2 %, España 16,7 % [kaggle_summary_geography]".
 

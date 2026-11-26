@@ -142,14 +142,14 @@ scored at chunk level (hit@k, MRR):
 
 | Variant | Chunks | Avg chars | hit@1 | hit@3 | hit@5 | MRR | Context (top 5, chars) |
 |---|---|---|---|---|---|---|---|
-| 300 / 45 overlap | 9,743 | 217 | 0.85 | 0.92 | 1.00 | 0.887 | 1,941 |
-| **600 / 90 overlap** | 4,663 | 453 | 0.85 | 0.92 | 1.00 | 0.887 | 2,571 |
-| 1000 / 150 overlap | 2,942 | 725 | 0.85 | 0.92 | 1.00 | 0.887 | 3,289 |
+| 300 / 45 overlap | 9,743 | 217 | 0.85 | 0.92 | 1.00 | 0.887 | 1,933 |
+| **600 / 90 overlap** | 4,663 | 453 | 0.85 | 0.92 | 1.00 | 0.887 | 2,605 |
+| 1000 / 150 overlap | 2,942 | 725 | 0.85 | 0.92 | 1.00 | 0.887 | 3,369 |
 
 Reading: on the final corpus and 13 retrieval questions the three sizes **tie on every metric** (one
 question is 0.077), so the experiment no longer separates them; the earlier, smaller corpus did put
 300 characters behind. The choice of **600 / 90** stays a trade-off: half the chunks of 300 (less to
-embed and store) and about 22 % less context for the LLM than 1000. The documents that are never split
+embed and store) and about 23 % less context for the LLM than 1000. The documents that are never split
 (dataset cards, macro notes) do not depend on the size. (Measured earlier, header-aware and fixed-size
 chunking also tied.)
 
@@ -167,7 +167,7 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
 ```
 
 - Questions: 4 about the dataset (D), 2 from the literature (L), 7 regulatory, current or from the
-  regulator and survey sources added late (R: Interchange Regulation, Eurostat, ECB rate, Banco de España
+  regulator and survey sources added late (R: the 2012 Commission switching study, Eurostat, ECB rate, Banco de España
   complaints 2025, CCSF switching review, World Bank branches, EBA Consumer Trends Report) and 2
   behavioural (U: an answer that is not in the corpus, and a request for a surname that must be
   refused). No gold number is typed by hand: dataset values come from `stats.json`, regulatory and
@@ -202,8 +202,7 @@ regulator and survey questions with exact, cited figures, while the plain model 
 the new-source questions (Banco de España complaints, CCSF "did not dare" share, World Bank branches) are
 facts it cannot know, and on R7 it says it does not know. Failures are kept on purpose as diagnostics:
 **D6** (the plain question "churn rate in Germany": the phrase "Kaggle Bank Customer Churn dataset" matches
-every card; plain RAG misses, hybrid search fixes it) and **R1** (the fixed interchange fee sits in the chunk
-after the one retrieved; both RAG modes still miss it). Scores come from a single run per question and
+every card; plain RAG misses, hybrid search fixes it) and **R1** (the 2012 Commission switching study: the right document is retrieved, but the report is hundreds of pages with dozens of similar percentages and the chunk holding the figure is not in the top 4; both RAG modes still miss it). Scores come from a single run per question and
 Gemini 3.5 ignores `temperature`, so small differences (for example a citation) can change between runs.
 A router bug found while adding the new sources is fixed: the word "study" used to trigger the arXiv-paper
 filter, which hid the Bundesbank study; only "arXiv", "paper", "authors" and "transformer" do now.
@@ -258,7 +257,7 @@ Germany" question (**D6**) goes from a wrong answer to a right one (numeric matc
 cross-encoders are trained on web passages and push the statistic cards down, and the multilingual model is far
 worse. With 13 questions one question is 0.077, so treat small differences as noise.
 Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.00 / 0.75 / 1.00 and R
-0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; R1 still fails in both RAG modes (it needs the neighbour chunk).
+0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; R1 still fails in both RAG modes (right document, wrong chunk).
 
 ## Tests and quality
 ```bash
