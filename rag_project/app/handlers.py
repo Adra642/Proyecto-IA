@@ -24,7 +24,10 @@ MSG_RATE_LIMIT = (
     "El proveedor del modelo está saturado (límite de peticiones). "
     "Espera unos segundos y vuelve a intentarlo."
 )
-MSG_NO_KEY = "Falta la clave de API del modelo en el servidor. Avisa a los responsables."
+MSG_NO_KEY = (
+    "Falta la clave de API de {provider} en el servidor. "
+    "Elige otro modelo o avisa a los responsables."
+)
 MSG_PROVIDER = "El modelo no respondió correctamente. Inténtalo de nuevo en un momento."
 MSG_EMPTY = "Escribe una pregunta."
 MAX_QUESTION_CHARS = 1000
@@ -56,17 +59,37 @@ class AppService:
 
     def __init__(
         self,
-        chain: Chain,
+        chain_for: Callable[[str], Chain],
+        default_provider: str,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
-        """Args: chain: answers questions; sleep: pause before the single retry (injectable)."""
-        self._chain = chain
+        """Set up the service.
+
+        Args:
+            chain_for: Builds the chain of an LLM provider (called once per provider).
+            default_provider: Used when a question names none.
+            sleep: Pause before the single retry (injectable for tests).
+        """
+        self._chain_for = chain_for
+        self._default = default_provider
+        self._chains: dict[str, Chain] = {}
         self._sleep = sleep
 
+    def _chain(self, provider: str) -> Chain:
+        if provider not in self._chains:
+            self._chains[provider] = self._chain_for(provider)
+        return self._chains[provider]
+
     def ask(
-        self, question: str, mode: str, where: dict[str, Any] | None = None
+        self,
+        question: str,
+        mode: str,
+        where: dict[str, Any] | None = None,
+        provider: str | None = None,
     ) -> tuple[str, RagAnswer | None]:
-        """Answer ``question`` in ``mode``; ``where`` only applies to the advanced mode.
+        """Answer ``question`` in ``mode`` with the LLM ``provider`` (default: the configured one).
+
+        ``where`` only applies to the advanced mode.
 
         Returns:
             ``(text, answer)``. ``answer`` is ``None`` when ``text`` is an error message.
@@ -76,11 +99,12 @@ class AppService:
             return MSG_EMPTY, None
         if len(question) > MAX_QUESTION_CHARS:
             return MSG_TOO_LONG, None
+        provider = provider or self._default
         try:
-            result = self._run(question, mode, where)
+            result = self._run(self._chain(provider), question, mode, where)
         except MissingCredentialError:
-            log.error("LLM credential missing")
-            return MSG_NO_KEY, None
+            log.error("LLM credential missing for %s", provider)
+            return MSG_NO_KEY.format(provider=provider), None
         except RateLimitError:
             return MSG_RATE_LIMIT, None
         except ProviderError as exc:
@@ -88,21 +112,24 @@ class AppService:
             return MSG_PROVIDER, None
         return result.answer, result
 
-    def _run(self, question: str, mode: str, where: dict[str, Any] | None) -> RagAnswer:
+    def _run(
+        self, chain: Chain, question: str, mode: str, where: dict[str, Any] | None
+    ) -> RagAnswer:
         """Call the chain; retry once when the provider is rate-limited."""
         try:
-            return self._call(question, mode, where)
+            return self._call(chain, question, mode, where)
         except RateLimitError:
             log.warning("Rate limited; retrying once")
             self._sleep(RETRY_PAUSE_S)
-            return self._call(question, mode, where)
+            return self._call(chain, question, mode, where)
 
-    def _call(self, question: str, mode: str, where: dict[str, Any] | None) -> RagAnswer:
+    @staticmethod
+    def _call(chain: Chain, question: str, mode: str, where: dict[str, Any] | None) -> RagAnswer:
         if mode == MODE_NO_RAG:
-            return self._chain.answer_no_rag(question)
+            return chain.answer_no_rag(question)
         if mode == MODE_ADVANCED:
-            return self._chain.answer_advanced(question, where=where)
-        return self._chain.answer_rag(question)
+            return chain.answer_advanced(question, where=where)
+        return chain.answer_rag(question)
 
 
 def format_sources(chunks: list[RetrievedChunk], cited_ids: list[str]) -> str:
@@ -115,6 +142,7 @@ def format_sources(chunks: list[RetrievedChunk], cited_ids: list[str]) -> str:
         title = meta.get("title") or chunk.doc_id
         url = meta.get("url", "")
         link = f"[{title}]({url})" if url else str(title)
+        open_link = f" · [abrir documento ↗]({url})" if url else ""
         cited = " · **citada en la respuesta**" if chunk.doc_id in cited_ids else ""
         text = " ".join(chunk.text.split())
         if len(text) > SNIPPET_CHARS:
@@ -122,7 +150,8 @@ def format_sources(chunks: list[RetrievedChunk], cited_ids: list[str]) -> str:
         blocks.append(
             f"**{rank}. {link}**{cited}  \n"
             f"`{chunk.doc_id}` · fuente: {meta.get('source', '?')} · "
-            f"tipo: {meta.get('source_type', '?')} · puntuación: {chunk.score:.3f}\n\n"
+            f"tipo: {meta.get('source_type', '?')} · puntuación: {chunk.score:.3f}"
+            f"{open_link}\n\n"
             f"> {text}"
         )
     return "\n\n".join(blocks)

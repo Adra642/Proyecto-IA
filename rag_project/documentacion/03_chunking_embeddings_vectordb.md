@@ -49,27 +49,24 @@ Métricas (a nivel de chunk):
 - **hit@k**: ¿alguno de los k primeros trozos pertenece a un documento correcto?
 - **MRR** (*mean reciprocal rank*): media de 1/posición del primer trozo correcto. Vale 1 si siempre es el primero.
 
-Resultados (12 preguntas con fuentes de referencia, chunker versión 2; `eval/chunking_results.csv`):
+Resultados (13 preguntas con fuentes de referencia, corpus final de 176 documentos; `eval/chunking_results.csv`):
 
 | Variante | Chunks | Caracteres medios | hit@1 | hit@3 | hit@5 | MRR | Contexto top-5 (caracteres) |
 |---|---|---|---|---|---|---|---|
-| 300 / solape 45 | 13.466 | 197 | 0,667 | 0,917 | 1,00 | 0,781 | 2.128 |
-| **600 / solape 90** | 6.309 | 415 | 0,667 | 0,917 | 1,00 | 0,794 | 2.568 |
-| 1000 / solape 150 | 3.873 | 681 | 0,750 | 0,917 | 1,00 | 0,836 | 2.975 |
-| Fijo 600 (sin encabezados) | 6.000 | 438 | 0,750 | 0,917 | 1,00 | 0,836 | 2.556 |
+| 300 / solape 45 | 9.743 | 217 | 0,846 | 0,923 | 1,00 | 0,887 | 1.933 |
+| **600 / solape 90** | 4.663 | 453 | 0,846 | 0,923 | 1,00 | 0,887 | 2.605 |
+| 1000 / solape 150 | 2.942 | 725 | 0,846 | 0,923 | 1,00 | 0,887 | 3.369 |
 
-**Tamaño en uso: 600 caracteres con 90 de solapamiento (15 %).** Argumentos:
-1. 300 duplica los trozos (13.466 frente a 6.309) sin mejorar la recuperación.
-2. 600 y 1000 llegan al mismo hit@5 (1,00); 1000 va ligeramente por delante en MRR (0,836 frente a 0,794), pero la diferencia la produce **una sola pregunta de 12** (R4, puesto 2 frente a 1) y 1000 envía más texto al LLM (2.975 frente a 2.568 caracteres en el top 5).
+**Tamaño en uso: 600 caracteres con 90 de solapamiento (15 %).** Con el corpus final **las tres variantes empatan en todas las métricas** (una pregunta pesa 0,077); con un corpus anterior y más pequeño 300 quedaba por detrás. Argumentos para mantener 600:
+1. 300 duplica los trozos (9.743 frente a 4.663) sin mejorar la recuperación: más cosas que embeber y guardar.
+2. 1000 empata en calidad pero envía un 23 % más de texto al LLM (3.369 frente a 2.605 caracteres en el top 5).
 3. Es un valor razonable para texto estructurado y encaja con el límite del modelo de embeddings.
-4. Además, la recuperación híbrida del modo avanzado (ver `05_rag_avanzado.md`) compensa la diferencia de posición de esas preguntas.
+4. La recuperación híbrida del modo avanzado (ver `05_rag_avanzado.md`) aporta mucho más que el tamaño del trozo.
 
 **Limitaciones que hay que reconocer (ser honestos puntúa):**
-- Con 12 preguntas, una pregunta pesa 0,083: las diferencias entre 600 y 1000 son ruido.
+- Con 13 preguntas, una pregunta pesa 0,077, y el experimento **ya no separa** los tamaños: la elección es un compromiso, no un resultado medido.
 - Los documentos atómicos (fichas, notas macro) **no cambian con el tamaño**, así que el experimento discrimina poco.
-- El chunking por encabezados **empata** con el de tamaño fijo en estas métricas; su ventaja real es que el trozo conserva la ruta de encabezados para citar. Las métricas no miden si el trozo contiene la respuesta (caso R1).
-- No se implementó el chunking semántico (era opcional).
-- Cambiar a 1000 obligaría a reconstruir el índice, repetir la evaluación y la ablación y actualizar el sitio; el equipo decidió mantener 600/90.
+- El chunking por encabezados **empata** con el de tamaño fijo (medido antes); su ventaja real es que el trozo conserva la ruta de encabezados para citar. Las métricas no miden si el trozo contiene la respuesta (caso R1).
 
 ## 4. Embeddings: `intfloat/multilingual-e5-small`
 

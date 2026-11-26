@@ -83,3 +83,11 @@ def test_body_class_with_sidebar_does_not_remove_the_page() -> None:
     )
     md = html_to_markdown(page, "T")
     assert md.startswith("# Droit au compte") and "menu" not in md and len(md) > 200
+
+
+def test_normalize_removes_pdf_dot_leaders_but_keeps_ellipsis_in_prose() -> None:
+    toc = "Vorwort.�.�.�.�.�.�.�3\nZusammenfassung..........5\n"
+    out = normalize_text(toc)
+    assert "�" not in out and ".........." not in out
+    assert "Vorwort" in out and "5" in out
+    assert normalize_text("Wait... what?") == "Wait... what?\n"

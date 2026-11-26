@@ -55,7 +55,7 @@ medido, pero desactivado por defecto**, por lo que muestra la tabla.
 
 ## Ablación
 
-Recuperación sola (sin LLM, determinista) sobre las 12 preguntas con documento de referencia. *hit@4* es lo que ve el LLM.
+Recuperación sola (sin LLM, determinista) sobre las 13 preguntas con documento de referencia. *hit@4* es lo que ve el LLM.
 
 ```{python}
 #| echo: false
@@ -78,18 +78,18 @@ plt.show()
 
 **Qué muestra y qué no.**
 
-- **La búsqueda híbrida es lo que rinde**: hit@4 sube de 0,92 a 1,00 y el MRR de 0,79 a 0,90. El caso claro es la
+- **La búsqueda híbrida es lo que rinde**: hit@1 sube de 0,85 a 1,00 y el MRR de 0,89 a 1,00. El caso claro es la
   pregunta simple "¿tasa de *churn* en Alemania?" (**D6**): con búsqueda vectorial la ficha de Alemania queda en el puesto 5 y
   el modelo responde que no lo sabe; con la híbrida queda la primera y acierta (32,4 %).
 - **El reranking no aporta** sobre la híbrida en estas preguntas, y los *cross-encoders* mayores empeoran: se entrenaron con pasajes web
-  y desplazan las fichas estadísticas; el modelo multilingüe es mucho peor (hit@4 de 0,50).
+  y desplazan las fichas estadísticas; el modelo multilingüe es mucho peor (hit@4 de 0,69).
 - **Los filtros no mejoran la recuperación** medida sobre la híbrida (ya acertaba), pero reducen el ruido y permiten filtrar a mano en la interfaz.
-- Con 12 preguntas, una vale 0,083: conviene tomar las diferencias pequeñas como ruido.
+- Con 13 preguntas, una vale 0,077: conviene tomar las diferencias pequeñas como ruido.
 
 ```{python}
 #| echo: false
 detail = read_csv("eval/ablation_detail.csv")
-want = {"D6": "Pregunta D6 (churn en Alemania)", "D1": "D1", "R4": "R4"}
+want = {"D6": "Pregunta D6 (churn en Alemania)", "D1": "D1", "R7": "R7"}
 cfgs = ["vector", "+hybrid", "+rerank (TinyBERT)", "+filters (hybrid)"]
 table = []
 for qid in want:

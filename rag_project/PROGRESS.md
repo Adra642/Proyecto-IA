@@ -232,3 +232,37 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 
 ### Hugging Face Spaces references removed (2026-11-26)
 Hugging Face Spaces is no longer part of the project: removed the "why not Spaces" text from the README, site, guide and plans, the `requirements.txt` / `app/README.md` Space entries in the plan, the Hugging Face token from the plan's credential lists and the `export-reqs` poe task (it only existed to feed Spaces). Kept: `HF_HOME` in the Dockerfile and the e5 model, which is downloaded from the Hugging Face Hub, and the 2026-11-22 decision entry above as history.
+
+### Data-quality review of the sources (2026-11-26, branch `data-quality-fixes`)
+- Removed `ecb_hfcs_wealth_surveys_at_the_ecb` (the PDF is a non-response-bias paper, not wealth tables) and the three EBA stubs (RTS on complaints handling is about crypto-asset tokens; the two guideline pages held only navigation text). Removed the SCHUFA landing page (729 bytes; Wikipedia `wiki_schufa` covers it).
+- Replaced the Banco de Espana complaints landing page by the full *Memoria de Reclamaciones 2025* PDF (first 80k characters): real complaint statistics for Spain.
+- Tried the EBA POG amending report: it is about ESG/greenwashing, so it was not added.
+- Refreshed A5, B2, B3, B4 (dates now 2026-11-26). The ECB RSS feed rotated: two older press releases left the corpus, two new ones (23 and 25 Nov) entered.
+- Re-indexed: 6,431 chunks. 216 unit tests pass.
+- Open: EUR-Lex is about 80% of the corpus bytes (AI Act and GDPR are only loosely related); `eval/results.csv` was not re-run after this change.
+
+### Data quality, round 2 (2026-11-26)
+- EUR-Lex fetcher: new `keep_articles` / `keep_matching` options (`select_articles`). The AI Act keeps Articles 5, 6, 10, 13, 14, 26, 50, 86 plus the creditworthiness recital and Annex III item 5(b) (47 KB instead of about 480 KB); GDPR keeps Articles 5, 6, 7, 12, 13, 15, 17, 20, 21, 22 (profiling, portability, erasure).
+- `Complain` is target leakage (99.8% of churners complained): its three segment cards were removed, the data dictionary flags it, and the leakage check in `kaggle_findings` stays (it answers eval question D6 and documents why the first project dropped the column).
+- New sources: Banque de France *aide a la mobilite bancaire*, Verbraucherzentrale *Kontowechselservice* (b8), Commission report on the Payment Accounts Directive COM(2023) 249 (a6). Rejected: the 2012 EC bank-switching study (HTTP 403 for our crawler, not circumvented), the BdF opinion page (only a PDF link), commercial finance sites.
+- Corpus: 174 documents, 282k words. Index: 4,473 chunks (was 6,431). Evaluation re-run (42 answers, 0 failed): D rag hit@1 0.50 to 0.67, D advanced 0.67 to 0.83, numeric match unchanged for RAG modes.
+- The chunk-size experiment in the README was measured on the earlier 6,309-chunk corpus and was not repeated.
+
+### Data quality, round 3 (2026-11-26)
+- Added: EBA Consumer Trends Report 2024/25 (b6; the page that could not be found at Stage 1 is now located), ECB SPACE 2024 payment-attitudes study (b5), Bundesbank *Zahlungsverhalten in Deutschland 2023* (b8, German), CCSF *bilan de la reforme de la mobilite bancaire* 2018 (b8, French), World Bank bank-branch density and internet use (b3), arXiv *Beyond Churn* 2608.30364 (a3).
+- arXiv curated with the new `exclude_ids` / `include_ids` options: 9 off-topic papers removed (lending sectors, bank-marketing, generic XAI, synthetic data, telecom federated learning); 11 remain.
+- Cleaning: PDF dot leaders (table-of-contents `.....` and `.�.�`) are removed in `normalize_text` (test added).
+- Not added: Flash Eurobarometer 509 (no official PDF reachable; only a third-party copy), the 2012 EC bank-switching study (HTTP 403 for our crawler), Banco de Espana stability reports (macroprudential, not customer behaviour).
+- Corpus: 176 documents, 311k words, 4,499 chunks, 4 languages. Evaluation re-run: 42 answers, 0 failed; scores unchanged versus round 2 (the 14 questions do not exercise the new sources).
+
+### Evaluation set rebuilt to 15 questions and final corpus (2026-11-26)
+- 2012 Commission study on bank-account switching (GfK mystery shopping, 27 Member States) added from the Internet Archive copy the user supplied (the Commission server returns 403 to our crawler); flagged as dated in `docs/02-pipeline.qmd`. Corpus: 177 documents, 325k words, 4,663 chunks.
+- Questions (max 15): removed D4, D5 (dataset questions of the same type) and R4 (interchange caps, already known by the model); added R4 Banco de Espana complaints 2025 (30,970), R5 CCSF share of French people who wanted to switch but did not dare (17%), R6 World Bank bank branches per 100,000 adults in Germany (6.66), R7 EBA Consumer Trends Report top-3 issues. Gold values are read from the ingested documents by regex (no figure typed by hand). First candidates (German switching deadline, Bundesbank cash share) were replaced because the base model already knew them.
+- Bug found by the new questions: the router treated the word "study" as an arXiv-paper request and filtered the Bundesbank study out. Fixed (test added).
+- Results (one run, 0 failed): numeric match D 0.00 / 0.75 / 1.00 and R 0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; retrieval ablation (13 questions) vector MRR 0.887, hybrid 1.000. R1 and D6 (plain RAG) remain the diagnostics. Chunk-size experiment: 300 / 600 / 1000 now tie (MRR 0.887); 600 is kept as a trade-off.
+- README, Quarto pages and `documentacion/` updated to the new numbers; 220 unit tests, ruff and mypy clean.
+- R1 replaced (2026-11-26): the interchange-fee question (the only EUR-Lex question, known by the base model) became a question on the 2012 Commission switching study (gold 81%, read from the document). Right document retrieved but not the chunk with the figure, so both RAG modes decline: it stays a documented diagnostic. Chunk-size experiment re-run on the final questions and corpus: 300 / 600 / 1000 tie (hit@1 0.846, MRR 0.887); top-5 context 1,933 / 2,605 / 3,369 characters, so 600 sends about 23 % less than 1000.
+
+### App model selector, sources layout, dark theme (2026-11-26, branch `app-model-selector-dark-theme`, based on `data-quality-fixes`)
+- App: model selector (Gemini default, Groq, DeepSeek) shared by Chat and Comparar; one chain per provider built on first use (`AppService.chain_for`, `Container.chain(provider)`); the chosen provider has no fallbacks; a missing key names the provider. Comparar shows the RAG and RAG avanzado sources next to each other; sources use a smaller font (`APP_CSS`, passed to `launch`) and an "abrir documento" link. Groq/DeepSeek need their secrets in Cloud Run (documented, `cloudbuild.yaml` comment); not set up.
+- Quarto: light/dark theme switch (`cosmo` / `darkly`); chunking page snippets now match the real code (`Container.llm`, `VectorStoreRepository`, `build_chunker`, `E5Embedder`); the app/deploy page covers the Cloud Run steps, local run, troubleshooting, the Quarto docs and the GitHub Pages workflow.

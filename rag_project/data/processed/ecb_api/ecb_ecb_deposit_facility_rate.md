@@ -10,7 +10,7 @@ topic: deposits_rates
 columns:
 - Balance
 date: '2026-09-16'
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'ECB statistical data: reuse allowed with source acknowledgement'
 format: csv
 ---
@@ -19,7 +19,7 @@ format: csv
 
 Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).
 
-As of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).
+As of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).
 
 Recent changes:
 - 2026-09-16: 2.50%

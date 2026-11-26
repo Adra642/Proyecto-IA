@@ -54,7 +54,9 @@ website:
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: cosmo
+      dark: darkly   # Quarto adds the light/dark switch to the navbar
     css: styles.css
     toc: true
     toc-title: "En esta página"

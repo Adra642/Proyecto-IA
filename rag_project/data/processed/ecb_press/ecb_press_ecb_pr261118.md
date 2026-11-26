@@ -10,7 +10,7 @@ topic: macro
 columns:
 - Balance
 date: '2026-11-18'
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'ECB publications: reuse allowed with source acknowledgement'
 format: html
 ---

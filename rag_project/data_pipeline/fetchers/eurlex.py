@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import warnings
 
 from bs4 import BeautifulSoup, Tag, XMLParsedAsHTMLWarning
@@ -94,6 +95,41 @@ def eurlex_to_markdown(markup: str) -> tuple[str, str]:
     return title, f"# {title}\n\n" + "\n\n".join(lines) + "\n"
 
 
+def select_articles(text: str, articles: list[int], keep_matching: str = "") -> str:
+    """Reduce a long act to the articles that matter, plus paragraphs matching a pattern.
+
+    Args:
+        text: Markdown from :func:`eurlex_to_markdown` (articles are ``### Article N - ...``).
+        articles: Article numbers to keep whole.
+        keep_matching: Optional regex; paragraphs outside the kept articles that match it
+            (a recital or an annex item) are appended under an excerpt heading.
+
+    Returns:
+        The title block, the kept articles in order, and the matching excerpts.
+    """
+    blocks = re.split(r"(?m)^(?=### Article \d+ )", text)
+    head, body = blocks[0], blocks[1:]
+    head = head.split("\n\n", 2)
+    kept = [head[0] + "\n"]  # the "# title" line only: recitals are not kept
+    wanted = {str(n) for n in articles}
+    for block in body:
+        match = re.match(r"### Article (\d+) ", block)
+        if match and match.group(1) in wanted:
+            # drop the next chapter/section headings that trail the article
+            block = re.sub(r"(?s)\n\n## .*$", "", block)
+            kept.append(block.rstrip() + "\n")
+    if keep_matching:
+        pattern = re.compile(keep_matching, re.IGNORECASE)
+        extras = [
+            para
+            for para in re.split(r"\n\n", text)
+            if pattern.search(para) and not para.startswith("#") and para not in "".join(kept)
+        ]
+        if extras:
+            kept.append("### Excerpts (recitals and annexes)\n\n" + "\n\n".join(extras) + "\n")
+    return "\n".join(kept)
+
+
 @register_fetcher("a6")
 class EurLexFetcher(BaseFetcher):
     """One document per CELEX id, with a chain of fallbacks."""
@@ -151,6 +187,8 @@ class EurLexFetcher(BaseFetcher):
         else:
             title, text = eurlex_to_markdown(payload.text())
             fmt = "html"
+        if p.get("keep_articles"):
+            text = select_articles(text, list(p["keep_articles"]), str(p.get("keep_matching", "")))
         meta = DocumentMetadata(
             doc_id=f"eurlex_{p['celex'].lower()}",
             title=str(p.get("title") or title),

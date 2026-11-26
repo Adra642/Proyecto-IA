@@ -26,10 +26,16 @@ SOURCE_TITLES: dict[str, tuple[str, str]] = {
     "bde": ("B1", "Banco de España, Portal del Cliente Bancario"),
     "eurostat": ("B2", "Eurostat API (FR, DE, ES indicators)"),
     "worldbank": ("B3", "World Bank API (FR, DE, ES indicators)"),
-    "eba": ("B6", "European Banking Authority consumer-protection pages and guidelines"),
-    "ecb_hfcs": ("B5", "ECB Household Finance and Consumption Survey"),
-    "credit_registers": ("B7", "Credit reporting systems (CIRBE, SCHUFA, FICP)"),
-    "regulators": ("B8", "Banque de France, BaFin and Bundesbank consumer pages"),
+    "eba": (
+        "B6",
+        "EBA consumer-protection pages, guidelines and Consumer Trends Report",
+    ),
+    "ecb_hfcs": ("B5", "ECB household surveys (HFCS wealth survey, SPACE payment survey)"),
+    "credit_registers": ("B7", "Credit reporting systems (CIRBE, FICP)"),
+    "regulators": (
+        "B8",
+        "Consumer pages and reports of Banque de France, BaFin, Bundesbank and Verbraucherzentrale",
+    ),
 }
 
 

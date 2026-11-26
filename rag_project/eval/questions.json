@@ -115,79 +115,6 @@
     "gold_facts": {}
   },
   {
-    "id": "D4",
-    "category": "D",
-    "behavior": "answer",
-    "question": "In the Kaggle Bank Customer Churn dataset, which Card Type has the highest churn rate, and which Card Type has the highest average loyalty points earned?",
-    "question_es": "En el dataset Kaggle Bank Customer Churn, ¿qué tipo de tarjeta (Card Type) tiene la mayor tasa de churn y cuál tiene la mayor media de puntos de fidelidad?",
-    "gold_answer": "Highest churn rate: DIAMOND (21.8%). Highest average loyalty points earned: PLATINUM (608.8 points).",
-    "gold_source_ids": [
-      "kaggle_summary_card_type"
-    ],
-    "gold_answer_template": "Highest churn rate: {top_churn_card} ({top_churn_card_value}%). Highest average loyalty points earned: {top_points_card} ({top_points_card_value} points).",
-    "gold_numbers_from": {},
-    "gold_numbers_from_text": {},
-    "gold_best_from": {
-      "top_churn_card": {
-        "segmentation": "card_type",
-        "metric": "churn_rate"
-      },
-      "top_points_card": {
-        "segmentation": "card_type",
-        "metric": "mean_points"
-      }
-    },
-    "gold_numbers": {
-      "top_churn_card_value": {
-        "value": 21.8,
-        "tolerance": 0.05,
-        "display": "21.8",
-        "percent": true
-      },
-      "top_points_card_value": {
-        "value": 608.8,
-        "tolerance": 0.05,
-        "display": "608.8",
-        "percent": false
-      }
-    },
-    "gold_facts": {
-      "top_churn_card": "DIAMOND",
-      "top_points_card": "PLATINUM"
-    }
-  },
-  {
-    "id": "D5",
-    "category": "D",
-    "behavior": "answer",
-    "question": "In the Kaggle Bank Customer Churn dataset, which age band has the highest churn rate?",
-    "question_es": "En el dataset Kaggle Bank Customer Churn, ¿qué banda de edad tiene la mayor tasa de churn?",
-    "gold_answer": "The 50-59 age band has the highest churn rate (56.0%).",
-    "gold_source_ids": [
-      "kaggle_summary_age_band"
-    ],
-    "gold_answer_template": "The {top_age_band} age band has the highest churn rate ({top_age_band_value}%).",
-    "gold_numbers_from": {},
-    "gold_numbers_from_text": {},
-    "gold_best_from": {
-      "top_age_band": {
-        "segmentation": "age_band",
-        "metric": "churn_rate"
-      }
-    },
-    "gold_numbers": {
-      "top_age_band_value": {
-        "value": 56.0,
-        "tolerance": 0.05,
-        "display": "56.0",
-        "percent": true
-      }
-    },
-    "gold_facts": {
-      "top_age_band": "50-59"
-    }
-  },
-  {
     "id": "D6",
     "category": "D",
     "behavior": "answer",
@@ -252,27 +179,27 @@
     "id": "R1",
     "category": "R",
     "behavior": "answer",
-    "question": "Under the EU Interchange Fee Regulation (EU) 2015/751, what fixed maximum per-transaction interchange fee in euro may Member States allow for domestic debit card transactions instead of the percentage cap?",
-    "question_es": "Según el Reglamento (UE) 2015/751 sobre tasas de intercambio, ¿qué importe fijo máximo por transacción, en euros, pueden permitir los Estados miembros para operaciones nacionales con tarjeta de débito en lugar del límite porcentual?",
-    "gold_answer": "EUR 0.05 per transaction (Article 3(2)(b)).",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "question_es": "En el estudio de la Comisión Europea de 2012 sobre el cambio de cuenta bancaria (clientes misteriosos), ¿qué porcentaje de los participantes no pudo abrir una cuenta en un banco nuevo y trasladar su orden permanente?",
+    "gold_answer": "81%.",
     "gold_source_ids": [
-      "eurlex_32015r0751"
+      "regulators_ec_study_on_bank_account_switching_2012"
     ],
-    "gold_answer_template": "EUR {fixed_fee_eur} per transaction (Article 3(2)(b)).",
+    "gold_answer_template": "{failed}%.",
     "gold_numbers_from": {},
     "gold_numbers_from_text": {
-      "fixed_fee_eur": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "no more than EUR (\\d,\\d{2}), or, in the Member States whose currency"
+      "failed": {
+        "doc_id": "regulators_ec_study_on_bank_account_switching_2012",
+        "pattern": "\\(i\\.e\\. (\\d+)%\\) were unable to"
       }
     },
     "gold_best_from": {},
     "gold_numbers": {
-      "fixed_fee_eur": {
-        "value": 0.05,
-        "tolerance": 0.0005,
-        "display": "0.05",
-        "percent": false
+      "failed": {
+        "value": 81.0,
+        "tolerance": 0.405,
+        "display": "81",
+        "percent": true
       }
     },
     "gold_facts": {}
@@ -361,39 +288,104 @@
     "id": "R4",
     "category": "R",
     "behavior": "answer",
-    "question": "What caps does the EU Interchange Fee Regulation (EU) 2015/751 set on interchange fees for consumer debit card and credit card transactions?",
-    "question_es": "¿Qué límites establece el Reglamento (UE) 2015/751 sobre tasas de intercambio para las operaciones con tarjetas de débito y de crédito de consumo?",
-    "gold_answer": "0.2% of the transaction value for debit card transactions and 0.3% for credit card transactions.",
+    "question": "How many complaints from users of the financial system did the Banco de España receive in 2025?",
+    "question_es": "¿Cuántas reclamaciones de usuarios del sistema financiero recibió el Banco de España en 2025?",
+    "gold_answer": "30.970 complaints in 2025.",
     "gold_source_ids": [
-      "eurlex_32015r0751"
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025"
     ],
-    "gold_answer_template": "{debit_cap_pct}% of the transaction value for debit card transactions and {credit_cap_pct}% for credit card transactions.",
+    "gold_answer_template": "{complaints_2025} complaints in 2025.",
     "gold_numbers_from": {},
     "gold_numbers_from_text": {
-      "debit_cap_pct": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "more than (\\d,\\d) % of the value of the transaction for any debit card"
-      },
-      "credit_cap_pct": {
-        "doc_id": "eurlex_32015r0751",
-        "pattern": "more than (\\d,\\d) % of the value of the transaction for any credit card"
+      "complaints_2025": {
+        "doc_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+        "pattern": "el Banco de España recibió ([\\d.]+) reclamaciones"
       }
     },
     "gold_best_from": {},
     "gold_numbers": {
-      "debit_cap_pct": {
-        "value": 0.2,
-        "tolerance": 0.001,
-        "display": "0.2",
-        "percent": true
-      },
-      "credit_cap_pct": {
-        "value": 0.3,
-        "tolerance": 0.0015,
-        "display": "0.3",
+      "complaints_2025": {
+        "value": 30970.0,
+        "tolerance": 154.85,
+        "display": "30.970",
+        "percent": false
+      }
+    },
+    "gold_facts": {}
+  },
+  {
+    "id": "R5",
+    "category": "R",
+    "behavior": "answer",
+    "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
+    "question_es": "Según el balance de 2018 del CCSF sobre la reforma de la movilidad bancaria en Francia, ¿qué porcentaje de franceses quiso cambiar de banco pero no se atrevió?",
+    "gold_answer": "17% of French people.",
+    "gold_source_ids": [
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018"
+    ],
+    "gold_answer_template": "{share}% of French people.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "share": {
+        "doc_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+        "pattern": "(\\d+)% des Français ont\\s+eu envie de changer de banque"
+      }
+    },
+    "gold_best_from": {},
+    "gold_numbers": {
+      "share": {
+        "value": 17.0,
+        "tolerance": 0.085,
+        "display": "17",
         "percent": true
       }
     },
+    "gold_facts": {}
+  },
+  {
+    "id": "R6",
+    "category": "R",
+    "behavior": "answer",
+    "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
+    "question_es": "Según el Banco Mundial, ¿cuántas sucursales de bancos comerciales por cada 100.000 adultos tenía Alemania en el último año disponible?",
+    "gold_answer": "6.66 per 100,000 adults.",
+    "gold_source_ids": [
+      "worldbank_fb_cbk_brch_p5_deu"
+    ],
+    "gold_answer_template": "{branches} per 100,000 adults.",
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {
+      "branches": {
+        "doc_id": "worldbank_fb_cbk_brch_p5_deu",
+        "pattern": "is ([\\d.]+) per 100,000 adults"
+      }
+    },
+    "gold_best_from": {},
+    "gold_numbers": {
+      "branches": {
+        "value": 6.66,
+        "tolerance": 0.0333,
+        "display": "6.66",
+        "percent": false
+      }
+    },
+    "gold_facts": {}
+  },
+  {
+    "id": "R7",
+    "category": "R",
+    "behavior": "answer",
+    "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
+    "question_es": "¿Qué tres asuntos identifica el Informe de Tendencias del Consumidor 2024/25 de la EBA como los más relevantes para los consumidores de la UE, por orden de importancia?",
+    "gold_answer": "Payment fraud (most significant), indebtedness (second) and de-risking (third).",
+    "gold_source_ids": [
+      "eba_eba_consumer_trends_report_2024_25"
+    ],
+    "gold_answer_template": null,
+    "gold_numbers_from": {},
+    "gold_numbers_from_text": {},
+    "gold_best_from": {},
+    "gold_numbers": {},
     "gold_facts": {}
   },
   {

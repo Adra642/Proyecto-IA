@@ -40,7 +40,10 @@ COLUMN_MEANINGS: dict[str, str] = {
     "IsActiveMember": "1 if the customer is an active member, otherwise 0.",
     "EstimatedSalary": "Estimated annual salary.",
     "Exited": "Target: 1 if the customer left the bank (churned), otherwise 0.",
-    "Complain": "1 if the customer filed a complaint, otherwise 0.",
+    "Complain": (
+        "1 if the customer filed a complaint, otherwise 0. Warning: it almost perfectly "
+        "mirrors Exited (target leakage), so no segment cards are built for it."
+    ),
     "Satisfaction Score": "Satisfaction score given by the customer, 1 (low) to 5 (high).",
     "Card Type": "Credit card tier: DIAMOND, GOLD, PLATINUM or SILVER.",
     "Point Earned": "Loyalty points earned by the customer.",
@@ -70,7 +73,6 @@ SEGMENTATIONS: list[Segmentation] = [
     Segmentation(
         "satisfaction_score", "Satisfaction score", ["Satisfaction Score"], ["Satisfaction Score"]
     ),
-    Segmentation("complain", "Complaint filed", ["Complain"], ["Complain"]),
     Segmentation(
         "geography_x_num_of_products",
         "Geography x number of products",

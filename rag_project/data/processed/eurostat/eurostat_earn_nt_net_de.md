@@ -10,7 +10,7 @@ topic: macro
 columns:
 - EstimatedSalary
 date: '2025-01-01'
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'Eurostat: CC BY 4.0 (reuse with source acknowledgement)'
 format: json
 ---

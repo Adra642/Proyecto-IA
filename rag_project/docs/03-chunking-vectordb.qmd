@@ -1,113 +1,222 @@
 ---
-title: "Chunking y base vectorial"
+title: "Fase B: Arquitectura RAG y Estrategia de Chunking"
+subtitle: "Decisiones técnicas y justificación de la base de conocimiento"
 ---
 
-```{python}
+## 1. El problema: ¿Por qué necesitamos un RAG?
+
+Los **LLM (Large Language Models)** o modelos de lenguaje, como ChatGPT, son IAs entrenadas con enormes cantidades de texto. Sin embargo, responden de memoria y, cuando no saben algo, tienden a inventarse la respuesta. A este fenómeno se le conoce como **alucinación**.
+
+::: {.callout-tip}
+## La analogía del "Examen a libro abierto"
+Un sistema **RAG (Retrieval-Augmented Generation)** o *Generación Aumentada por Recuperación*, funciona como un examen a libro abierto. Antes de responder, el sistema **busca en nuestros propios documentos** (leyes europeas, datos del banco) y contesta apoyándose en lo que encuentra, en lugar de fiarse de su memoria.
+:::
+
+Nuestro reto es combinar **datos tabulares** (el CSV del banco) con **normativa europea** en tres idiomas (español, alemán y francés). Para construir este "cerebro", tomamos **3 decisiones clave**:
+
+1.  **Orquestación:** LangChain.
+2.  **Base de Datos Vectorial:** ChromaDB.
+3.  **Segmentación:** Estrategia de Chunking.
+
+---
+
+## 2. Orquestación: ¿Por qué LangChain?
+
+Un **orquestador** (o *framework*) es el "director de orquesta" del sistema. Se encarga de coordinar al buscador, a los modelos de IA y a las bases de datos para que trabajen juntos. Evaluamos tres opciones: **LangChain**, **LlamaIndex** y **Haystack**.
+
+::: {.callout-note}
+## Justificación técnica
+*   **Flexibilidad (Enrutamiento):** Nuestro sistema admite varios proveedores de IA: **Gemini** (por defecto), **Groq** y **DeepSeek**. Se elige con una opción de `config.yaml` o, en la aplicación, con el selector de modelo; LangChain permite cambiar de proveedor sin reescribir la lógica.
+*   **Ecosistema:** Es el framework más maduro, con más integraciones y documentación del mercado.
+*   **Rendimiento:** Su sobrecarga (*overhead* o tiempo que tarda en procesar la orden) es de apenas **~10 ms**, algo insignificante frente a los segundos que tarda la IA en pensar.
+:::
+
+**¿Qué hace este código?** Es el uso real del proyecto: `Container` (`factory.py`) construye el cliente del modelo a partir de `config.yaml`. Por defecto usa Gemini; pasando otro proveedor (`groq` o `deepseek`) se obtiene un cliente distinto con **la misma interfaz** (`invoke`), sin cambiar la lógica. La aplicación usa esto para su selector de modelo.
+
+```python
+#| eval: false
+#| echo: true
+#| code-fold: true
+
+from core.settings import load_settings
+from factory import Container
+
+container = Container(load_settings())
+
+llm = container.llm()           # el proveedor de config.yaml (Gemini por defecto)
+llm_groq = container.llm("groq")  # otro proveedor, misma interfaz
+
+respuesta = llm.invoke("¿Qué es el churn?")
+```
+
+---
+
+## 3. Base de Datos Vectorial: ¿Por qué ChromaDB?
+
+Una **Base de Datos Vectorial** no busca palabras exactas, sino que busca por **significado**. Para ello, convierte cada texto en un **vector** (una lista de coordenadas matemáticas que representan la idea) y recupera los más cercanos a la pregunta.
+
+| Opción Evaluada | Valoración Técnica |
+| :--- | :--- |
+| **ChromaDB** | **Elegida.** Ligera, persistente y con filtros nativos. |
+| FAISS | Es un buscador ultrarrápido, pero **no es una base de datos real**. |
+| Qdrant / Milvus | Diseñadas para miles de millones de datos. **Demasiado complejas** para nuestra escala. |
+| Pinecone | Requiere servicios en la nube y costes asociados. |
+
+::: {.callout-important}
+## Justificación técnica
+*   **Persistencia y Ligereza:** ChromaDB se guarda en un archivo local. Es ideal para nuestro despliegue en **Google Cloud Run** (servidores en la nube que se apagan y encienden).
+*   **Filtros de metadatos:** Los **metadatos** son etiquetas (ej. `idioma: es`, `fuente: BCE`). ChromaDB permite filtrar por estas etiquetas **antes** de buscar, lo cual es crucial para no mezclar idiomas.
+*   **Escala adecuada:** Nuestro corpus genera **~4.700 trozos (4.663)**. ChromaDB es el punto medio perfecto.
+:::
+
+**¿Qué hace este código?** `VectorStoreRepository` (`rag/vectorstore.py`) es el único sitio que usa ChromaDB: abre una colección persistente en disco con distancia coseno, guarda cada *chunk* con sus metadatos (`add`) y busca por similitud (`query`). El parámetro `where` filtra por metadatos **antes** de buscar, por ejemplo solo documentos de Alemania.
+
+```python
+#| eval: false
+#| echo: true
+#| code-fold: true
+
+from rag.vectorstore import VectorStoreRepository, open_persistent_client
+
+client = open_persistent_client("chroma_db")   # carpeta en disco
+repo = VectorStoreRepository(client, "banca", embedder)
+
+repo.add(chunks)  # guarda texto, vector y metadatos de cada chunk
+
+# Búsqueda semántica restringida por metadatos
+resultados = repo.query("churn en Alemania", k=4, where={"geography": "DE"})
+```
+
+---
+
+## 4. Estrategia de Segmentación (Chunking)
+
+Los LLMs tienen un límite de contexto (una memoria máxima). Si le metemos un documento de 50 páginas, se perderá información. La solución es trocear el texto en fragmentos más pequeños llamados chunks (trozos).
+
+Para no perder el contexto, controlamos dos parámetros:
+
+*   **Tamaño:** Equilibrio entre precisión y contexto.
+*   **Solapamiento (Overlap):** Repetimos el final de un trozo al principio del siguiente para no cortar una idea por la mitad (el estándar es un 10-15% del tamaño).
+
+### 4.1. Estrategia de Enrutamiento por Documento
+
+No todos los documentos se cortan igual. Usamos un enrutador para elegir la estrategia:
+
+| Tipo de Documento | Estrategia Aplicada | ¿Por qué? |
+| :--- | :--- | :--- |
+| Tablas y datos | `PassthroughChunker` (No se cortan) | Son documentos atómicos. Si los cortas, separas la cifra de su etiqueta. |
+| Leyes y Wikipedia | `MarkdownRecursiveChunker` | Respeta los encabezados (#) y párrafos antes de dividir. |
+| Pruebas | `FixedSizeChunker` | Corta a ciegas por número de letras. Solo usado para comparar. |
+
+**¿Qué hace este código?** `build_chunker` (`rag/chunking.py`) crea el enrutador a partir de `config.yaml`. Los tipos de documento atómicos (estadísticas del dataset y datos macro, en `atomic_source_types`) van a `PassthroughChunker`, que no los divide; todo lo demás va a `MarkdownRecursiveChunker`, que corta primero por encabezados y luego por tamaño (600 caracteres con 90 de solapamiento).
+
+```python
+#| eval: false
+#| echo: true
+#| code-fold: true
+
+def build_chunker(cfg):
+    splitter = MarkdownRecursiveChunker(cfg.chunk_size, cfg.chunk_overlap)  # 600 / 90
+    return RoutingChunker(
+        PassthroughChunker(),             # 1 documento = 1 chunk
+        splitter,
+        set(cfg.atomic_source_types),     # dataset_stats, macro_data
+    )
+```
+
+---
+
+## 5. El Experimento: ¿Cuál es el tamaño perfecto?
+
+Para no elegir el tamaño "a ojo", ejecutamos un experimento. Medimos el **Hit@1**, que es la proporción de veces que la respuesta correcta aparece como el primer resultado recuperado. Un Hit@1 alto indica que el sistema de recuperación es muy preciso: la respuesta correcta suele ser el primer fragmento que devuelve.
+
+**¿Por qué los valores son `[0.846, 0.846, 0.846]`?**  
+Estos valores provienen de los resultados empíricos del experimento con tres tamaños de chunk, medido sobre el corpus final (176 documentos) y las 13 preguntas de recuperación con documento de referencia (cada pregunta pesa 0,077). Con el corpus y las preguntas finales **los tres tamaños empatan en todas las métricas** (Hit@1 0,846, Hit@5 1,00 y MRR 0,887); con un corpus anterior y más pequeño, 300 caracteres quedaba por detrás:
+
+| Tamaño | Chunks | Caracteres medios | Hit@1 | Hit@5 | MRR | Contexto top-5 (caracteres) |
+|---|---|---|---|---|---|---|
+| 300 (45 de overlap) | 9.743 | 217 | 0,846 | 1,00 | 0,887 | 1.933 |
+| **600 (90 de overlap)** | 4.663 | 453 | 0,846 | 1,00 | 0,887 | 2.605 |
+| 1000 (150 de overlap) | 2.942 | 725 | 0,846 | 1,00 | 0,887 | 3.369 |
+
+*   **300 caracteres (con 45 de overlap):** Obtiene el mismo **Hit@1 del 84,6%**, pero genera más del doble de chunks (9.743 frente a 4.663): hay que calcular y guardar el doble de vectores sin ninguna mejora de precisión.
+*   **600 caracteres (con 90 de overlap):** Alcanza también un **Hit@1 del 84,6%**. Este tamaño ofrece un equilibrio razonable: los chunks son lo suficientemente grandes para contener la idea completa sin fragmentarla, pero lo bastante pequeños para ser precisos. El solapamiento del 15% evita cortes bruscos.
+*   **1000 caracteres:** También logra un **Hit@1 del 84,6%**. Como el rendimiento es igual al de 600 caracteres, este tamaño solo añade coste: consume más contexto (más caracteres por consulta) sin una mejora adicional en la precisión. Por tanto, **600 caracteres es la elección que mantenemos** porque ofrece la misma precisión con un menor coste de contexto (un 23% menos que 1000), lo que se traduce en menor latencia y menor coste por consulta. Es un compromiso razonado más que una victoria medida: con 13 preguntas el experimento ya no separa los tamaños.
+
+**¿Qué hace este código?** Este bloque utiliza `matplotlib` para generar un gráfico de barras que compara visualmente el Hit@1 de los tres tamaños de chunk. Define las etiquetas de los ejes, los colores de las barras y añade anotaciones con el porcentaje exacto sobre cada barra para facilitar la lectura. El gráfico resultante es la representación visual del experimento y justifica la elección de 600 caracteres.
+
+```python
 #| echo: false
-import sys
-sys.path.insert(0, ".")
-from _helpers import read_csv, md_table, show_source
+#| fig-cap: "Precisión de recuperación (Hit@1) según el tamaño de chunk."
+#| fig-width: 8
+#| fig-height: 4
+
 import matplotlib.pyplot as plt
-```
 
-## Estrategia de *chunking* por tipo de documento
+tamanos = ["300 car.\n(45 overlap)", "600 car.\n(90 overlap)", "1000 car."]
+hit_at_1 = [0.846, 0.846, 0.846]
+colores = ["#ff9999", "#66b3ff", "#99ff99"]
 
-No todos los documentos se parten igual. Un `RoutingChunker` elige la estrategia según el tipo:
+fig, ax = plt.subplots(figsize=(8, 4))
+bars = ax.bar(tamanos, hit_at_1, color=colores, edgecolor="black")
 
-| Tipo de documento | Estrategia | Por qué |
-|---|---|---|
-| `dataset_stats` (fichas y resúmenes del dataset), `macro_data` (series) | **Atómico**: un documento = un *chunk* | Son cortos y autocontenidos; partirlos separaría una cifra de su etiqueta |
-| Resto (artículos, leyes, páginas web, guías) | **Markdown + recursivo**: divide por encabezados y luego por tamaño | Respeta la estructura del texto y conserva la ruta de encabezados (por ejemplo `CAPÍTULO I > Artículo 4`) |
+for bar in bars:
+    h = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width() / 2, h + 0.01, f"{h * 100:.1f} %",
+            ha="center", va="bottom", fontweight="bold")
 
-```{python}
-#| echo: false
-show_source("rag/chunking.py", "RoutingChunker")
-```
-
-La **ruta de encabezados** y el título del documento se anteponen al texto que se vectoriza
-(`embedding_text`), de modo que un fragmento de la mitad de un reglamento conserva su contexto.
-
-## ¿Qué tamaño de *chunk*? Un experimento
-
-El tamaño es un compromiso: *chunks* pequeños son más precisos pero pierden contexto y multiplican el
-número de vectores; *chunks* grandes arrastran ruido al contexto del LLM y diluyen la similitud. Se probó el
-mismo corpus con varios tamaños (solapamiento del 15 %) y se midió la recuperación a nivel de *chunk* con
-las preguntas de evaluación.
-
-```{python}
-#| echo: false
-rows = read_csv("eval/chunking_results.csv")
-md_table([
-    {
-        "Variante": r["variant"],
-        "Chunks": f'{int(r["chunks_total"]):,}',
-        "hit@1": r["hit@1"],
-        "hit@5": r["hit@5"],
-        "MRR": r["mrr"],
-        "Contexto medio (top-5, caracteres)": f'{float(r["avg_context_chars_top5"]):,.0f}',
-    }
-    for r in rows
-])
-```
-
-```{python}
-#| echo: false
-#| fig-cap: "Calidad de recuperación (MRR) frente al contexto que recibe el LLM, por variante."
-fig, ax = plt.subplots(figsize=(6.5, 3.2))
-labels = [r["variant"].replace("markdown_recursive_", "md ").replace("fixed_", "fijo ") for r in rows]
-ax.bar(labels, [float(r["mrr"]) for r in rows], color="#3b6ea5")
-ax.set_ylim(0.7, 0.9)
-ax.set_ylabel("MRR")
-ax2 = ax.twinx()
-ax2.plot(labels, [float(r["avg_context_chars_top5"]) for r in rows], "o-", color="#c4572a")
-ax2.set_ylabel("caracteres de contexto")
-fig.tight_layout()
+ax.set_ylim(0, 1.1)
+ax.set_ylabel("Hit@1")
+ax.set_title("Precisión de Recuperación según Tamaño del Chunk")
+ax.grid(axis="y", linestyle="--", alpha=0.7)
 plt.show()
 ```
 
-**Decisión: 600 caracteres con 90 de solapamiento** (confirmada por el equipo tras la primera medición y
-mantenida tras repetirla). Con las 12 preguntas de recuperación y el chunker actual (versión 2), las cuatro
-variantes aciertan en el top 5 (hit@5 = 1,00) y 300 caracteres sigue siendo la peor en MRR (0,781; 13 466
-*chunks*). 600 (MRR 0,794) queda **por debajo de 1000 y del tamaño fijo de 600 (MRR 0,836 ambos)**, y la
-diferencia es una sola pregunta, R4, cuyo documento sale en el puesto 2 con 600 y en el 1 con 1000 o con
-fragmentos fijos. A cambio, 600 da menos contexto al LLM (2 568 frente a 2 975 caracteres) y unos 415
-caracteres de media por *chunk*. Se mantiene 600 por ese menor contexto y porque la diferencia no es
-concluyente; 1000 sería una alternativa igual de defendible.
+![Precisión de recuperación (Hit@1) según el tamaño del chunk.](hit_at_1_plot.png){#fig-hit1 width=80%}
 
 ::: {.callout-warning}
-## Cómo leer el experimento
-Con 12 preguntas, una pregunta pesa 0,083, así que las diferencias entre 600 y 1000 no son concluyentes. Los
-documentos atómicos no dependen del tamaño. La medición se repitió tras acortar la ruta de encabezados y
-ampliar las preguntas (la primera daba MRR 0,933 para 600, 1000 y fijo). La bajada de 600 se explica por dos preguntas nuevas, D6
-(puesto 5) y R4 (puesto 2), y por D3, que pasó del puesto 1 al 2 con el cambio de encabezados o de pregunta.
+### ¿Cómo se calcula el ahorro del 23% de contexto?
+El ahorro no se refiere al tamaño del chunk individual, sino al volumen total de texto enviado al LLM en una consulta.
+
+En la medición, al recuperar los 5 fragmentos más relevantes con chunks de 1000 caracteres, enviamos al modelo de media 3.369 caracteres.
+
+Con chunks de 600, enviamos 2.605 caracteres: un 23% menos (los chunks de 300 enviarían 1.933, pero duplican el número de chunks).
+
+Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma información, el volumen total sigue siendo menor. Este ahorro se traduce directamente en menor coste por consulta y menor latencia (el modelo responde más rápido).
 :::
 
-## ¿Por qué ChromaDB?
+---
 
-| Opción | Filtros por metadatos | Infraestructura | Veredicto |
-|---|---|---|---|
-| **ChromaDB** (embebida, persistente) | **Sí, nativos** (`where`) | Ninguna: es una carpeta | **Elegida** |
-| FAISS | No (hay que filtrar a mano) | Ninguna | Rápida, pero sin filtros |
-| Qdrant, Milvus, Pinecone | Sí | Un servidor aparte o un servicio de pago | Excesivo para 6 309 *chunks* |
+## 6. Del texto al vector: El archivado final
 
-Con ~6 300 vectores, una base embebida basta; los **filtros por metadatos** (tipo de fuente, geografía,
-idioma) son un requisito del RAG avanzado, y Chroma los trae. La contrapartida es que no escala a millones de
-vectores ni se comparte entre procesos. Para ese caso habría que migrar a Qdrant o Milvus. Todo el código accede
-a Chroma a través de un único *repositorio*, así que migrar significaría reescribir una clase.
+Para que ChromaDB pueda buscar, los textos deben convertirse en números. Este proceso se llama **Embedding**. Utilizamos un modelo de HuggingFace (`intfloat/multilingual-e5-small`, cargado con `sentence-transformers`), que es gratuito, se ejecuta localmente (por privacidad) y está optimizado para varios idiomas.
 
-```{python}
-#| echo: false
-show_source("rag/vectorstore.py", "VectorStoreRepository.query")
+**¿Qué hace este código?** `E5Embedder` (`rag/embeddings.py`) envuelve el modelo `intfloat/multilingual-e5-small` de `sentence-transformers` (gratuito y local). Este modelo necesita un prefijo: `passage: ` al guardar textos y `query: ` al buscar. Los vectores van normalizados, y `repo.add` y `repo.query` los usan para indexar y para la búsqueda semántica.
+
+```python
+#| eval: false
+#| echo: true
+#| code-fold: true
+
+from sentence_transformers import SentenceTransformer
+from rag.embeddings import E5Embedder
+
+modelo = SentenceTransformer("intfloat/multilingual-e5-small", device="cpu")
+embedder = E5Embedder(modelo, query_prefix="query: ", passage_prefix="passage: ")
+
+vectores = embedder.embed_passages(["El churn subió en 2023..."])  # al indexar
+consulta = embedder.embed_query("¿Por qué se van los clientes?")    # al buscar
 ```
 
-## Embeddings
+---
 
-Se usa `intfloat/multilingual-e5-small` (384 dimensiones) con `sentence-transformers`: es **multilingüe**
-(el corpus mezcla inglés, español, francés y alemán, y las preguntas pueden venir en cualquiera) y lo bastante
-pequeño para ejecutarse en CPU. El modelo e5 exige prefijos: `"passage: "` para los documentos y
-`"query: "` para las preguntas, y el código los aplica en un único lugar.
-La distancia es coseno.
+## 7. Conclusión de la Fase B
 
-El índice resultante tiene **178 documentos y 6 309 *chunks***; construirlo en frío tarda unos 200 s en CPU y se
-sincroniza de forma incremental (cada documento guarda una huella de su contenido y de la configuración, y solo
-se reindexa lo que cambia).
+::: {.callout-note}
+### Resumen de decisiones
+*   **LangChain:** Orquestador flexible para alternar entre modelos (Gemini/Groq) y herramientas.
+*   **ChromaDB:** Base vectorial ligera, persistente y con filtros por metadatos, ideal para la nube.
+*   **Chunking validado:** Corte de 600 caracteres / 90 overlap, respaldado por el experimento empírico (los tres tamaños empatan con un Hit@1 del 84,6%; se elige 600 por el menor contexto y el menor número de chunks).
+:::
+
+Con esta arquitectura preparada, el sistema está listo para la **Fase C: Evaluación comparativa (Sin RAG vs. Con RAG)**.

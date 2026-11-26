@@ -10,7 +10,7 @@ topic: deposits_rates
 columns:
 - Balance
 date: '2026-09-16'
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'ECB statistical data: reuse allowed with source acknowledgement'
 format: csv
 ---
@@ -19,7 +19,7 @@ format: csv
 
 Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).
 
-As of 2026-11-19, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).
+As of 2026-11-26, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).
 
 Recent changes:
 - 2026-09-16: 2.65%

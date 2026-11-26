@@ -21,7 +21,7 @@ _SMALL_TALK = re.compile(
 # (source types to search, pattern). First match wins, so the order matters.
 _SOURCE_RULES: tuple[tuple[tuple[str, ...], re.Pattern[str]], ...] = (
     (("dataset_stats",), re.compile(r"kaggle|bank customer churn|\bdataset\b", re.I)),
-    (("paper",), re.compile(r"arxiv|\bpapers?\b|\bstudy\b|\bauthors?\b|transformer", re.I)),
+    (("paper",), re.compile(r"arxiv|\bpapers?\b|\bauthors?\b|transformer", re.I)),
     (
         ("regulation", "regulator_guide"),
         re.compile(

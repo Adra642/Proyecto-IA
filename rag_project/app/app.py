@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from app.handlers import AppService
-from app.ui import build_demo, load_example_questions
+from app.ui import APP_CSS, build_demo, load_example_questions
 from core.corpus import load_documents
 from core.logging_setup import get_logger, setup_logging
 from core.settings import Settings, load_settings
@@ -43,9 +43,15 @@ def main() -> None:
         "warm-up", 1
     )  # builds the BM25 index now, not on the first question
     examples = load_example_questions(settings.resolve(EXAMPLES_FILE))
-    demo = build_demo(AppService(container.chain()), examples)
+    default = settings.llm.provider
+    service = AppService(lambda provider: container.chain(provider), default)  # type: ignore[arg-type]
+    demo = build_demo(
+        service, examples, {str(k): v for k, v in settings.llm.models.items()}, default
+    )
     demo.queue(default_concurrency_limit=2)
-    demo.launch(server_name=HOST, server_port=int(os.environ.get("PORT", DEFAULT_PORT)))
+    demo.launch(
+        server_name=HOST, server_port=int(os.environ.get("PORT", DEFAULT_PORT)), css=APP_CSS
+    )
 
 
 if __name__ == "__main__":

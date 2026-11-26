@@ -36,6 +36,12 @@ no revela apellidos ni identificadores de clientes.
 """
 
 
+# Passed to ``launch`` (Gradio 6 takes the CSS there). Smaller text for the retrieved sources.
+APP_CSS = """
+.fuentes { font-size: 0.82rem; line-height: 1.35; }
+.fuentes blockquote { font-size: 0.78rem; }
+"""
+
 SOURCE_TYPES = ["dataset_stats", "paper", "encyclopedia", "regulation", "macro_data",
                 "regulator_guide", "press"]  # fmt: skip
 GEOGRAPHIES = ["FR", "DE", "ES", "EU", "global", "US"]
@@ -48,20 +54,34 @@ def load_example_questions(path: Path) -> list[str]:
     return [str(q.get("question_es") or q["question"]) for q in data]
 
 
-def build_demo(service: AppService, examples: list[str]) -> gr.Blocks:
-    """Build the Blocks app with a chat tab, a side-by-side comparison tab and an About tab."""
+def build_demo(
+    service: AppService, examples: list[str], models: dict[str, str], default_provider: str
+) -> gr.Blocks:
+    """Build the Blocks app: model selector, chat tab, comparison tab and About tab.
+
+    Args:
+        service: Answers the questions.
+        examples: Example-button questions.
+        models: LLM provider -> model name, shown in the selector.
+        default_provider: Provider selected at start (``gemini`` unless configured otherwise).
+    """
     demo = gr.Blocks(title="RAG: churn en banca europea")
     with demo:
         gr.Markdown("# RAG: churn y retención en banca europea")
+        provider = gr.Radio(
+            [(f"{name.capitalize()} · {model}", name) for name, model in models.items()],
+            value=default_provider,
+            label="Modelo (el mismo en todos los modos)",
+        )
         with gr.Tabs():
-            _chat_tab(service, examples)
-            _compare_tab(service, examples)
+            _chat_tab(service, examples, provider)
+            _compare_tab(service, examples, provider)
             with gr.Tab("Acerca de"):
                 gr.Markdown(ABOUT_MD)
     return demo
 
 
-def _chat_tab(service: AppService, examples: list[str]) -> None:
+def _chat_tab(service: AppService, examples: list[str], provider: gr.Radio) -> None:
     with gr.Tab("Chat"):
         mode = gr.Radio(MODES, value=MODE_RAG, label="Modo")
         with gr.Accordion("Filtros (solo en RAG avanzado)", open=False):
@@ -75,7 +95,7 @@ def _chat_tab(service: AppService, examples: list[str]) -> None:
         chatbot = gr.Chatbot(label="Conversación", height=380)
         status = gr.Markdown()
         with gr.Accordion("Fuentes", open=False):
-            sources = gr.Markdown("_Aún no hay fuentes._")
+            sources = gr.Markdown("_Aún no hay fuentes._", elem_classes=["fuentes"])
         box = gr.Textbox(label="Pregunta", placeholder="Escribe tu pregunta…", lines=2)
         with gr.Row():
             send = gr.Button("Enviar", variant="primary")
@@ -89,10 +109,11 @@ def _chat_tab(service: AppService, examples: list[str]) -> None:
             types: list[str] | None,
             geos: list[str] | None,
             langs: list[str] | None,
+            llm: str,
         ) -> tuple[list[dict[str, str]], str, str, str]:
             history = history or []
             where: dict[str, Any] | None = where_from_filters(types or [], geos or [], langs or [])
-            text, answer = service.ask(question, selected, where)
+            text, answer = service.ask(question, selected, where, llm)
             history = [
                 *history,
                 {"role": "user", "content": question},
@@ -106,13 +127,13 @@ def _chat_tab(service: AppService, examples: list[str]) -> None:
             return history, src, format_status(answer), ""
 
         outputs = [chatbot, sources, status, box]
-        inputs = [box, chatbot, mode, f_types, f_geo, f_lang]
+        inputs = [box, chatbot, mode, f_types, f_geo, f_lang, provider]
         send.click(respond, inputs, outputs)
         box.submit(respond, inputs, outputs)
         clear.click(lambda: ([], "_Aún no hay fuentes._", "", ""), None, outputs)
 
 
-def _compare_tab(service: AppService, examples: list[str]) -> None:
+def _compare_tab(service: AppService, examples: list[str], provider: gr.Radio) -> None:
     with gr.Tab("Comparar"):
         gr.Markdown(
             "La misma pregunta y el mismo modelo, en tres modos: **sin RAG**, **RAG** "
@@ -129,14 +150,15 @@ def _compare_tab(service: AppService, examples: list[str]) -> None:
                     gr.Markdown(f"### {title}")
                     answers.append(gr.Markdown())
                     statuses.append(gr.Markdown())
-        with gr.Accordion("Fuentes (RAG)", open=False):
-            sources_rag = gr.Markdown()
-        with gr.Accordion("Fuentes (RAG avanzado)", open=False):
-            sources_adv = gr.Markdown()
+        with gr.Row():  # the two sets of sources next to each other, easy to compare
+            with gr.Column(), gr.Accordion("Fuentes (RAG)", open=False):
+                sources_rag = gr.Markdown(elem_classes=["fuentes"])
+            with gr.Column(), gr.Accordion("Fuentes (RAG avanzado)", open=False):
+                sources_adv = gr.Markdown(elem_classes=["fuentes"])
         gr.Examples(examples=examples, inputs=box, label="Preguntas de ejemplo")
 
-        def compare(question: str) -> list[str]:
-            results = [service.ask(question, m) for m in modes]
+        def compare(question: str, llm: str) -> list[str]:
+            results = [service.ask(question, m, None, llm) for m in modes]
             out: list[str] = []
             for text, answer in results:
                 out += [text, format_status(answer)]
@@ -146,5 +168,5 @@ def _compare_tab(service: AppService, examples: list[str]) -> None:
 
         outputs = [x for pair in zip(answers, statuses, strict=True) for x in pair]
         outputs += [sources_rag, sources_adv]
-        go.click(compare, box, outputs)
-        box.submit(compare, box, outputs)
+        go.click(compare, [box, provider], outputs)
+        box.submit(compare, [box, provider], outputs)

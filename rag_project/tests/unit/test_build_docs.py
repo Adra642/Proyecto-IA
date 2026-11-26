@@ -108,7 +108,8 @@ def test_stats_keys(df: pd.DataFrame) -> None:
     assert stats["geography_x_num_of_products.France|1.customers"] == 3
     assert stats["age_band.50-59.churn_rate"] == 1.0
     assert stats["num_of_products.4.churn_rate"] == 1.0  # not "4.0"
-    assert stats["complain.1.customers"] == 5 and stats["satisfaction_score.1.churn_rate"] == 1.0
+    assert stats["satisfaction_score.1.churn_rate"] == 1.0
+    assert not any(k.startswith("complain.") for k in stats)  # leakage: no segment cards
     assert stats["card_type.DIAMOND.mean_points"] == 550
     assert stats["leakage.share_churners_complained"] == 1.0
     json.dumps(stats, allow_nan=True)
@@ -118,6 +119,7 @@ def test_documents(df: pd.DataFrame, raw: pd.DataFrame) -> None:
     docs, stats = build_documents(df, "https://kaggle.test", date(2026, 11, 19), "lic")
     ids = [d.doc_id for d in docs]
     assert len(ids) == len(set(ids))
+    assert not [i for i in ids if "complain" in i]  # leakage column has no cards
     for needed in (
         "kaggle_data_dictionary",
         "kaggle_overview",
@@ -126,7 +128,6 @@ def test_documents(df: pd.DataFrame, raw: pd.DataFrame) -> None:
         "kaggle_summary_geography",
         "kaggle_segment_geography_x_num_of_products_germany_3",
         "kaggle_segment_num_of_products_4",
-        "kaggle_segment_complain_1",
     ):
         assert needed in ids
     four = next(d for d in docs if d.doc_id == "kaggle_segment_num_of_products_4")

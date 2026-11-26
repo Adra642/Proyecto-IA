@@ -59,12 +59,12 @@ Devuelve un `RagAnswer` (pydantic): respuesta, modo, trozos con puntuación, cit
 
 ## 4. La evaluación (`eval/`)
 
-### Las 14 preguntas (`eval/questions.json`)
+### Las 15 preguntas (`eval/questions.json`)
 | Cat. | Qué | Preguntas |
 |---|---|---|
-| **D** (dataset, 6) | Cifras calculadas del CSV | D1 churn por país; D2 churn con 4 productos frente a 2; D3 relación Complain–Exited; D4 tarjeta con más churn y más puntos; D5 banda de edad con más churn; D6 la versión simple de D1 («churn en Alemania») |
+| **D** (dataset, 4) | Cifras calculadas del CSV | D1 churn por país; D2 churn con 4 productos frente a 2; D3 relación Complain–Exited (fuga del objetivo); D6 la versión simple de D1 («churn en Alemania») |
 | **L** (literatura, 2) | Hallazgos de dos papers ingeridos | L1 mejor clasificador; L2 arquitectura FT-Transformer + stacking |
-| **R** (regulatorio y actual, 4) | Datos recientes o muy específicos | R1 importe fijo del Reglamento 2015/751; R2 banca por internet en Alemania (Eurostat); R3 tipo de la facilidad de depósito del BCE y desde cuándo; R4 topes del 0,2 % y 0,3 % |
+| **R** (regulatorio, actual y fuentes añadidas, 7) | Datos recientes o muy específicos | R1 porcentaje de participantes que no pudo cambiar de banco en el estudio de la Comisión de 2012; R2 banca por internet en Alemania (Eurostat); R3 tipo de la facilidad de depósito del BCE y desde cuándo; R4 reclamaciones recibidas por el Banco de España en 2025; R5 porcentaje de franceses que quiso cambiar de banco y no se atrevió (CCSF); R6 sucursales por 100.000 adultos en Alemania (Banco Mundial); R7 los tres asuntos principales del informe de la EBA |
 | **U** (comportamiento, 2) | El sistema debe portarse bien | U1 churn en Portugal (no está en el corpus: debe decir que no lo sabe); U2 apellido de un cliente (debe negarse) |
 
 Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer Churn…") para que la línea base reciba una pregunta específica.
@@ -89,29 +89,30 @@ Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya 
 
 | Categoría | Modo | Cifras correctas | hit@4 | Cita correcta | Comportamiento |
 |---|---|---|---|---|---|
-| D (6) | sin RAG | **0,00** | | | |
-| D (6) | RAG | **0,83** | 0,83 | 0,50 | |
-| D (6) | RAG avanzado | **1,00** | 1,00 | 0,83 | |
+| D (4) | sin RAG | **0,00** | | | |
+| D (4) | RAG | **0,75** | 0,75 | 0,75 | |
+| D (4) | RAG avanzado | **1,00** | 1,00 | 0,75 | |
 | L (2) | RAG / avanzado | | 1,00 | 1,00 | |
-| R (4) | sin RAG | 0,25 | | | |
-| R (4) | RAG | 0,75 | 1,00 | 0,50 | |
-| R (4) | RAG avanzado | 0,62 | 1,00 | 1,00 | |
+| R (7) | sin RAG | 0,00 | | | |
+| R (7) | RAG | 0,83 | 1,00 | 0,86 | |
+| R (7) | RAG avanzado | 0,83 | 1,00 | 0,86 | |
 | U (2) | los tres modos | | | | 1,00 |
 
-Latencia mediana: 1,2 s sin RAG, 1,0 s con RAG y 1,8 s con RAG avanzado.
+Latencia mediana: 1,1 s sin RAG, 2,1 s con RAG y 1,0 s con RAG avanzado.
 
 Cómo leerlo:
 - **D:** sin RAG el modelo no conoce las cifras (responde "no lo sé", que es una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
 - **L:** con RAG recupera y cita el paper correcto; sin RAG dice que no puede verificarlo.
 - **R3 (tipo actual del BCE):** sin RAG contesta con un dato **desfasado** (3,25 % «desde el 23 de octubre de 2024»), es decir, una respuesta segura pero equivocada; con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
+- **R4 a R7 (fuentes añadidas al final):** sin RAG no acierta ninguna cifra (reclamaciones del Banco de España en 2025, 17 % de franceses que no se atrevió a cambiar de banco, sucursales en Alemania) y en R7 dice que no lo sabe; con RAG las acierta y cita el documento correcto. Es la prueba de que las fuentes nuevas aportan conocimiento que el modelo no tiene.
 - **U1 y U2:** los tres modos se portan bien (el RAG se niega por la guarda de privacidad; el modelo sin RAG dice que no lo sabe). U **no discrimina** entre sistemas con este prompt de línea base.
-- **R:** el modo avanzado acierta la cita más a menudo (1,00 frente a 0,50) pero su acierto numérico baja de 0,75 a 0,62 por R4 (la misma pregunta varía entre ejecuciones; con 4 preguntas es ruido). R1 y R4 siguen imperfectas: la cifra de R1 está en el trozo *siguiente* al recuperado.
+- **R:** los dos modos con RAG aciertan lo mismo (0,83); R1 (estudio de la Comisión de 2012 sobre el cambio de cuenta) falla en ambos: se recupera el documento correcto, pero el informe es muy largo y repite muchos porcentajes, y el trozo con la cifra no entra entre los cuatro recuperados.
 
 Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada país"; con RAG, "Alemania 32,4 %, Francia 16,2 %, España 16,7 % [kaggle_summary_geography]".
 
 ## 6. Limitaciones (decirlas antes de que las pregunten)
 
-1. **14 preguntas** (12 de recuperación con fuentes de referencia): sirve como demostración y diagnóstico, no como estadística. Con 12 preguntas una vale 0,083.
+1. **15 preguntas** (13 de recuperación con fuentes de referencia): sirve como demostración y diagnóstico, no como estadística. Con 13 preguntas una vale 0,077.
 2. **Una ejecución por pregunta** y Gemini 3.5 ignora `temperature`: hay variabilidad no medida (por ejemplo, una cita que cambia entre ejecuciones con la misma recuperación).
 3. El **prompt sin RAG permite abstenerse**: es una línea base honesta, pero un modelo obligado a responder alucinaría más.
 4. **No hay puntuación manual** (decisión del equipo): todas las métricas son automáticas. Las referencias de L1/L2 sí están verificadas por una persona.
@@ -121,10 +122,10 @@ Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada
 ## 7. Preguntas probables
 
 - *¿Cómo sabéis que la mejora es del RAG y no del modelo?* Mismo modelo y mismas preguntas; lo único que cambia es el contexto recuperado.
-- *¿Y si el modelo ya sabía la respuesta?* Las preguntas que la línea base respondía bien (R1 y R2 originales) se sustituyeron por otras más específicas; R4 se conserva como caso donde el modelo sin RAG ya acierta.
+- *¿Y si el modelo ya sabía la respuesta?* Las preguntas que la línea base respondía bien (R1 y R2 originales, y los topes de intercambio) se sustituyeron por otras más específicas; las nuevas (R4 a R6) son datos que el modelo no puede conocer.
 - *¿Cómo evitáis un gold escrito a mano?* Se genera desde `stats.json` y desde el texto ingerido con regex verificables; solo L1/L2 se redactaron a mano y una persona las verificó contra el PDF.
 - *¿Qué pasa si no hay información?* Contexto vacío: respuesta fija "No lo sé" sin llamar al LLM. Con contexto irrelevante, el prompt obliga a decir que es insuficiente (U1).
 - *¿Qué hace la guarda de privacidad?* Rechaza antes de llamar al LLM las preguntas por apellidos o clientes concretos; además esos datos nunca se indexaron.
-- *¿Por qué fallan D6, R1 y R4 en el RAG básico?* Recupera el documento correcto pero no el trozo con la cifra, o la frase común del dataset diluye «Alemania». El modo avanzado (búsqueda híbrida) arregla D6; R1 y R4 siguen siendo imperfectas.
+- *¿Por qué fallan D6 y R1 en el RAG básico?* Recupera el documento correcto pero no el trozo con la cifra, o la frase común del dataset diluye «Alemania». El modo avanzado (búsqueda híbrida) arregla D6; R1 sigue fallando.
 - *¿Por qué `hit@k` puede engañar?* Mide si el documento correcto aparece, no si el trozo contiene la respuesta.
 - *¿Cómo gestionáis los límites de la API gratuita?* Throttling de 1 s, reintentos con espera exponencial, proveedor alternativo opcional.

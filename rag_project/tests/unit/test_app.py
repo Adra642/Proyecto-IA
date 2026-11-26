@@ -80,7 +80,7 @@ class FakeChain:
 
 
 def _service(chain: FakeChain) -> AppService:
-    return AppService(chain, sleep=lambda _s: None)
+    return AppService(lambda _provider: chain, "gemini", sleep=lambda _s: None)
 
 
 def test_ask_routes_by_mode() -> None:
@@ -121,7 +121,10 @@ def test_rate_limit_twice_shows_friendly_message() -> None:
 
 @pytest.mark.parametrize(
     ("error", "message"),
-    [(MissingCredentialError("no key"), MSG_NO_KEY), (ProviderError("boom"), MSG_PROVIDER)],
+    [
+        (MissingCredentialError("no key"), MSG_NO_KEY.format(provider="gemini")),
+        (ProviderError("boom"), MSG_PROVIDER),
+    ],
 )
 def test_provider_errors_become_friendly_messages(error: Exception, message: str) -> None:
     assert _service(FakeChain([error])).ask("q", MODE_RAG) == (message, None)
@@ -131,6 +134,7 @@ def test_format_sources_shows_title_link_citation_and_score() -> None:
     md = format_sources([_chunk()], ["doc_a"])
     assert "[Card A](https://x.org/a)" in md
     assert "citada en la respuesta" in md and "0.812" in md and "`doc_a`" in md
+    assert "[abrir documento ↗](https://x.org/a)" in md
 
 
 def test_format_sources_truncates_and_handles_empty() -> None:
@@ -145,7 +149,8 @@ def test_format_status() -> None:
 
 
 def test_ui_builds_and_exposes_both_modes() -> None:
-    demo = build_demo(_service(FakeChain()), ["example question"])
+    models = {"gemini": "g-model", "groq": "q-model", "deepseek": "d-model"}
+    demo = build_demo(_service(FakeChain()), ["example question"], models, "gemini")
     assert demo.title == "RAG: churn en banca europea"
     assert MODES == (MODE_NO_RAG, MODE_RAG, MODE_ADVANCED)
 
@@ -158,3 +163,27 @@ def test_example_questions_prefer_the_spanish_wording(tmp_path: Path) -> None:
     ]
     path.write_text(json.dumps(items), encoding="utf-8")
     assert load_example_questions(path) == ["¿Churn?", "Only English?"]
+
+
+def test_each_provider_gets_its_own_chain_built_once() -> None:
+    built: list[str] = []
+    chains = {"gemini": FakeChain(), "groq": FakeChain()}
+
+    def chain_for(provider: str) -> FakeChain:
+        built.append(provider)
+        return chains[provider]
+
+    service = AppService(chain_for, "gemini", sleep=lambda _s: None)
+    service.ask("q1", MODE_RAG)  # default provider
+    service.ask("q2", MODE_RAG, provider="groq")
+    service.ask("q3", MODE_RAG, provider="groq")
+    assert built == ["gemini", "groq"]
+    assert [len(c.calls) for c in chains.values()] == [1, 2]
+
+
+def test_missing_key_message_names_the_chosen_provider() -> None:
+    def chain_for(provider: str) -> FakeChain:
+        raise MissingCredentialError(f"{provider} key missing")
+
+    text, answer = AppService(chain_for, "gemini").ask("q", MODE_RAG, provider="deepseek")
+    assert answer is None and "deepseek" in text
