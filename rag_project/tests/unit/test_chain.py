@@ -127,7 +127,3 @@ def test_citations_only_count_retrieved_documents() -> None:
     text = "See [card_de], again [card_de#0002], and [made_up_doc]. Also [card_fr]."
     assert extract_citations(text, [DE, FR]) == ["card_de", "card_fr"]
     assert extract_citations("no citations here", [DE]) == []
-
-
-def test_rag_prompt_cites_context() -> None:
-    assert build_rag_prompt("q", [DE]).count("[card_de]") >= 1

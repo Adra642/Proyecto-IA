@@ -20,6 +20,6 @@ def test_prefixes_are_added() -> None:
     assert model.seen == ["passage: a", "passage: b", "query: q"]
 
 
-def test_returns_plain_float_lists() -> None:
+def test_query_vector_is_computed_from_the_prefixed_text() -> None:
     vec = E5Embedder(FakeModel(), "query: ", "passage: ").embed_query("x")
-    assert vec == [float(len("query: x")), 0.0]
+    assert isinstance(vec, list) and vec == [float(len("query: x")), 0.0]

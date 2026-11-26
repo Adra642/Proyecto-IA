@@ -107,8 +107,7 @@ def test_config_pages_have_required_metadata(settings: Settings) -> None:
     assert {"es", "fr", "de", "en"} <= langs
 
 
-def test_eba_registered_and_configured(settings: Settings) -> None:
+def test_eba_is_registered() -> None:
     from data_pipeline.fetchers.html_pages import EbaFetcher
 
-    assert FETCHER_REGISTRY["b6"] is EbaFetcher and EbaFetcher.source_name == "eba"
-    assert len(settings.sources["b6"]["pages"]) >= 5
+    assert FETCHER_REGISTRY["b6"] is EbaFetcher

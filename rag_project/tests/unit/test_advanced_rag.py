@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -261,3 +262,40 @@ def test_ablation_scores_each_configuration_and_filtered_falls_back() -> None:
     only_other = ListRetriever([CORPUS[2]])
     run = filtered(only_other, RuleRouter())
     assert [c.doc_id for c in run("Kaggle dataset churn")] == ["c"]  # filter empty -> unfiltered
+
+
+def test_flashrank_reranker_sorts_by_model_score_and_replaces_scores(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The FlashRank wrapper maps results back to chunks without loading the real model."""
+    import sys
+    import types
+
+    class FakeRequest:
+        def __init__(self, query: str, passages: list[dict[str, str]]) -> None:
+            self.query, self.passages = query, passages
+
+    class FakeRanker:
+        def __init__(self, model_name: str, cache_dir: str) -> None:
+            self.loaded = (model_name, cache_dir)
+
+        def rerank(self, request: FakeRequest) -> list[dict[str, object]]:
+            # pretend the model prefers the second passage
+            ids = [p["id"] for p in request.passages]
+            return [{"id": ids[1], "score": 0.9}, {"id": ids[0], "score": 0.1}]
+
+    fake = types.ModuleType("flashrank")
+    fake.Ranker = FakeRanker  # type: ignore[attr-defined]
+    fake.RerankRequest = FakeRequest  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "flashrank", fake)
+
+    from rag.rerank import FlashRankReranker
+
+    a = RetrievedChunk(chunk_id="a#0", doc_id="a", text="alpha", score=0.5, metadata={})
+    b = RetrievedChunk(chunk_id="b#0", doc_id="b", text="beta", score=0.4, metadata={})
+    reranker = FlashRankReranker("m", tmp_path / "cache")
+    out = reranker.rerank("q", [a, b])
+    assert [c.chunk_id for c in out] == ["b#0", "a#0"]
+    assert [c.score for c in out] == [0.9, 0.1]
+    assert (tmp_path / "cache").is_dir()
+    assert reranker.rerank("q", []) == []
