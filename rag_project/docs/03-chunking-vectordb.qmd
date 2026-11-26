@@ -26,27 +26,27 @@ Un **orquestador** (o *framework*) es el "director de orquesta" del sistema. Se 
 
 ::: {.callout-note}
 ## Justificación técnica
-*   **Flexibilidad (Enrutamiento):** Nuestro sistema no usa un solo modelo de IA. Usa **Gemini** para preguntas complejas (más lento, pero más inteligente) y **Groq** para respuestas rápidas. LangChain nos permite cambiar de modelo con una sola línea de código.
+*   **Flexibilidad (Enrutamiento):** Nuestro sistema admite varios proveedores de IA: **Gemini** (por defecto), **Groq** y **DeepSeek**. Se elige con una opción de `config.yaml` o, en la aplicación, con el selector de modelo; LangChain permite cambiar de proveedor sin reescribir la lógica.
 *   **Ecosistema:** Es el framework más maduro, con más integraciones y documentación del mercado.
 *   **Rendimiento:** Su sobrecarga (*overhead* o tiempo que tarda en procesar la orden) es de apenas **~10 ms**, algo insignificante frente a los segundos que tarda la IA en pensar.
 :::
 
-**¿Qué hace este código?** Este bloque demuestra la flexibilidad de LangChain para alternar entre dos modelos de lenguaje con la misma interfaz. Primero, instancia un modelo complejo (Gemini) para tareas de razonamiento profundo y, segundo, un modelo rápido (Groq) para consultas simples. Finalmente, realiza una invocación al modelo rápido para obtener una respuesta, ilustrando cómo se puede cambiar de proveedor sin reescribir la lógica de la aplicación.
+**¿Qué hace este código?** Es el uso real del proyecto: `Container` (`factory.py`) construye el cliente del modelo a partir de `config.yaml`. Por defecto usa Gemini; pasando otro proveedor (`groq` o `deepseek`) se obtiene un cliente distinto con **la misma interfaz** (`invoke`), sin cambiar la lógica. La aplicación usa esto para su selector de modelo.
 
 ```python
 #| eval: false
 #| echo: true
 #| code-fold: true
 
-# Usamos Gemini para preguntas que requieren razonamiento profundo
-llm_complejo = ChatGoogleGenerativeAI(model="gemini-pro")
+from core.settings import load_settings
+from factory import Container
 
-# Usamos Groq para preguntas simples donde prima la velocidad
-llm_rapido = ChatGroq(model="llama3-8b")
+container = Container(load_settings())
 
-# LangChain nos permite usar la misma interfaz para ambos.
-# Es como tener un mando universal para la TV y el aire acondicionado.
-respuesta = llm_rapido.invoke("¿Qué es el churn?")
+llm = container.llm()           # el proveedor de config.yaml (Gemini por defecto)
+llm_groq = container.llm("groq")  # otro proveedor, misma interfaz
+
+respuesta = llm.invoke("¿Qué es el churn?")
 ```
 
 ---
@@ -69,24 +69,22 @@ Una **Base de Datos Vectorial** no busca palabras exactas, sino que busca por **
 *   **Escala adecuada:** Nuestro corpus genera **~4.700 trozos (4.663)**. ChromaDB es el punto medio perfecto.
 :::
 
-**¿Qué hace este código?** Este fragmento inicializa ChromaDB en modo persistente (guardando los datos en disco) y crea una colección llamada "banca". Luego, añade un documento de ejemplo junto con sus metadatos (etiquetas como el idioma y la fuente). Estos metadatos son clave porque permiten filtrar las búsquedas posteriormente (por ejemplo, buscar solo en documentos en español).
+**¿Qué hace este código?** `VectorStoreRepository` (`rag/vectorstore.py`) es el único sitio que usa ChromaDB: abre una colección persistente en disco con distancia coseno, guarda cada *chunk* con sus metadatos (`add`) y busca por similitud (`query`). El parámetro `where` filtra por metadatos **antes** de buscar, por ejemplo solo documentos de Alemania.
 
 ```python
 #| eval: false
 #| echo: true
 #| code-fold: true
 
-import chromadb
+from rag.vectorstore import VectorStoreRepository, open_persistent_client
 
-client = chromadb.PersistentClient(path="./chroma_db")
-collection = client.get_or_create_collection("banca")
+client = open_persistent_client("chroma_db")   # carpeta en disco
+repo = VectorStoreRepository(client, "banca", embedder)
 
-# Guardamos el texto junto con sus etiquetas (metadatos)
-collection.add(
-    documents=["El churn subió en 2023..."],
-    metadatas=[{"idioma": "es", "fuente": "BCE"}], # Etiquetas para filtrar
-    ids=["chunk_1"]
-)
+repo.add(chunks)  # guarda texto, vector y metadatos de cada chunk
+
+# Búsqueda semántica restringida por metadatos
+resultados = repo.query("churn en Alemania", k=4, where={"geography": "DE"})
 ```
 
 ---
@@ -110,22 +108,20 @@ No todos los documentos se cortan igual. Usamos un enrutador para elegir la estr
 | Leyes y Wikipedia | `MarkdownRecursiveChunker` | Respeta los encabezados (#) y párrafos antes de dividir. |
 | Pruebas | `FixedSizeChunker` | Corta a ciegas por número de letras. Solo usado para comparar. |
 
-**¿Qué hace este código?** La función `obtener_chunker` actúa como un enrutador. Según el tipo de documento que reciba, devuelve una instancia de chunker diferente. Para "tabla_datos" usa `PassthroughChunker` (que no divide el documento, tratándolo como un todo atómico). Para "ley_europea" usa `MarkdownRecursiveChunker` con un tamaño de 600 caracteres y un solapamiento de 90 caracteres (el 15% recomendado). Esto asegura que cada tipo de documento se procese con la estrategia más adecuada.
+**¿Qué hace este código?** `build_chunker` (`rag/chunking.py`) crea el enrutador a partir de `config.yaml`. Los tipos de documento atómicos (estadísticas del dataset y datos macro, en `atomic_source_types`) van a `PassthroughChunker`, que no los divide; todo lo demás va a `MarkdownRecursiveChunker`, que corta primero por encabezados y luego por tamaño (600 caracteres con 90 de solapamiento).
 
 ```python
 #| eval: false
 #| echo: true
 #| code-fold: true
 
-def obtener_chunker(tipo_documento):
-    if tipo_documento == "tabla_datos":
-        return PassthroughChunker() # 1 documento = 1 chunk
-
-    elif tipo_documento == "ley_europea":
-        return MarkdownRecursiveChunker(
-            chunk_size=600, # Tamaño óptimo
-            overlap=90      # 15% del tamaño
-        )
+def build_chunker(cfg):
+    splitter = MarkdownRecursiveChunker(cfg.chunk_size, cfg.chunk_overlap)  # 600 / 90
+    return RoutingChunker(
+        PassthroughChunker(),             # 1 documento = 1 chunk
+        splitter,
+        set(cfg.atomic_source_types),     # dataset_stats, macro_data
+    )
 ```
 
 ---
@@ -193,30 +189,23 @@ Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma infor
 
 ## 6. Del texto al vector: El archivado final
 
-Para que ChromaDB pueda buscar, los textos deben convertirse en números. Este proceso se llama **Embedding**. Utilizamos un modelo de HuggingFace (`multilingual-e5`), que es gratuito, se ejecuta localmente (por privacidad) y está optimizado para varios idiomas.
+Para que ChromaDB pueda buscar, los textos deben convertirse en números. Este proceso se llama **Embedding**. Utilizamos un modelo de HuggingFace (`intfloat/multilingual-e5-small`, cargado con `sentence-transformers`), que es gratuito, se ejecuta localmente (por privacidad) y está optimizado para varios idiomas.
 
-**¿Qué hace este código?** Este bloque realiza tres pasos fundamentales: (1) carga el modelo de embeddings `multilingual-e5` de HuggingFace, que convierte texto en vectores numéricos; (2) crea una base de datos ChromaDB a partir de nuestros chunks, utilizando el modelo de embeddings para indexarlos y persistiéndolos en el directorio `./chroma_db`; y (3) realiza una búsqueda semántica de ejemplo con la consulta "¿Por qué se van los clientes?", recuperando los fragmentos más similares según su representación vectorial.
+**¿Qué hace este código?** `E5Embedder` (`rag/embeddings.py`) envuelve el modelo `intfloat/multilingual-e5-small` de `sentence-transformers` (gratuito y local). Este modelo necesita un prefijo: `passage: ` al guardar textos y `query: ` al buscar. Los vectores van normalizados, y `repo.add` y `repo.query` los usan para indexar y para la búsqueda semántica.
 
 ```python
 #| eval: false
 #| echo: true
 #| code-fold: true
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from sentence_transformers import SentenceTransformer
+from rag.embeddings import E5Embedder
 
-# 1. Modelo que convierte texto a números (gratuito y local)
-modelo_embeddings = HuggingFaceEmbeddings(model_name="multilingual-e5")
+modelo = SentenceTransformer("intfloat/multilingual-e5-small", device="cpu")
+embedder = E5Embedder(modelo, query_prefix="query: ", passage_prefix="passage: ")
 
-# 2. Base de datos con los chunks
-db = Chroma.from_documents(
-    documents=nuestros_chunks,
-    embedding=modelo_embeddings,
-    persist_directory="./chroma_db"
-)
-
-# 3. Búsqueda semántica
-resultados = db.similarity_search("¿Por qué se van los clientes?")
+vectores = embedder.embed_passages(["El churn subió en 2023..."])  # al indexar
+consulta = embedder.embed_query("¿Por qué se van los clientes?")    # al buscar
 ```
 
 ---

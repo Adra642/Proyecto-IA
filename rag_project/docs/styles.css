@@ -9,3 +9,6 @@ img { max-width: 100%; }
 /* Label the page-navigation buttons in Spanish (Quarto only shows the target title). */
 .nav-page-previous .nav-page-text::before { content: "Anterior: "; font-weight: 600; }
 .nav-page-next .nav-page-text::before { content: "Siguiente: "; font-weight: 600; }
+
+/* Dark mode: images with a white background (screenshots, matplotlib figures) keep a soft frame. */
+.quarto-dark img:not([src$=".svg"]) { border-radius: 6px; background: #fff; }

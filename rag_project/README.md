@@ -211,14 +211,17 @@ filter, which hid the Bundesbank study; only "arXiv", "paper", "authors" and "tr
 ```bash
 uv run python -m app.app          # or: uv run poe app   -> http://localhost:8080 (set PORT to change)
 ```
-It needs `GOOGLE_API_KEY` (or the key of the provider chosen in `.env`). On start it syncs the Chroma
+It needs `GOOGLE_API_KEY` for the default model; the **model selector** at the top of the page switches
+between Gemini (default), Groq and DeepSeek, and shows a clear message when the chosen provider's key is not set. On start it syncs the Chroma
 index with `data/processed/` (a no-op when current; a cold build takes about 5 minutes on CPU).
 The interface and every answer are in Spanish (the prompts ask for Spanish whatever the question's language): a **Chat** tab (mode *Sin RAG* / *RAG*, response time, a *Fuentes*
 accordion with title, link, source, similarity and the retrieved text), a **Comparar** tab (same
 question, No RAG | RAG side by side), example buttons (the evaluation questions) and an **Acerca de**
 tab. Rate-limited calls are retried once, then a friendly message is shown. **RAG avanzado**
 (hybrid search, routing and metadata filters) has its own mode and filter controls (source type,
-geography, language); the **Comparar** tab shows all three modes side by side.
+geography, language); the **Comparar** tab shows all three modes side by side, with the sources of RAG and
+RAG avanzado next to each other. Sources use a smaller font and link to the original document.
+The Quarto site has a light/dark switch; the "App y despliegue" page covers the app deploy and the docs workflow.
 
 ## Advanced RAG (Stage 5)
 Mode *RAG avanzado* (`RagChain.answer_advanced`) = **router** -> **hybrid retrieval** (BM25 + vector)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from core.settings import Settings
+from core.settings import Provider, Settings
 from rag.chain import RagChain
 from rag.chunking import Chunker, build_chunker
 from rag.embeddings import Embedder, build_embedder
@@ -30,9 +30,16 @@ class Container:
         self._bm25: BM25Retriever | None = None
         self._rerankers: dict[str, FlashRankReranker] = {}
 
-    def llm(self) -> LLMClient:
-        """Return the configured LLM client."""
-        return build_llm(self.settings)
+    def llm(self, provider: Provider | None = None) -> LLMClient:
+        """Return the configured LLM client, or the one of ``provider`` (no fallbacks)."""
+        return build_llm(self._settings_for(provider))
+
+    def _settings_for(self, provider: Provider | None) -> Settings:
+        """Settings with ``provider`` selected and no fallback, so the user's choice is honoured."""
+        if provider is None:
+            return self.settings
+        llm = self.settings.llm.model_copy(update={"provider": provider, "fallback_order": []})
+        return self.settings.model_copy(update={"llm": llm})
 
     def embedder(self) -> Embedder:
         """Return the embedder (loaded once per container: the model is slow to load)."""
@@ -98,18 +105,22 @@ class Container:
             self._rerankers[model_name] = FlashRankReranker(model_name, cache)
         return self._rerankers[model_name]
 
-    def model_id(self) -> str:
+    def model_id(self, provider: Provider | None = None) -> str:
         """``provider:model`` of the primary LLM (used in logs)."""
-        provider = self.settings.llm.provider
+        provider = provider or self.settings.llm.provider
         return f"{provider}:{self.settings.llm.models[provider]}"
 
-    def chain(self) -> RagChain:
-        """Return the chain (LLM + retriever) used by the evaluation and the app."""
+    def chain(self, provider: Provider | None = None) -> RagChain:
+        """Return the chain (LLM + retriever) used by the evaluation and the app.
+
+        Args:
+            provider: LLM provider to use instead of ``llm.provider`` (the app's model selector).
+        """
         return RagChain(
-            self.llm(),
+            self.llm(provider),
             self.retriever(),
             self.settings.retrieval.top_k,
-            self.model_id(),
+            self.model_id(provider),
             advanced_retriever=self.retriever("advanced"),
             router=RuleRouter(),
         )
