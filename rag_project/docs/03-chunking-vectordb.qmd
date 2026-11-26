@@ -139,6 +139,18 @@ Estos valores provienen de los resultados empíricos del experimento con tres ta
 | **600 (90 de overlap)** | 4.663 | 453 | 0,846 | 1,00 | 0,887 | 2.605 |
 | 1000 (150 de overlap) | 2.942 | 725 | 0,846 | 1,00 | 0,887 | 3.369 |
 
+**¿Qué significa cada columna?**
+
+| Columna | Definición |
+|---|---|
+| **Tamaño (overlap)** | Máximo de caracteres de cada *chunk* y caracteres que se repiten entre un *chunk* y el siguiente para no cortar una idea. |
+| **Chunks** | Número de fragmentos en que queda dividido todo el corpus; es lo que hay que convertir en vectores y guardar. |
+| **Caracteres medios** | Longitud media real de un *chunk* (suele quedar por debajo del máximo porque se corta en párrafos y frases). |
+| **Hit@1** | Proporción de preguntas cuyo **primer** fragmento recuperado pertenece a un documento de referencia. |
+| **Hit@5** | Igual, pero basta con que un documento de referencia aparezca entre los **cinco** primeros fragmentos. |
+| **MRR** | Media del inverso de la posición del primer fragmento correcto (1 si siempre es el primero, 0,5 si es el segundo...). Resume en un número cómo de arriba queda la respuesta. |
+| **Contexto top-5** | Caracteres medios que los cinco mejores fragmentos envían al modelo en cada consulta: indica el coste y la latencia. |
+
 *   **300 caracteres (con 45 de overlap):** Obtiene el mismo **Hit@1 del 84,6%**, pero genera más del doble de chunks (9.743 frente a 4.663): hay que calcular y guardar el doble de vectores sin ninguna mejora de precisión.
 *   **600 caracteres (con 90 de overlap):** Alcanza también un **Hit@1 del 84,6%**. Este tamaño ofrece un equilibrio razonable: los chunks son lo suficientemente grandes para contener la idea completa sin fragmentarla, pero lo bastante pequeños para ser precisos. El solapamiento del 15% evita cortes bruscos.
 *   **1000 caracteres:** También logra un **Hit@1 del 84,6%**. Como el rendimiento es igual al de 600 caracteres, este tamaño solo añade coste: consume más contexto (más caracteres por consulta) sin una mejora adicional en la precisión. Por tanto, **600 caracteres es la elección que mantenemos** porque ofrece la misma precisión con un menor coste de contexto (un 23% menos que 1000), lo que se traduce en menor latencia y menor coste por consulta. Es un compromiso razonado más que una victoria medida: con 13 preguntas el experimento ya no separa los tamaños.
@@ -187,30 +199,7 @@ Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma infor
 
 ---
 
-## 6. Del texto al vector: El archivado final
-
-Para que ChromaDB pueda buscar, los textos deben convertirse en números. Este proceso se llama **Embedding**. Utilizamos un modelo de HuggingFace (`intfloat/multilingual-e5-small`, cargado con `sentence-transformers`), que es gratuito, se ejecuta localmente (por privacidad) y está optimizado para varios idiomas.
-
-**¿Qué hace este código?** `E5Embedder` (`rag/embeddings.py`) envuelve el modelo `intfloat/multilingual-e5-small` de `sentence-transformers` (gratuito y local). Este modelo necesita un prefijo: `passage: ` al guardar textos y `query: ` al buscar. Los vectores van normalizados, y `repo.add` y `repo.query` los usan para indexar y para la búsqueda semántica.
-
-```python
-#| eval: false
-#| echo: true
-#| code-fold: true
-
-from sentence_transformers import SentenceTransformer
-from rag.embeddings import E5Embedder
-
-modelo = SentenceTransformer("intfloat/multilingual-e5-small", device="cpu")
-embedder = E5Embedder(modelo, query_prefix="query: ", passage_prefix="passage: ")
-
-vectores = embedder.embed_passages(["El churn subió en 2023..."])  # al indexar
-consulta = embedder.embed_query("¿Por qué se van los clientes?")    # al buscar
-```
-
----
-
-## 7. Conclusión de la Fase B
+## 6. Conclusión de la Fase B
 
 ::: {.callout-note}
 ### Resumen de decisiones
