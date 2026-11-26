@@ -39,8 +39,8 @@ Demo: abrir la app, preguntar «¿Cuál es la tasa de churn en Alemania?» en lo
 ### Parte 4: evaluación y técnicas avanzadas (fases C y E) · ~7 min
 Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recuperación. Y mostramos también dónde falla."*
 1. Diseño: 15 preguntas (D, L, R, U; las R incluyen fuentes añadidas al final: Banco de España, CCSF, Banco Mundial, EBA), gold generado y puntuación automática (cifras, citas, abstención, fugas de datos personales).
-2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,75 → 1,00**; R **0,00 → 0,83 → 0,83** (citas R 0,86 en ambos); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
-3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,887 → 1,000; hit@1 0,846 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
+2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,12 → 0,75 → 1,00**; R **0,00 → 0,83 → 0,83** (citas R 0,86 y 1,00); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
+3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,887 → 1,000; hit@1 0,846 → 1,00), filtros por metadatos y router por reglas; reranking mixto (FlashRank + orden híbrido) que recupera el trozo con la cifra de R1 sin perder los aciertos en primer puesto.
 4. Honestidad: D6 y R1 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática (L1/L2 verificadas por una persona); 15 preguntas son pocas.
 
 Demo: `uv run python -m eval.ablation` (sin LLM) y abrir `eval/ablation.csv`; `uv run python -m eval.score --examples` para ejemplos antes/después.
@@ -105,7 +105,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso es una ejecución por pregunta y se aceptan pequeñas diferencias entre ejecuciones.
 38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 15 (13 de recuperación más 2 de comportamiento); R1 y R2 originales, D4, D5 y los topes de intercambio los sabía el modelo o repetían otras preguntas, y se sustituyeron por preguntas sobre las fuentes nuevas (Banco de España, CCSF, Banco Mundial, EBA y el estudio de la Comisión de 2012).
 39. **¿Quién puntúa las respuestas?** Se puntúan automáticamente: cifras de referencia generadas desde `stats.json`, verificación de citas contra los trozos recuperados, abstención y fugas de datos personales. No hay puntuación manual; es una limitación que reconocemos (14 preguntas, una ejecución).
-39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,887 a 1,000 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
+39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,887 a 1,000 y resuelve D6; los filtros no añaden nada medible; el reranking del *cross-encoder* solo empeora, pero mezclado con el orden híbrido (peso 0,7) trae el trozo de R1 al puesto 3 sin perder aciertos.
 39c. **¿Por qué Cloud Run?** Ejecuta el contenedor con el modelo y el índice incluidos, escala a cero y tiene cuota gratuita.
 
 ### Ingeniería
@@ -122,7 +122,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 - **Corpus**: 13 fuentes · 177 documentos · 325.000 palabras · 4 idiomas.
 - **Índice**: 4.663 trozos · 600/90 · 384 dimensiones · 5 min en frío · 1 s sin cambios.
 - **Experimento de tamaño**: MRR 0,887 en las tres variantes (empate) · contexto top-5 1.933 / 2.605 / 3.369 caracteres.
-- **Evaluación**: 15 preguntas · D: 0,00 → 0,75 → 1,00 de cifras correctas · R: 0,00 → 0,83 → 0,83.
-- **Recuperación**: vectorial MRR 0,887 → híbrida 1,000 · hit@1 0,846 → 1,000 · reranking sin mejora.
+- **Evaluación**: 15 preguntas · D: 0,12 → 0,75 → 1,00 de cifras correctas · R: 0,00 → 0,83 → 0,83.
+- **Recuperación**: vectorial MRR 0,887 → híbrida 1,000 · hit@1 0,846 → 1,000 · reranking mixto: fact@4 0,90 → 1,00.
 - **Despliegue**: Cloud Run, 2 GiB / 2 CPU, imagen de 2,76 GB · sitio en GitHub Pages.
 - **Calidad**: 223 tests · 95 % de cobertura · ruff y mypy estrictos limpios.

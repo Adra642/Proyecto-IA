@@ -85,28 +85,28 @@ Las preguntas llevan su contexto completo ("En el dataset Kaggle Bank Customer C
 
 ## 5. Resultados (puntuación automática, `eval/auto_summary.csv`)
 
-Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya en español (ejecución del 25 de noviembre de 2026):
+Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya en español (ejecución del 27 de noviembre de 2026):
 
 | Categoría | Modo | Cifras correctas | hit@4 | Cita correcta | Comportamiento |
 |---|---|---|---|---|---|
-| D (4) | sin RAG | **0,00** | | | |
+| D (4) | sin RAG | **0,12** | | | |
 | D (4) | RAG | **0,75** | 0,75 | 0,75 | |
 | D (4) | RAG avanzado | **1,00** | 1,00 | 0,75 | |
 | L (2) | RAG / avanzado | | 1,00 | 1,00 | |
 | R (7) | sin RAG | 0,00 | | | |
 | R (7) | RAG | 0,83 | 1,00 | 0,86 | |
-| R (7) | RAG avanzado | 0,83 | 1,00 | 0,86 | |
+| R (7) | RAG avanzado | 0,83 | 1,00 | 1,00 | |
 | U (2) | los tres modos | | | | 1,00 |
 
-Latencia mediana: 1,1 s sin RAG, 2,1 s con RAG y 1,0 s con RAG avanzado.
+Latencia mediana: 1,6 s sin RAG, 1,9 s con RAG y 1,8 s con RAG avanzado.
 
 Cómo leerlo:
-- **D:** sin RAG el modelo no conoce las cifras (responde "no lo sé", que es una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
+- **D:** sin RAG el modelo apenas conoce las cifras (responde "no lo sé"; el 0,12 es una cifra suelta acertada en D2, una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
 - **L:** con RAG recupera y cita el paper correcto; sin RAG dice que no puede verificarlo.
 - **R3 (tipo actual del BCE):** sin RAG contesta con un dato **desfasado** (3,25 % «desde el 23 de octubre de 2024»), es decir, una respuesta segura pero equivocada; con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
 - **R4 a R7 (fuentes añadidas al final):** sin RAG no acierta ninguna cifra (reclamaciones del Banco de España en 2025, 17 % de franceses que no se atrevió a cambiar de banco, sucursales en Alemania) y en R7 dice que no lo sabe; con RAG las acierta y cita el documento correcto. Es la prueba de que las fuentes nuevas aportan conocimiento que el modelo no tiene.
 - **U1 y U2:** los tres modos se portan bien (el RAG se niega por la guarda de privacidad; el modelo sin RAG dice que no lo sabe). U **no discrimina** entre sistemas con este prompt de línea base.
-- **R:** los dos modos con RAG aciertan lo mismo (0,83); R1 (estudio de la Comisión de 2012 sobre el cambio de cuenta) falla en ambos: se recupera el documento correcto, pero el informe es muy largo y repite muchos porcentajes, y el trozo con la cifra no entra entre los cuatro recuperados.
+- **R:** los dos modos con RAG aciertan lo mismo (0,83); R1 (estudio de la Comisión de 2012 sobre el cambio de cuenta) falla en ambos: el informe es muy largo y repite muchos porcentajes; con el reranking mixto el trozo con la cifra ya llega al modelo (puesto 3), pero esa frase habla de los bancos que no completaron la apertura de cuenta y el modelo responde «no lo sé».
 
 Ejemplo (D1, "tasa de churn por país"): sin RAG, "no sé la tasa exacta de cada país"; con RAG, "Alemania 32,4 %, Francia 16,2 %, España 16,7 % [kaggle_summary_geography]".
 

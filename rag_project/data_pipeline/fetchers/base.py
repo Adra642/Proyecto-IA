@@ -89,6 +89,8 @@ class BaseFetcher(ABC):
     def fetch(self) -> FetchResult:
         """Run the source; a failing item is logged and never aborts the run."""
         result = FetchResult(self.source_id)
+        # Template Method: listing, caching and error handling live here; subclasses only
+        # implement _items(), _download() and _parse().
         try:
             items = self._items()
         except Exception as exc:
@@ -98,11 +100,13 @@ class BaseFetcher(ABC):
             return result
         for item in items:
             try:
+                # Cache hit = no network; a miss downloads once and stores the bytes (idempotent).
                 payload = self.cache.get_or_fetch(item.key, item.ext, partial(self._download, item))
                 docs = self._parse(item, payload)
                 result.documents.extend(docs)
                 log.info("[%s] %s -> %d document(s)", self.source_id, item.key, len(docs))
             except Exception as exc:
+                # One bad item is recorded and skipped; the rest of the source still runs.
                 msg = f"[{self.source_id}] {item.key}: {exc}"
                 log.error(msg)
                 result.errors.append(msg)
@@ -131,6 +135,7 @@ def register_fetcher(
 
     def decorator(cls: type[BaseFetcher]) -> type[BaseFetcher]:
         cls.source_id = source_id
+        # Adding a source = one decorated class; the orchestrator never needs editing.
         FETCHER_REGISTRY[source_id] = cls
         return cls
 

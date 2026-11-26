@@ -1,5 +1,5 @@
 ---
-title: "Fase B: Arquitectura RAG y Estrategia de Chunking"
+title: "Arquitectura RAG y estrategia de chunking"
 subtitle: "Decisiones técnicas y justificación de la base de conocimiento"
 ---
 
@@ -43,9 +43,11 @@ from factory import Container
 
 container = Container(load_settings())
 
+# El contenedor es la raíz de composición: construye todo desde config.yaml
 llm = container.llm()           # el proveedor de config.yaml (Gemini por defecto)
 llm_groq = container.llm("groq")  # otro proveedor, misma interfaz
 
+# Misma llamada con cualquier proveedor
 respuesta = llm.invoke("¿Qué es el churn?")
 ```
 
@@ -116,6 +118,7 @@ No todos los documentos se cortan igual. Usamos un enrutador para elegir la estr
 #| code-fold: true
 
 def build_chunker(cfg):
+    # Estrategia + fábrica: el tamaño y los tipos atómicos salen de config.yaml
     splitter = MarkdownRecursiveChunker(cfg.chunk_size, cfg.chunk_overlap)  # 600 / 90
     return RoutingChunker(
         PassthroughChunker(),             # 1 documento = 1 chunk
@@ -166,18 +169,19 @@ Estos valores provienen de los resultados empíricos del experimento con tres ta
 import matplotlib.pyplot as plt
 
 tamanos = ["300 car.\n(45 overlap)", "600 car.\n(90 overlap)", "1000 car."]
-hit_at_1 = [0.846, 0.846, 0.846]
+hit_at_1 = [0.846, 0.846, 0.846]  # resultado del experimento: empate a Hit@1
 colores = ["#ff9999", "#66b3ff", "#99ff99"]
 
 fig, ax = plt.subplots(figsize=(8, 4))
 bars = ax.bar(tamanos, hit_at_1, color=colores, edgecolor="black")
 
+# Escribe el porcentaje exacto encima de cada barra
 for bar in bars:
     h = bar.get_height()
     ax.text(bar.get_x() + bar.get_width() / 2, h + 0.01, f"{h * 100:.1f} %",
             ha="center", va="bottom", fontweight="bold")
 
-ax.set_ylim(0, 1.1)
+ax.set_ylim(0, 1.1)  # margen superior para que quepan las etiquetas
 ax.set_ylabel("Hit@1")
 ax.set_title("Precisión de Recuperación según Tamaño del Chunk")
 ax.grid(axis="y", linestyle="--", alpha=0.7)
@@ -199,7 +203,7 @@ Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma infor
 
 ---
 
-## 6. Conclusión de la Fase B
+## 6. Conclusión
 
 ::: {.callout-note}
 ### Resumen de decisiones
@@ -208,4 +212,4 @@ Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma infor
 *   **Chunking validado:** Corte de 600 caracteres / 90 overlap, respaldado por el experimento empírico (los tres tamaños empatan con un Hit@1 del 84,6%; se elige 600 por el menor contexto y el menor número de chunks).
 :::
 
-Con esta arquitectura preparada, el sistema está listo para la **Fase C: Evaluación comparativa (Sin RAG vs. Con RAG)**.
+Con esta arquitectura preparada, el sistema está listo para la **evaluación comparativa (Sin RAG vs. Con RAG)**.

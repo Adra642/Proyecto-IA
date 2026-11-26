@@ -92,15 +92,19 @@ class RuleRouter:
     def route(self, question: str) -> Route:
         """Route a question: small talk is answered directly, the rest gets a filtered search."""
         text = question.strip()
+        # Greetings and short chit-chat need no retrieval at all.
         if len(text) <= SMALL_TALK_MAX_CHARS and _SMALL_TALK.search(text):
             return Route(False, None, "small talk: answered without retrieval")
+        # Keyword rules map the question to the source types most likely to hold the answer.
         for source_types, pattern in _SOURCE_RULES:
             if not pattern.search(text):
                 continue
             conds: list[dict[str, Any]] = [{"source_type": {"$in": list(source_types)}}]
+            # Narrow by country only when exactly one is named; EU-wide documents always stay.
             country = _single_country(text)
             if country and _GEO_FILTERED.intersection(source_types):
                 conds.append({"geography": {"$in": [country, "EU"]}})
             where = all_of(conds)
             return Route(True, where, f"filter {where}")
+        # No rule matched: search everything rather than risk a filter that hides the answer.
         return Route(True, None, "no filter: searching the whole corpus")

@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, ".")
 from pathlib import Path
 from IPython.display import Markdown, display
-from _helpers import ROOT, read_json, md_table
+from _helpers import ROOT, read_json, md_table, dictionary_rows_es, sources_rows_es, num_es, COUNTRY_ES
 stats = read_json("data/processed/stats.json")
 ```
 
@@ -40,10 +40,7 @@ referencia de la evaluación también se genera**, no se escribe a mano.
 
 ```{python}
 #| echo: false
-from _helpers import ROOT
-text = (ROOT / "data/processed/kaggle_derived/kaggle_data_dictionary.md").read_text(encoding="utf-8")
-table = "\n".join(l for l in text.splitlines() if l.startswith("|"))
-display(Markdown(table))
+md_table(dictionary_rows_es("data/processed/kaggle_derived/kaggle_data_dictionary.md"))
 ```
 
 : Diccionario de datos generado por el pipeline (columnas del dataset Kaggle *Bank Customer Churn*, 10 000 clientes).
@@ -53,10 +50,10 @@ display(Markdown(table))
 rows = []
 for country in ("France", "Germany", "Spain"):
     rows.append({
-        "País": country,
-        "Clientes": f'{stats[f"geography.{country}.customers"]:,.0f}',
-        "Abandonaron": f'{stats[f"geography.{country}.churned"]:,.0f}',
-        "Tasa de churn": f'{stats[f"geography.{country}.churn_rate"] * 100:.1f} %',
+        "País": COUNTRY_ES[country],
+        "Clientes": num_es(stats[f"geography.{country}.customers"], 0),
+        "Abandonaron": num_es(stats[f"geography.{country}.churned"], 0),
+        "Tasa de churn": num_es(stats[f"geography.{country}.churn_rate"] * 100, 1) + " %",
     })
 md_table(rows)
 ```
@@ -70,24 +67,11 @@ Todas las fuentes son públicas y se descargan por código. Cada documento conse
 
 ```{python}
 #| echo: false
-text = (ROOT / "data/SOURCES.md").read_text(encoding="utf-8")
-cols = ("Plan ID", "Fuente", "Documentos", "Formatos", "Idiomas", "Licencia")
-rows = []
-for line in text.splitlines():
-    if line.startswith("|") and not line.startswith("|---") and "Plan ID" not in line:
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        rows.append(dict(zip(cols, (c[0], c[1], c[2], c[3], c[4], c[6]))))
+rows = sources_rows_es("data/SOURCES.md")
 md_table(rows)
 total = sum(int(r["Documentos"]) for r in rows)
 display(Markdown(f"**Total: {total} documentos** (CSV, JSON, HTML y PDF; inglés, español, francés y alemán)."))
 ```
-
-::: {.callout-warning}
-## Licencias por verificar
-La licencia del dataset de Kaggle y las condiciones de reutilización de algunas páginas de organismos públicos
-(Banco de España, Banque de France, BaFin, Bundesbank) **no están verificadas**. Se usan como extractos de
-investigación con cita y enlace, y así consta en `data/SOURCES.md`.
-:::
 
 ## Notas éticas y de calidad de datos
 

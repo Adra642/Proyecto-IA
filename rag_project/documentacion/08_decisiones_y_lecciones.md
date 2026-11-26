@@ -24,7 +24,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 | Texto del vector = título + ruta de encabezados (sin H1) + texto | Solo el texto del trozo | El contexto ayuda a recuperar apartados de leyes; el H1 largo repetido ahogaba lo distintivo |
 | **Indexación incremental** con huella (incluye `CHUNKER_VERSION`) | Reconstruir siempre | 1 s sin cambios; un cambio de lógica fuerza la reindexación |
 | **Híbrida BM25 + vectorial** en el modo avanzado | Solo vectorial | Medido: MRR de 0,887 a 1,000 y arregla D6 |
-| **Reranking implementado pero desactivado** | Activarlo | Medido: no mejora y los grandes empeoran |
+| **Reranking mixto activado** (FlashRank TinyBERT 0,7 + orden híbrido) | Cross-encoder solo, o sin reranking | Medido por trozo: el cross-encoder solo baja D6 al puesto 2; la mezcla recupera R1 sin perder aciertos; los grandes empeoran |
 | **Router por reglas** | Router con LLM | Gratis, determinista y comprobable |
 
 ### Generación y evaluación

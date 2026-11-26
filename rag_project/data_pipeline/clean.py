@@ -51,6 +51,7 @@ def drop_pii(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         The table without ``RowNumber``, ``CustomerId`` and ``Surname``.
     """
+    # errors="ignore": a table that already lacks a column is fine. .copy() leaves the input intact.
     return df.drop(columns=list(PII_COLUMNS), errors="ignore").copy()
 
 
@@ -171,6 +172,8 @@ def clean_documents(
     Returns:
         Cleaned, de-duplicated documents in a deterministic order.
     """
+    # Each step is a small pure function (strip_html, normalize, dedupe, ...), applied in order.
     for step in steps:
         docs = step(docs)
+    # Sorting makes the output deterministic, so re-running gives identical files.
     return sorted(docs, key=lambda d: d.doc_id)

@@ -60,15 +60,18 @@ class HybridRetriever:
         self, query: str, k: int, where: dict[str, Any] | None = None
     ) -> list[RetrievedChunk]:
         """Return the ``k`` chunks with the best fused rank."""
+        # Take more candidates than k from each retriever so the fusion has material to work with.
         depth = max(k, self._candidates)
         fused: dict[str, float] = {}
         chunks: dict[str, RetrievedChunk] = {}
         for weight, retriever in zip(self._weights, (self._dense, self._lexical), strict=True):
             for rank, chunk in enumerate(retriever.retrieve(query, depth, where), 1):
+                # Reciprocal Rank Fusion: weight / (rrf_k + rank). It only uses ranks, so cosine
+                # and BM25 scores (different scales) never have to be compared.
                 fused[chunk.chunk_id] = fused.get(chunk.chunk_id, 0.0) + weight / (
                     self._rrf_k + rank
                 )
-                chunks.setdefault(chunk.chunk_id, chunk)
+                chunks.setdefault(chunk.chunk_id, chunk)  # a chunk found by both is kept once
         best = sorted(fused, key=lambda cid: fused[cid], reverse=True)[:k]
         return [chunks[cid].model_copy(update={"score": fused[cid]}) for cid in best]
 

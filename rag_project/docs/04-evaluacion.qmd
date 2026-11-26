@@ -7,7 +7,7 @@ title: "Evaluación: sin RAG frente a con RAG"
 import sys
 sys.path.insert(0, ".")
 from IPython.display import Markdown, display
-from _helpers import ROOT, read_csv, read_json, md_table, show_source
+from _helpers import ROOT, read_csv, read_json, md_table, show_source, num_es
 questions = read_json("eval/questions.json")
 results = {(r["id"], r["mode"]): r for r in read_json("eval/results.json")}
 ```
@@ -30,7 +30,7 @@ son los de una ejecución, guardados en `eval/results.json`.
 ```{python}
 #| echo: false
 md_table(
-    [{"ID": q["id"], "Pregunta": q["question"], "Comportamiento esperado": {
+    [{"ID": q["id"], "Pregunta": q["question_es"], "Comportamiento esperado": {
         "answer": "responder", "abstain": "decir que no lo sabe", "refuse_pii": "rechazar (PII)"}[q["behavior"]]}
      for q in questions]
 )
@@ -55,18 +55,26 @@ rows = read_csv("eval/auto_summary.csv")
 md_table([
     {
         "Cat.": r["category"], "Modo": names[r["mode"]], "Preguntas": r["questions"],
-        "Acierto numérico": r["numeric_match"] or "—", "hit@4 (recuperación)": r["hit@4"] or "—",
-        "Cita correcta": r["citation_ok"] or "—", "Conducta correcta": r["behavior_ok"] or "—",
+        "Acierto numérico": num_es(r["numeric_match"]), "hit@4 (recuperación)": num_es(r["hit@4"]),
+        "Cita correcta": num_es(r["citation_ok"]), "Conducta correcta": num_es(r["behavior_ok"]),
     }
     for r in rows
 ])
 ```
 
-: Métricas automáticas por categoría y modo (`eval/auto_summary.csv`). *Acierto numérico*: la respuesta contiene la cifra de referencia (con tolerancia). *hit@4*: algún *chunk* de los 4 recuperados pertenece a un documento de referencia.
+: Métricas automáticas por categoría y modo (`eval/auto_summary.csv`).
+
+::: {.callout-note}
+## Cómo leer las columnas
+- **hit@4 (recuperación):** de los 4 *chunks* que el buscador entrega al modelo, ¿al menos uno pertenece a un documento de referencia (el que contiene la respuesta)? Vale 1,00 si siempre ocurre y 0,00 si nunca. Mide solo la **búsqueda**, no la respuesta del modelo; por eso no aplica (—) al modo *Sin RAG*, que no recupera nada.
+- **Acierto numérico:** la respuesta contiene la cifra de referencia, con una tolerancia pequeña.
+- **Cita correcta:** la respuesta cita (`[doc_id]`) al menos un documento de referencia.
+- **Conducta correcta:** en las preguntas U, el modelo se abstiene o rechaza cuando toca.
+:::
 
 Lo que muestran:
 
-- **Sin RAG** no acierta ninguna cifra del dataset (0,00) ni de las de regulación, macro y fuentes añadidas al final (0,00): las preguntas R4 a R6 (reclamaciones del Banco de España, franceses que no se atrevieron a cambiar de banco, sucursales en Alemania) son datos que el modelo no puede conocer.
+- **Sin RAG** apenas acierta cifras del dataset (0,12: una cifra suelta de D2, de 4 preguntas) y ninguna de regulación, macro y fuentes añadidas al final (0,00): las preguntas R4 a R6 (reclamaciones del Banco de España, franceses que no se atrevieron a cambiar de banco, sucursales en Alemania) son datos que el modelo no puede conocer.
   Es un modelo honesto: ante lo que no sabe, **lo dice** en lugar de inventar.
 - **Con RAG** sube al 75 % en datos propios y al 83 % en regulación, macro y fuentes añadidas, y cita el documento de origen; el **RAG avanzado** llega al 100 % en datos propios.
 - **Las preguntas de conducta (U)** las resuelven bien los tres modos: no inventan un dato de Portugal y se niegan a revelar el apellido.
@@ -82,7 +90,7 @@ def esc(text):
 
 for qid in ("D6", "R3", "U2"):
     q = next(x for x in questions if x["id"] == qid)
-    display(Markdown(f"### {qid}: {q['question']}"))
+    display(Markdown(f"### {qid}: {q['question_es']}"))
     display(Markdown(f"**Referencia:** {esc(q['gold_answer'])}"))
     for mode in ("no_rag", "rag", "rag_advanced"):
         r = results.get((qid, mode))
@@ -92,14 +100,3 @@ for qid in ("D6", "R3", "U2"):
         sources = ", ".join(f"`{c}`" for c in r["cited_ids"]) or "—"
         display(Markdown(f"**{names[mode]}**{extra}: {esc(r['answer'])}  \n_Fuentes citadas: {sources}_"))
 ```
-
-## Límites y casos que siguen fallando
-
-::: {.callout-warning}
-## Lectura honesta de los resultados
-- **Una sola ejecución por pregunta**, y los modelos Gemini 3.5 ignoran `temperature`: una cita puede cambiar entre dos ejecuciones con la misma recuperación. Las diferencias pequeñas son ruido.
-- **El modelo base puede decir "no lo sé"**, lo que le favorece frente a uno que inventa; un *prompt* sin esa opción probablemente lo dejaría peor parado.
-- **R1** (porcentaje de participantes que no pudo cambiar de banco en el estudio de la Comisión de 2012) falla en los dos modos con RAG: se recupera el documento correcto, pero el informe tiene cientos de páginas con decenas de porcentajes parecidos y el *chunk* con la cifra no entra entre los cuatro recuperados. **D6** (la pregunta simple sobre Alemania) falla en RAG básico y se arregla con la búsqueda híbrida. Al añadir las fuentes nuevas se detectó y corrigió un fallo del router: la palabra «study» activaba el filtro de papers de arXiv y ocultaba el estudio del Bundesbank.
-- **La puntuación es solo automática** (cifras, citas, abstención y fugas de datos personales): no hay puntuación manual. Las referencias de L1 y L2 se redactaron a partir de los resúmenes de arXiv y una persona las **verificó contra el PDF** (`eval/literature_verification.md`).
-- Son **15 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
-:::

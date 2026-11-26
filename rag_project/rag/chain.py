@@ -110,18 +110,22 @@ class RagChain:
         without calling the LLM.
         """
         start = self._clock()
+        # Guardrail first: personal-data requests are refused before any retrieval or LLM call.
         if is_pii_request(question):
             return self._fixed(question, REFUSAL_PII, [], start, refused=True)
+        # The retriever is injected (vector, hybrid or advanced); the chain does not care which.
         chunks = self._retriever.retrieve(question, k or self._top_k, where)
+        # Nothing retrieved: answer "No lo sé" instead of letting the model invent something.
         if not chunks:
             return self._fixed(question, NO_CONTEXT, [], start)
+        # The prompt injects the chunks as context and asks for [doc_id] citations.
         text = self._llm.invoke(build_rag_prompt(question, chunks)).strip()
         return RagAnswer(
             question=question,
             mode="rag",
             answer=text,
             chunks=chunks,
-            cited_ids=extract_citations(text, chunks),
+            cited_ids=extract_citations(text, chunks),  # only ids that were really retrieved
             latency_s=self._clock() - start,
             model=self._model_id,
         )
