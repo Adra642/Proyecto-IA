@@ -276,3 +276,6 @@ Hugging Face Spaces is no longer part of the project: removed the "why not Space
 - Full evaluation re-run (45 answers, 0 failed, one run): numeric match D 0.12 / 0.75 / 1.00 (No RAG got one loose figure in D2; it was 0.00 before, run-to-run noise), R 0.00 / 0.83 / 0.83; citation OK for R advanced 1.00 (was 0.86). R1 still fails: its figure now reaches the model at rank 3, but that sentence is about banks that did not complete the account opening and the model answers "no lo sé".
 - Caveats: 13 questions (10 with a figure), the blend was tuned on the same questions. Dockerfile now warms the FlashRank model at build time (`retriever('advanced').retrieve(...)`); the command was checked locally, the image was not rebuilt.
 - Docs updated: Quarto page 05 (new table, chart, sweep, caveats), page 04 prose, README, `documentacion/`. 230 unit tests, ruff and mypy clean.
+
+### Groq model fixed (2026-11-27)
+- Groq returned 404 because `llama-3.3-70b-versatile` is no longer served for our key. Listing `GET /openai/v1/models` showed `openai/gpt-oss-120b`, `openai/gpt-oss-20b` and `qwen/qwen3.8-27b` as chat models; all three answered through `Container.llm("groq")`. The default is now `openai/gpt-oss-120b` (the earlier docs-only check of the old name was wrong). For a deployed service the model can be changed without a rebuild with `LLM__MODELS__GROQ`.
