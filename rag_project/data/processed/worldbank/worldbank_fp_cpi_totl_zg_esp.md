@@ -10,7 +10,7 @@ topic: inflation
 columns:
 - Balance
 date: null
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'World Bank Open Data: CC BY 4.0'
 format: json
 ---

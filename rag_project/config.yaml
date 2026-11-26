@@ -150,20 +150,18 @@ sources:
       - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarrecl/", title: "Como realizar una reclamacion", language: es, geography: ES, topic: complaints, columns: [Complain]}
       - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/consultasreclama/comorealizarconsulta/", title: "Como realizar una consulta", language: es, geography: ES, topic: complaints, columns: [Complain]}
       - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/comisiones/", title: "Comisiones de productos bancarios", language: es, geography: ES, topic: cards, columns: [Balance, HasCrCard]}
-      - {url: "https://www.bde.es/wbe/es/publicaciones/informes-memorias-anuales/memoria-reclamaciones/", title: "Memoria de Reclamaciones del Banco de Espana", language: es, geography: ES, topic: complaints, columns: [Complain]}
+      - {url: "https://www.bde.es/f/webbe/Secciones/Publicaciones/PublicacionesAnuales/MemoriaServicioReclamaciones/25/MSR2025.pdf", format: pdf, max_chars: 80000, title: "Memoria de Reclamaciones del Banco de Espana 2025", language: es, geography: ES, topic: complaints, columns: [Complain]}
 
   b5:  # ECB Household Finance and Consumption Survey (wealth and deposits by age and country)
     enabled: true
     pages:
       - {url: "https://www.ecb.europa.eu/stats/ecb_surveys/hfcs/html/index.en.html", title: "Household Finance and Consumption Survey overview", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
       - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/201903_Research_Report_HFCS.pdf", format: pdf, max_chars: 60000, title: "HFCS research report", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
-      - {url: "https://www.ecb.europa.eu/home/pdf/research/hfcn/WealthSurveys.pdf", format: pdf, max_chars: 60000, title: "Wealth surveys at the ECB", language: en, geography: EU, topic: wealth, columns: [Age, Balance]}
 
   b7:  # Credit reporting systems: CIRBE (ES), SCHUFA (DE), FICP (FR)
     enabled: true
     pages:
       - {url: "https://clientebancario.bde.es/pcb/es/menu-horizontal/podemosayudarte/cirbe/", title: "CIRBE Central de Informacion de Riesgos", language: es, geography: ES, topic: credit_score, columns: [CreditScore, Geography]}
-      - {url: "https://www.schufa.de/scoring-daten/index.html", title: "SCHUFA Scoring und Daten", language: de, geography: DE, topic: credit_score, columns: [CreditScore, Geography]}
       - {url: "https://www.banque-france.fr/fr/a-votre-service/particuliers/fichiers-incident-bancaire/fichier-incidents-remboursement-credits", title: "FICP fichier des incidents de remboursement des credits", language: fr, geography: FR, topic: credit_score, columns: [CreditScore, Geography]}
 
   b8:  # Consumer pages of Banque de France (FR) and BaFin / Bundesbank (DE)
@@ -190,7 +188,4 @@ sources:
       - {url: "https://www.eba.europa.eu/activities/information-consumers/how-complain", title: "EBA how to complain", language: en, geography: EU, topic: complaints, columns: [Complain]}
       - {url: "https://www.eba.europa.eu/activities/information-consumers", title: "EBA information for consumers", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
       - {url: "https://www.eba.europa.eu/regulation-and-policy/consumer-protection", title: "EBA consumer protection overview", language: en, geography: EU, topic: complaints, columns: [Complain, NumOfProducts]}
-      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/guidelines-product-oversight-and-governance-arrangements-retail-banking-products", title: "EBA guidelines on product oversight and governance for retail banking products", language: en, geography: EU, topic: cross_selling, columns: [NumOfProducts, Card Type]}
-      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/consumer-protection/regulatory-technical-standards-complaints-handling-procedures-issuers-arts", title: "EBA RTS on complaints handling", language: en, geography: EU, topic: complaints, columns: [Complain]}
-      - {url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/credit-risk/guidelines-loan-origination-and-monitoring", title: "EBA guidelines on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}
       - {url: "https://www.eba.europa.eu/sites/default/files/document_library/Publications/Guidelines/2020/Guidelines%20on%20loan%20origination%20and%20monitoring/884283/EBA%20GL%202020%2006%20Final%20Report%20on%20GL%20on%20loan%20origination%20and%20monitoring.pdf", format: pdf, max_chars: 60000, title: "EBA final report on loan origination and monitoring", language: en, geography: EU, topic: credit_score, columns: [CreditScore, Balance]}

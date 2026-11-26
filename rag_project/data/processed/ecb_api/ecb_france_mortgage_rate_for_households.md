@@ -11,7 +11,7 @@ columns:
 - Balance
 - Geography
 date: '2026-09-01'
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'ECB statistical data: reuse allowed with source acknowledgement'
 format: csv
 ---

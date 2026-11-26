@@ -11,7 +11,7 @@ columns:
 - CreditScore
 - Balance
 date: null
-retrieved_at: '2026-11-19'
+retrieved_at: '2026-11-26'
 license: 'EBA publications: reuse authorised with acknowledgement of the source'
 format: pdf
 ---

@@ -232,3 +232,11 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 
 ### Hugging Face Spaces references removed (2026-11-26)
 Hugging Face Spaces is no longer part of the project: removed the "why not Spaces" text from the README, site, guide and plans, the `requirements.txt` / `app/README.md` Space entries in the plan, the Hugging Face token from the plan's credential lists and the `export-reqs` poe task (it only existed to feed Spaces). Kept: `HF_HOME` in the Dockerfile and the e5 model, which is downloaded from the Hugging Face Hub, and the 2026-11-22 decision entry above as history.
+
+### Data-quality review of the sources (2026-11-26, branch `data-quality-fixes`)
+- Removed `ecb_hfcs_wealth_surveys_at_the_ecb` (the PDF is a non-response-bias paper, not wealth tables) and the three EBA stubs (RTS on complaints handling is about crypto-asset tokens; the two guideline pages held only navigation text). Removed the SCHUFA landing page (729 bytes; Wikipedia `wiki_schufa` covers it).
+- Replaced the Banco de Espana complaints landing page by the full *Memoria de Reclamaciones 2025* PDF (first 80k characters): real complaint statistics for Spain.
+- Tried the EBA POG amending report: it is about ESG/greenwashing, so it was not added.
+- Refreshed A5, B2, B3, B4 (dates now 2026-11-26). The ECB RSS feed rotated: two older press releases left the corpus, two new ones (23 and 25 Nov) entered.
+- Re-indexed: 6,431 chunks. 216 unit tests pass.
+- Open: EUR-Lex is about 80% of the corpus bytes (AI Act and GDPR are only loosely related); `eval/results.csv` was not re-run after this change.
