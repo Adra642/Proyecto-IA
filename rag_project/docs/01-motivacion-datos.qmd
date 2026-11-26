@@ -25,9 +25,6 @@ dominio, algo que un LLM genérico no puede hacer con precisión:
 - ¿Qué fija exactamente el Reglamento (UE) 2015/751 para las tasas de intercambio?
 - ¿Cuál es hoy el tipo de la facilidad de depósito del BCE y desde cuándo rige?
 
-El subtema elegido es **retención y *churn* en la banca minorista de Francia, Alemania y España**: los
-impulsores del abandono, lo que muestran los datos del banco y el contexto regulatorio y de mercado.
-
 ## Decisión clave: convertir el CSV en conocimiento
 
 Un RAG no puede responder preguntas agregadas ("¿tasa de *churn* en Alemania?") a partir de 10 000 filas
