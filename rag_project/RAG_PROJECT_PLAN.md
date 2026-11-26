@@ -12,7 +12,7 @@
 1. Read the whole file once. Work **stage by stage** (Section 6). Do not start a stage before the previous one meets its **Acceptance criteria**.
 2. Keep a running log in `rag_project/PROGRESS.md` (stage, what was done, what is pending, decisions taken, open issues).
 3. **Git workflow: one branch per stage and a pull request for the team to review.** Create `stage-<n>-<short-name>` from an up-to-date `main`, make small commits with clear messages (at least one per sub-stage), push, and open a PR with `gh pr create` that lists what was done, how it was verified (commands and results) and any open issue. **Never merge your own PR and never push to `main`**; stop and wait for the team's review before starting the next stage (if the next stage depends on an unmerged PR, branch from that stage's branch and say so in the PR). Never commit secrets (`.env`, API keys, tokens). Keep `.env.example` with variable names only.
-4. Ask the human only for things you cannot do yourself: credentials (Kaggle, LLM provider, Hugging Face token, GitHub), choices marked **[DECISION]**, and manual scoring of the evaluation.
+4. Ask the human only for things you cannot do yourself: credentials (Kaggle, LLM provider, Hugging Face token, GitHub), and choices marked **[DECISION]**. The evaluation is scored automatically (no manual scoring).
 5. Before writing code that touches an external API, check the **installed library version** and the **current docs** (LangChain import paths and model names change often). Versions are pinned by `uv.lock`.
 6. Prefer small, testable modules over notebooks. Every script must run from the `rag_project/` folder with `uv run python -m ...` and must be **idempotent** (re-running does not duplicate or corrupt data).
 7. Source URLs and API series keys in Section 4 were not all tested. Treat each as **"verify before relying on it"**; log any that fail in `PROGRESS.md` and substitute an equivalent.
@@ -34,7 +34,7 @@
 | C | 5–10+ niche questions a generic LLM can't answer; side-by-side **Without RAG vs. With RAG**, documented |
 | D | Interactive web app (Streamlit or Gradio), **publicly deployed** |
 | E (extra) | Reranking, metadata filters, adaptive RAG, hybrid BM25 + vector |
-| Docs | Code in GitHub folder `/rag_project`; **Quarto** website (motivation + provenance, pipeline + chunking, evaluation, links to app and repo, explained code excerpts), published online (GitHub Pages or Cloudflare Pages / Quarto Pub), URL shared in Loop (Teams) |
+| Docs | Code in GitHub folder `/rag_project`; **Quarto** website (motivation + provenance, pipeline + chunking, evaluation, links to app and repo, explained code excerpts), published online (GitHub Pages or Cloudflare Pages / Quarto Pub) |
 | Grading | Ingestion robustness · justification of vector DB and chunking · clarity of comparison · UI quality and public deployment · Quarto/GitHub quality · individual technical mastery |
 
 ---

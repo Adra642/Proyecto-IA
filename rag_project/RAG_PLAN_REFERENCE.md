@@ -94,7 +94,7 @@ rag_project/
 │   ├── questions.json          # questions + gold answers + gold source ids
 │   ├── generate_gold.py        # fills gold numbers from stats.json
 │   ├── run_eval.py             # No-RAG vs RAG (vs advanced) -> results.csv
-│   ├── score.py                # retrieval hit@k + exports a sheet for manual scoring
+│   ├── score.py                # automatic scoring: hit@k, numeric match, citations, behaviour
 │   └── chunking_experiment.py
 ├── app/
 │   ├── app.py                  # Gradio
@@ -172,7 +172,7 @@ rag_project/
 - `chain.py`: `answer_no_rag(question)` (plain LLM, same model/temperature) and `answer_rag(question, **opts)`.
   - RAG prompt: *answer only from the context; cite sources as [doc_id]; if the context is insufficient, say so; answer in the user's language.* Return the answer, the retrieved chunks (id, score, metadata) and latency.
 - `run_eval.py`: runs every question in each mode, saves `eval/results.csv` and `eval/results.json` (answer, retrieved ids, latency, token counts if available).
-- `score.py`: computes **retrieval hit@k** automatically and exports a sheet for the team to score manually: **0** = wrong/hallucinated, **1** = partly right or vague, **2** = correct and specific; plus "citation correct? Y/N" for RAG. Auto-check numeric answers against `gold_numbers` as a second opinion.
+- `score.py`: scores everything **automatically** (there is no manual scoring step): **retrieval hit@k**, numeric answers checked against `gold_numbers`, whether the cited ids are the gold sources, abstention and PII-leak checks.
 - Save a few clean before/after examples for the memoir (the question, the No-RAG answer, the RAG answer with its cited chunks).
 
 **Acceptance:** `results.csv` exists for all questions; RAG scores higher than No-RAG on D, L and R categories; U questions are handled correctly. If the baseline already answers a question well, **replace that question** with a more niche one.
@@ -203,18 +203,18 @@ Implement in this order and **measure each** with the same questions (ablation t
 3. **Metadata filters**: Chroma `where` filters on `source_type`, `geography`, `language`, `topic`. Expose in the UI. Optionally add simple rule-based extraction (question mentions "Germany" → `geography in [DE, EU]`).
 4. **Adaptive/modular RAG**: a small router prompt (or rules) decides `retrieve` vs `answer directly` (e.g., chit-chat, definitions) and picks the retriever (dataset questions → `source_type=dataset_stats`).
 
-**Acceptance:** `eval/ablation.csv` with hit@k and manual-score means per configuration; the UI exposes the advanced mode; there is at least one clear example where reranking or filtering fixed a failure.
+**Acceptance:** `eval/ablation.csv` with hit@k and MRR per configuration; the UI exposes the advanced mode; there is at least one clear example where reranking or filtering fixed a failure.
 
 ### Stage 6: Quarto memoir and publication
 **Site structure (`rag_project/docs/`)**
 
 | Page | Content |
 |---|---|
-| `index.qmd` | summary, team, links to **app**, **repo**, and Loop |
+| `index.qmd` | summary, team, links to **app** and **repo** |
 | `01-motivacion-datos.qmd` | why churn/banking, link to project 1, dataset description and column table, the source catalog table (A/B/C) with licenses, ethical note (PII drop, synthetic data, leakage of `Complain`) |
 | `02-pipeline.qmd` | automation diagram, fetcher design (retries, cache, idempotence), cleaning, how segment cards are generated; explained code excerpts |
 | `03-chunking-vectordb.qmd` | chunking strategy per document type, **chunk-size experiment** (table + plot), why Chroma, embedding choice |
-| `04-evaluacion.qmd` | question table, No-RAG vs RAG results (read live from `eval/results.csv` in a Python cell), clean before/after examples with screenshots, scoring summary |
+| `04-evaluacion.qmd` | question table, No-RAG vs RAG results (read live from `eval/results.csv` in a Python cell), clean before/after examples with screenshots, automatic scoring summary |
 | `05-rag-avanzado.qmd` | hybrid, reranking, filters, router, ablation table |
 | `06-app-despliegue.qmd` | app screenshots, deployment steps, link |
 | `07-equipo-referencias.qmd` | who did what, sources and references |
@@ -223,13 +223,13 @@ Implement in this order and **measure each** with the same questions (ablation t
 - **Publish as a static site, via a GitHub Actions workflow** (repo-root `.github/workflows/rag_project-docs.yml`, path-filtered to `rag_project/**`). Support both options and document them in the README; the team picks one:
   - **GitHub Pages** (default): the workflow runs `quarto render rag_project/docs` and deploys `docs/_site` to Pages (or use `quarto publish gh-pages`).
   - **Cloudflare Pages**: connect the repo, root directory `rag_project/docs`, build command `quarto render`, output directory `_site` (Quarto must be available in the build; if not, build in the GitHub Action and deploy the output with Wrangler). Needs the Cloudflare account token as a repo secret.
-  Verify all links, then **post the URL in Loop (Teams)**.
+  Verify all links.
 
 **Acceptance:** public site renders without errors; every required section from Section 1 is present; links to app and repo work.
 
 ### Stage 7: Freeze, QA, rehearsal
 - Feature freeze. Test from a clean clone **following only the README**: `uv sync` → pipeline → index → evaluation → app locally → tests and linters. Fix any README step that fails.
-- Check the Space is awake; prepare a backup demo (recorded video and screenshots) in case of rate limits or cold start.
+- Check the app is awake (Cloud Run min instances 1 for the live demo).
 - Rehearse the oral defense (below); every member must be able to answer technical questions on their part.
 
 ### Presentation — Fri 27 Nov
@@ -244,7 +244,7 @@ Four parts, one per member:
 |---|---|
 | Kaggle download needs credentials in automation | test in Stage 0; env vars; fallback URL in `config.yaml` |
 | A source blocks scraping (EUR-Lex challenge page, ECB, regulator sites) | polite crawling, alternate endpoint (PDF/Cellar/API), skip and log; the run never aborts |
-| Free LLM tier rate limits during the demo | caching of eval answers, second provider, backup recorded demo |
+| Free LLM tier rate limits during the demo | second provider (`llm.fallback_order`), Cloud Run min instances 1 |
 | Baseline LLM already knows the answer | make questions specific to computed numbers, the latest ECB data, or the dataset itself; replace weak questions |
 | RAG fails on aggregate questions | segment cards and `stats.json` approach (Section 2), not raw rows |
 | Cloud Run cold start, memory or cost | small embedding model, committed processed docs, index baked into the image, 2 GiB memory, budget alert, `--min-instances 1` for the live demo |
@@ -257,9 +257,9 @@ Four parts, one per member:
 
 - [ ] **Ingestion robustness:** one command rebuilds the corpus; ≥ 10 sources, ≥ 3 formats, ≥ 3 languages; idempotent; failures logged, not fatal; PII dropped
 - [ ] **Technical justification:** Chroma choice explained; chunking per document type, with the **chunk-size experiment** results
-- [ ] **Comparison clarity:** ≥ 10 questions, No-RAG vs RAG table, manual scores, cited chunks, at least one correct "I don't know" and one PII refusal
+- [ ] **Comparison clarity:** ≥ 10 questions, No-RAG vs RAG table with automatic scores, cited chunks, at least one correct "I don't know" and one PII refusal
 - [ ] **UI and deployment:** public Gradio app, compare tab, sources panel, no secrets in repo
-- [ ] **Documentation:** Quarto site published (all required sections), URL posted in Loop, repo organized with README and pinned requirements
+- [ ] **Documentation:** Quarto site published (all required sections), repo organized with README and pinned requirements
 - [ ] **Advanced RAG (extra):** hybrid + rerank + filters (+ router) with an ablation table
 - [ ] **Engineering quality:** `.venv` + uv with committed `uv.lock`; typed, documented code; design patterns where justified; `ruff`, `mypy` and `pytest` all green; README reproduces everything from a clean clone
 - [ ] **Oral defense:** each member can explain their part and run a live example
