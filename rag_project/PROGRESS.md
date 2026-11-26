@@ -254,3 +254,10 @@ Hugging Face Spaces is no longer part of the project: removed the "why not Space
 - Cleaning: PDF dot leaders (table-of-contents `.....` and `.�.�`) are removed in `normalize_text` (test added).
 - Not added: Flash Eurobarometer 509 (no official PDF reachable; only a third-party copy), the 2012 EC bank-switching study (HTTP 403 for our crawler), Banco de Espana stability reports (macroprudential, not customer behaviour).
 - Corpus: 176 documents, 311k words, 4,499 chunks, 4 languages. Evaluation re-run: 42 answers, 0 failed; scores unchanged versus round 2 (the 14 questions do not exercise the new sources).
+
+### Evaluation set rebuilt to 15 questions and final corpus (2026-11-26)
+- 2012 Commission study on bank-account switching (GfK mystery shopping, 27 Member States) added from the Internet Archive copy the user supplied (the Commission server returns 403 to our crawler); flagged as dated in `docs/02-pipeline.qmd`. Corpus: 177 documents, 325k words, 4,663 chunks.
+- Questions (max 15): removed D4, D5 (dataset questions of the same type) and R4 (interchange caps, already known by the model); added R4 Banco de Espana complaints 2025 (30,970), R5 CCSF share of French people who wanted to switch but did not dare (17%), R6 World Bank bank branches per 100,000 adults in Germany (6.66), R7 EBA Consumer Trends Report top-3 issues. Gold values are read from the ingested documents by regex (no figure typed by hand). First candidates (German switching deadline, Bundesbank cash share) were replaced because the base model already knew them.
+- Bug found by the new questions: the router treated the word "study" as an arXiv-paper request and filtered the Bundesbank study out. Fixed (test added).
+- Results (one run, 0 failed): numeric match D 0.00 / 0.75 / 1.00 and R 0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; retrieval ablation (13 questions) vector MRR 0.887, hybrid 1.000. R1 and D6 (plain RAG) remain the diagnostics. Chunk-size experiment: 300 / 600 / 1000 now tie (MRR 0.887); 600 is kept as a trade-off.
+- README, Quarto pages and `documentacion/` updated to the new numbers; 220 unit tests, ruff and mypy clean.

@@ -103,11 +103,12 @@ def test_generated_questions_in_the_repo_are_consistent(settings: Settings, tmp_
     assert qs["D1"].gold_numbers["germany"].value == pytest.approx(32.4)
     assert qs["R1"].gold_numbers["fixed_fee_eur"].value == 0.05
     assert qs["R1"].gold_answer == "EUR 0.05 per transaction (Article 3(2)(b))."
-    assert qs["R4"].gold_numbers["debit_cap_pct"].value == 0.2
     assert qs["R2"].gold_facts["latest_year"].isdigit()
     assert "2.50" in qs["R3"].gold_answer or "2.5" in qs["R3"].gold_answer
-    assert qs["D4"].gold_facts["top_churn_card"] in {"DIAMOND", "GOLD", "PLATINUM", "SILVER"}
-    assert qs["D5"].gold_facts["top_age_band"] == "50-59"
+    assert qs["R4"].gold_numbers["complaints_2025"].value == 30970  # "30.970": Spanish thousands
+    assert qs["R5"].gold_numbers["share"].value == 17 and qs["R5"].gold_numbers["share"].percent
+    assert qs["R6"].gold_numbers["branches"].value > 0
+    assert "de-risking" in qs["R7"].gold_answer and not qs["R7"].gold_numbers
     copy = tmp_path / "q.json"
     copy.write_text(json.dumps([q.model_dump() for q in qs.values()]), encoding="utf-8")
     again = generate(settings, copy)

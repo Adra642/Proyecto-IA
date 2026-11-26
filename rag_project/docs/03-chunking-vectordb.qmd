@@ -66,20 +66,17 @@ plt.show()
 ```
 
 **Decisión: 600 caracteres con 90 de solapamiento** (confirmada por el equipo tras la primera medición y
-mantenida tras repetirla). Con las 12 preguntas de recuperación y el chunker actual (versión 2), las cuatro
-variantes aciertan en el top 5 (hit@5 = 1,00) y 300 caracteres sigue siendo la peor en MRR (0,781; 13 466
-*chunks*). 600 (MRR 0,794) queda **por debajo de 1000 y del tamaño fijo de 600 (MRR 0,836 ambos)**, y la
-diferencia es una sola pregunta, R4, cuyo documento sale en el puesto 2 con 600 y en el 1 con 1000 o con
-fragmentos fijos. A cambio, 600 da menos contexto al LLM (2 568 frente a 2 975 caracteres) y unos 415
-caracteres de media por *chunk*. Se mantiene 600 por ese menor contexto y porque la diferencia no es
-concluyente; 1000 sería una alternativa igual de defendible.
+mantenida tras repetirla con el corpus final). Con las 13 preguntas de recuperación, las tres variantes
+**empatan en todas las métricas** (hit@1 0,846, hit@5 1,00, MRR 0,887; una pregunta pesa 0,077). Con un corpus
+anterior y más pequeño 300 caracteres quedaba por detrás; ahora ya no se separan. La decisión es por tanto un
+compromiso razonado, no un resultado medido: 300 caracteres duplican los *chunks* (9 743 frente a 4 663) sin
+mejorar nada, y 1000 envía un 22 % más de texto al LLM (3 289 frente a 2 571 caracteres en el top 5).
+Se mantiene 600, con unos 453 caracteres de media por *chunk*.
 
 ::: {.callout-warning}
 ## Cómo leer el experimento
-Con 12 preguntas, una pregunta pesa 0,083, así que las diferencias entre 600 y 1000 no son concluyentes. Los
-documentos atómicos no dependen del tamaño. La medición se repitió tras acortar la ruta de encabezados y
-ampliar las preguntas (la primera daba MRR 0,933 para 600, 1000 y fijo). La bajada de 600 se explica por dos preguntas nuevas, D6
-(puesto 5) y R4 (puesto 2), y por D3, que pasó del puesto 1 al 2 con el cambio de encabezados o de pregunta.
+Con 13 preguntas, una pregunta pesa 0,077, así que el experimento ya no separa los tamaños. Los
+documentos atómicos no dependen del tamaño. La medición se repitió varias veces al ampliar el corpus y las preguntas (la primera daba MRR 0,933 para 600, 1000 y fijo; con las preguntas y el corpus finales las tres variantes empatan en 0,887).
 :::
 
 ## ¿Por qué ChromaDB?
@@ -88,7 +85,7 @@ ampliar las preguntas (la primera daba MRR 0,933 para 600, 1000 y fijo). La baja
 |---|---|---|---|
 | **ChromaDB** (embebida, persistente) | **Sí, nativos** (`where`) | Ninguna: es una carpeta | **Elegida** |
 | FAISS | No (hay que filtrar a mano) | Ninguna | Rápida, pero sin filtros |
-| Qdrant, Milvus, Pinecone | Sí | Un servidor aparte o un servicio de pago | Excesivo para 6 309 *chunks* |
+| Qdrant, Milvus, Pinecone | Sí | Un servidor aparte o un servicio de pago | Excesivo para 4 663 *chunks* |
 
 Con ~6 300 vectores, una base embebida basta; los **filtros por metadatos** (tipo de fuente, geografía,
 idioma) son un requisito del RAG avanzado, y Chroma los trae. La contrapartida es que no escala a millones de
@@ -108,6 +105,6 @@ pequeño para ejecutarse en CPU. El modelo e5 exige prefijos: `"passage: "` para
 `"query: "` para las preguntas, y el código los aplica en un único lugar.
 La distancia es coseno.
 
-El índice resultante tiene **176 documentos y 4 499 *chunks***; construirlo en frío tarda unos 200 s en CPU y se
+El índice resultante tiene **177 documentos y 4 663 *chunks***; construirlo en frío tarda unos 200 s en CPU y se
 sincroniza de forma incremental (cada documento guarda una huella de su contenido y de la configuración, y solo
 se reindexa lo que cambia).

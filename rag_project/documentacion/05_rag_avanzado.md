@@ -38,31 +38,31 @@ flowchart LR
 
 ## 3. Reranking (implementado, medido y desactivado)
 
-`RerankingRetriever` (decorador sobre cualquier retriever) reordena los candidatos con un *cross-encoder* local (`rag/rerank.py`, **FlashRank**, ONNX, sin clave ni coste). Se activa con `retrieval.rerank_enabled`. Está **desactivado por defecto** porque en nuestras 12 preguntas no mejoró la recuperación híbrida y los modelos más grandes la empeoraron (tabla siguiente). FlashRank descarga su modelo la primera vez, por eso la imagen de Docker no lo incluye.
+`RerankingRetriever` (decorador sobre cualquier retriever) reordena los candidatos con un *cross-encoder* local (`rag/rerank.py`, **FlashRank**, ONNX, sin clave ni coste). Se activa con `retrieval.rerank_enabled`. Está **desactivado por defecto** porque en nuestras 13 preguntas no mejoró la recuperación híbrida y los modelos más grandes la empeoraron (tabla siguiente). FlashRank descarga su modelo la primera vez, por eso la imagen de Docker no lo incluye.
 
-## 4. Ablación (solo recuperación, 12 preguntas con fuentes de referencia, a nivel de trozo)
+## 4. Ablación (solo recuperación, 13 preguntas con fuentes de referencia, a nivel de trozo)
 
 `uv run python -m eval.ablation` → `eval/ablation.csv` y `eval/ablation_detail.csv`. `hit@4` es lo que ve el LLM.
 
 | Configuración | hit@1 | hit@4 | MRR |
 |---|---|---|---|
-| Vectorial (base) | 0,667 | 0,917 | 0,794 |
-| **+ híbrida (BM25 + vectorial)** | **0,833** | **1,000** | **0,903** |
-| + reranking (TinyBERT) | 0,833 | 1,000 | 0,896 |
-| + filtros (router, híbrida) | 0,833 | 1,000 | 0,903 |
-| + filtros + reranking (TinyBERT) | 0,833 | 1,000 | 0,896 |
-| Reranking MiniLM-L-12 (+ filtros) | 0,667 | 1,000 | 0,812 |
-| Reranking MultiBERT-L-12 (+ filtros) | 0,417 | 0,500 | 0,454 |
+| Vectorial (base) | 0,846 | 0,923 | 0,887 |
+| **+ híbrida (BM25 + vectorial)** | **1,000** | **1,000** | **1,000** |
+| + reranking (TinyBERT) | 0,923 | 1,000 | 0,962 |
+| + filtros (router, híbrida) | 1,000 | 1,000 | 1,000 |
+| + filtros + reranking (TinyBERT) | 0,923 | 1,000 | 0,962 |
+| Reranking MiniLM-L-12 (+ filtros) | 0,769 | 1,000 | 0,865 |
+| Reranking MultiBERT-L-12 (+ filtros) | 0,462 | 0,692 | 0,545 |
 
 Lectura:
-- **La técnica que rinde es la búsqueda híbrida.** Arregla D6 («churn en Alemania»): la ficha de Alemania pasa del puesto 5 al 1 y la respuesta de incorrecta a correcta.
+- **La técnica que rinde es la búsqueda híbrida.** Arregla D6 («churn en Alemania»): la respuesta pasa de incorrecta a correcta y el hit@1 sube de 0,846 a 1,000.
 - Los **filtros** no añaden nada medible sobre la híbrida con estas preguntas (ya acierta); su valor es de control para el usuario y de reducción de ruido.
 - El **reranking** no ayuda aquí y los cross-encoders grandes empeoran: están entrenados con páginas web y hunden las fichas de estadísticas; el multilingüe es mucho peor.
-- Con 12 preguntas una vale 0,083: las diferencias pequeñas son ruido.
+- Con 13 preguntas una vale 0,077: las diferencias pequeñas son ruido.
 
 ## 5. A nivel de respuesta (`eval/auto_summary.csv`)
 
-Cifras correctas: D **0,00 / 0,83 / 1,00** y R **0,25 / 0,75 / 0,62** (sin RAG / RAG / RAG avanzado). Citas correctas: D 0,50 frente a 0,83 y R 0,50 frente a 1,00 (RAG frente a avanzado). R1 sigue imperfecta (su cifra está en el trozo vecino) y R4 varía entre ejecuciones.
+Cifras correctas: D **0,00 / 0,75 / 1,00** y R **0,00 / 0,83 / 0,83** (sin RAG / RAG / RAG avanzado). Citas correctas: D 0,75 y 0,75 y R 0,86 y 0,86 (RAG frente a avanzado). R1 sigue fallando en los dos modos (su cifra está en el trozo vecino). Al añadir las fuentes nuevas apareció un fallo del router: la palabra «study» activaba el filtro de papers de arXiv y ocultaba el estudio del Bundesbank; ahora solo lo activan «arXiv», «paper», «authors» y «transformer».
 
 ## 6. Preguntas probables
 

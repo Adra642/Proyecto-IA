@@ -34,20 +34,20 @@ El plan clasifica las fuentes en niveles A (núcleo) y B (ampliadas). El corpus 
 
 | ID | Fuente | Formato | Idioma | Docs | Particularidad importante |
 |---|---|---|---|---|---|
-| A1/A2 | CSV de Kaggle y **documentos derivados** | CSV a texto generado | EN | 66 | Descarga con `kagglehub` (anónima funciona); se eliminan columnas PII; ver sección 5 |
-| A3 | Papers de **arXiv** | PDF + API Atom | EN | 19 | Solo metadatos, resumen y extractos de introducción, resultados y conclusión (no el texto completo) |
+| A1/A2 | CSV de Kaggle y **documentos derivados** | CSV a texto generado | EN | 63 | Descarga con `kagglehub` (anónima funciona); se eliminan columnas PII; `Complain` no genera fichas por ser fuga del objetivo; ver sección 5 |
+| A3 | Papers de **arXiv** | PDF + API Atom | EN | 11 | Solo metadatos, resumen y extractos (no el texto completo); curados con `exclude_ids`/`include_ids` (se descartaron 9 papers fuera de tema) |
 | A4 | **Wikipedia** | JSON de la API MediaWiki | EN | 16 | Licencia CC BY-SA: se guarda la URL; limita el ritmo (error 429) |
 | A5 | **Portal de datos del BCE** | CSV SDMX | EN | 13 | Tipos oficiales, inflación y tipos bancarios; cada serie es una nota corta con fecha |
-| A6 | **Legislación de la UE** | HTML/XHTML/PDF | EN | 7 | EUR-Lex sirve un reto anti-bots; hay cadena de alternativas |
+| A6 | **Legislación de la UE** | HTML/XHTML/PDF | EN | 8 | EUR-Lex sirve un reto anti-bots; hay cadena de alternativas. La ley de IA y el RGPD se reducen a los artículos pertinentes (`keep_articles`); incluye el informe de la Comisión sobre la Directiva de cuentas de pago |
 | B1 | **Banco de España**, Portal del Cliente Bancario | HTML | ES | 7 | Da texto en español (recuperación multilingüe) |
 | B2 | **Eurostat** | JSON-stat | EN | 15 | Una nota por indicador y país (FR, DE, ES) |
-| B3 | **Banco Mundial** | JSON | EN | 12 | Idem: inflación, PIB per cápita, crédito privado, cuentas bancarias |
+| B3 | **Banco Mundial** | JSON | EN | 18 | Idem: inflación, PIB per cápita, crédito privado, cuentas bancarias, sucursales por 100.000 adultos y uso de internet |
 | B4 | **Notas de prensa del BCE** | RSS + HTML | EN | 3 | Solo lo que hay en el feed RSS (unas 15 entradas recientes) |
-| B5 | **Encuesta de Finanzas y Consumo de los Hogares (HFCS)** | HTML + PDF | EN | 3 | El BCE no ofrece las tablas por edad en una URL estable: se usa la página y dos informes |
-| B6 | **EBA** (Autoridad Bancaria Europea) | HTML + PDF | EN | 7 | Páginas de consumidor y guías de originación de préstamos |
-| B7 | **Registros de crédito** (CIRBE, SCHUFA, FICP) | HTML | ES/DE/FR | 3 | Explican por qué una puntuación de crédito no es comparable entre países |
-| B8 | **Banque de France, BaFin, Bundesbank** | HTML | FR/DE | 7 | Evita el sesgo hacia España; permite filtrar por país |
-| | **Total** | | | **178** | Unas 399.000 palabras |
+| B5 | **Encuesta de Finanzas y Consumo de los Hogares (HFCS)** | HTML + PDF | EN | 3 | Página de la HFCS, su informe de investigación y el estudio SPACE 2024 sobre hábitos de pago; el BCE no ofrece las tablas por edad en una URL estable |
+| B6 | **EBA** (Autoridad Bancaria Europea) | HTML + PDF | EN | 5 | Páginas de consumidor, informe de originación de préstamos y el Informe de Tendencias del Consumidor 2024/25 |
+| B7 | **Registros de crédito** (CIRBE, FICP) | HTML | ES/FR | 2 | Explican por qué una puntuación de crédito no es comparable entre países |
+| B8 | **Banque de France, BaFin, Bundesbank, Verbraucherzentrale** | HTML + PDF | EN/FR/DE | 12 | Cambio de banco (Francia y Alemania), reclamaciones y hábitos de pago; evita el sesgo hacia España |
+| | **Total** | | | **177** | Unas 325.000 palabras |
 
 Fuera de alcance por decisión del equipo: quejas del CFPB (EE. UU.) y Banking77, para mantener el foco europeo.
 

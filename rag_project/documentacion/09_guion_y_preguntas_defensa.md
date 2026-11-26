@@ -38,10 +38,10 @@ Demo: abrir la app, preguntar «¿Cuál es la tasa de churn en Alemania?» en lo
 
 ### Parte 4: evaluación y técnicas avanzadas (fases C y E) · ~7 min
 Idea fuerza: *"Mismo modelo, mismas preguntas: lo único que cambia es la recuperación. Y mostramos también dónde falla."*
-1. Diseño: 14 preguntas (D, L, R, U), gold generado y puntuación automática (cifras, citas, abstención, fugas de datos personales).
-2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,83 → 1,00**; R **0,25 → 0,75 → 0,62** (citas R 0,50 → 1,00 en avanzado); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
-3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,794 → 0,903; hit@4 0,917 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
-4. Honestidad: D6, R1 y R4 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática (L1/L2 verificadas por una persona); 12 preguntas son pocas.
+1. Diseño: 15 preguntas (D, L, R, U; las R incluyen fuentes añadidas al final: Banco de España, CCSF, Banco Mundial, EBA), gold generado y puntuación automática (cifras, citas, abstención, fugas de datos personales).
+2. Resultados (cifras correctas, sin RAG → RAG → RAG avanzado): D **0,00 → 0,75 → 1,00**; R **0,00 → 0,83 → 0,83** (citas R 0,86 en ambos); L cita el paper correcto; R3 da el dato vigente del BCE; U no discrimina.
+3. Técnicas avanzadas y ablación: híbrida BM25 + vectorial (MRR 0,887 → 1,000; hit@1 0,846 → 1,00), filtros por metadatos y router por reglas; reranking implementado, medido y desactivado porque no mejora.
+4. Honestidad: D6 y R1 como diagnósticos (el documento correcto se recuperó pero no siempre el trozo); la evaluación es solo automática (L1/L2 verificadas por una persona); 15 preguntas son pocas.
 
 Demo: `uv run python -m eval.ablation` (sin LLM) y abrir `eval/ablation.csv`; `uv run python -m eval.score --examples` para ejemplos antes/después.
 
@@ -105,7 +105,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 37. **¿Qué pasa con la temperatura?** Los modelos Gemini 3.5 la ignoran; por eso es una ejecución por pregunta y se aceptan pequeñas diferencias entre ejecuciones.
 38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 14 (12 de recuperación más 2 diagnósticos); R1 y R2 originales las sabía el modelo sin RAG y el plan pide sustituirlas por preguntas más específicas.
 39. **¿Quién puntúa las respuestas?** Se puntúan automáticamente: cifras de referencia generadas desde `stats.json`, verificación de citas contra los trozos recuperados, abstención y fugas de datos personales. No hay puntuación manual; es una limitación que reconocemos (14 preguntas, una ejecución).
-39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,794 a 0,903 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
+39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,887 a 1,000 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
 39c. **¿Por qué Cloud Run?** Ejecuta el contenedor con el modelo y el índice incluidos, escala a cero y tiene cuota gratuita.
 
 ### Ingeniería
@@ -119,10 +119,10 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 ## 5. Tarjetas de cifras (una por persona)
 
 - **Datos**: 10.000 clientes · 20,4 % de churn · Alemania 32,4 % · 4 productos 100 % · 99,8 % de quienes se fueron se habían quejado.
-- **Corpus**: 13 fuentes · 176 documentos · 310.000 palabras · 4 idiomas.
-- **Índice**: 6.309 trozos · 600/90 · 384 dimensiones · 5 min en frío · 1 s sin cambios.
-- **Experimento de tamaño**: MRR 0,781 (300), 0,794 (600), 0,836 (1000 y fijo) · contexto top-5 2.128 / 2.568 / 2.975 caracteres.
-- **Evaluación**: 14 preguntas · D: 0,00 → 0,83 → 1,00 de cifras correctas · R: 0,25 → 0,75 → 0,62.
-- **Recuperación**: vectorial MRR 0,794 → híbrida 0,903 · hit@4 0,917 → 1,000 · reranking sin mejora.
+- **Corpus**: 13 fuentes · 177 documentos · 325.000 palabras · 4 idiomas.
+- **Índice**: 4.663 trozos · 600/90 · 384 dimensiones · 5 min en frío · 1 s sin cambios.
+- **Experimento de tamaño**: MRR 0,887 en las tres variantes (empate) · contexto top-5 1.941 / 2.571 / 3.289 caracteres.
+- **Evaluación**: 15 preguntas · D: 0,00 → 0,75 → 1,00 de cifras correctas · R: 0,00 → 0,83 → 0,83.
+- **Recuperación**: vectorial MRR 0,887 → híbrida 1,000 · hit@1 0,846 → 1,000 · reranking sin mejora.
 - **Despliegue**: Cloud Run, 2 GiB / 2 CPU, imagen de 2,76 GB · sitio en GitHub Pages.
 - **Calidad**: 223 tests · 95 % de cobertura · ruff y mypy estrictos limpios.

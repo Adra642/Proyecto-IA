@@ -14,7 +14,7 @@ results = {(r["id"], r["mode"]): r for r in read_json("eval/results.json")}
 
 ## Cómo se evalúa
 
-Se parte de **14 preguntas de nicho** que un LLM genérico no debería poder contestar con precisión. Cada una
+Se parte de **15 preguntas de nicho** que un LLM genérico no debería poder contestar con precisión. Cada una
 se contesta con **el mismo modelo** (Gemini 3.5 Flash-Lite, mismo *prompt* base) en tres modos, y se compara con una respuesta de
 referencia **generada por código** a partir de `stats.json` o del texto de los documentos. Cada ejecución
 vuelve a llamar al modelo, que no es determinista (Gemini 3.5 ignora `temperature`); los resultados que se muestran
@@ -66,9 +66,9 @@ md_table([
 
 Lo que muestran:
 
-- **Sin RAG** no acierta ninguna cifra del dataset (0,00) y solo un 25 % de las de regulación y macro (las cifras que ya conocía).
+- **Sin RAG** no acierta ninguna cifra del dataset (0,00) ni de las de regulación, macro y fuentes añadidas al final (0,00): las preguntas R4 a R6 (reclamaciones del Banco de España, franceses que no se atrevieron a cambiar de banco, sucursales en Alemania) son datos que el modelo no puede conocer.
   Es un modelo honesto: ante lo que no sabe, **lo dice** en lugar de inventar.
-- **Con RAG** sube al 83 % en datos propios y al 75 % en regulación y macro, y cita el documento de origen.
+- **Con RAG** sube al 75 % en datos propios y al 83 % en regulación, macro y fuentes añadidas, y cita el documento de origen; el **RAG avanzado** llega al 100 % en datos propios.
 - **Las preguntas de conducta (U)** las resuelven bien los tres modos: no inventan un dato de Portugal y se niegan a revelar el apellido.
 
 ## Ejemplos antes y después
@@ -99,7 +99,7 @@ for qid in ("D6", "R3", "U2"):
 ## Lectura honesta de los resultados
 - **Una sola ejecución por pregunta**, y los modelos Gemini 3.5 ignoran `temperature`: una cita puede cambiar entre dos ejecuciones con la misma recuperación. Las diferencias pequeñas son ruido.
 - **El modelo base puede decir "no lo sé"**, lo que le favorece frente a uno que inventa; un *prompt* sin esa opción probablemente lo dejaría peor parado.
-- **R1** (importe fijo de la tasa de intercambio) sigue fallando: la respuesta está en el *chunk* siguiente al recuperado. **R4** a veces responde con Wikipedia en lugar del reglamento.
+- **R1** (importe fijo de la tasa de intercambio) sigue fallando en los dos modos con RAG: la respuesta está en el *chunk* siguiente al recuperado. **D6** (la pregunta simple sobre Alemania) falla en RAG básico y se arregla con la búsqueda híbrida. Al añadir las fuentes nuevas se detectó y corrigió un fallo del router: la palabra «study» activaba el filtro de papers de arXiv y ocultaba el estudio del Bundesbank.
 - **La puntuación es solo automática** (cifras, citas, abstención y fugas de datos personales): no hay puntuación manual. Las referencias de L1 y L2 se redactaron a partir de los resúmenes de arXiv y una persona las **verificó contra el PDF** (`eval/literature_verification.md`).
-- Son **14 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
+- Son **15 preguntas**: sirven para ilustrar el método, no para afirmar diferencias finas.
 :::

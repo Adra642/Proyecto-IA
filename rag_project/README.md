@@ -137,25 +137,25 @@ uv run python -m eval.chunking_experiment --with-fixed   # about 20 min on CPU: 
 ```
 
 Writes `eval/chunking_results.csv`, `eval/chunking_detail.csv` (per question) and
-`eval/chunking_results.png`. Retrieval only, 12 questions with gold sources (`eval/questions.json`),
+`eval/chunking_results.png`. Retrieval only, 13 questions with gold sources (`eval/questions.json`),
 scored at chunk level (hit@k, MRR):
 
 | Variant | Chunks | Avg chars | hit@1 | hit@3 | hit@5 | MRR | Context (top 5, chars) |
 |---|---|---|---|---|---|---|---|
-| 300 / 45 overlap | 13,466 | 197 | 0.80 | 1.00 | 1.00 | 0.883 | 2,154 |
-| **600 / 90 overlap** | 6,309 | 415 | 0.90 | 1.00 | 1.00 | 0.933 | 2,795 |
-| 1000 / 150 overlap | 3,873 | 681 | 0.90 | 1.00 | 1.00 | 0.933 | 3,341 |
-| fixed 600 (no headers) | 6,000 | 438 | 0.90 | 1.00 | 1.00 | 0.933 | 2,735 |
+| 300 / 45 overlap | 9,743 | 217 | 0.85 | 0.92 | 1.00 | 0.887 | 1,941 |
+| **600 / 90 overlap** | 4,663 | 453 | 0.85 | 0.92 | 1.00 | 0.887 | 2,571 |
+| 1000 / 150 overlap | 2,942 | 725 | 0.85 | 0.92 | 1.00 | 0.887 | 3,289 |
 
-Reading: 300 characters is worse (one more question misses rank 1) and doubles the number of
-chunks; 600 and 1000 tie. 600 gives the same retrieval quality with about 16 % less context
-passed to the LLM. With 10 questions one question is 0.1, and the documents that are never split
-(dataset cards, macro notes) are unaffected by the size, so the experiment separates sizes only
-weakly. The header-aware and size-only strategies tie on this question set.
+Reading: on the final corpus and 13 retrieval questions the three sizes **tie on every metric** (one
+question is 0.077), so the experiment no longer separates them; the earlier, smaller corpus did put
+300 characters behind. The choice of **600 / 90** stays a trade-off: half the chunks of 300 (less to
+embed and store) and about 22 % less context for the LLM than 1000. The documents that are never split
+(dataset cards, macro notes) do not depend on the size. (Measured earlier, header-aware and fixed-size
+chunking also tied.)
 
 ## Run the evaluation
 
-Fourteen questions (`eval/questions.json`) are answered in two modes with the **same LLM**
+Fifteen questions (`eval/questions.json`) are answered in two modes with the **same LLM**
 (`config.yaml` -> `llm`): **No RAG** (the plain model, told to say so when it does not know) and
 **RAG** (top-4 chunks from the index, answer only from the context, cite `[doc_id]`).
 
@@ -166,7 +166,9 @@ uv run python -m eval.score           # automatic scores -> eval/auto_scores.csv
 uv run python -m eval.score --examples --example-ids D1,R3   # before/after examples for the memoir
 ```
 
-- Questions: 6 about the dataset (D), 2 from the literature (L), 4 regulatory or current (R) and 2
+- Questions: 4 about the dataset (D), 2 from the literature (L), 7 regulatory, current or from the
+  regulator and survey sources added late (R: Interchange Regulation, Eurostat, ECB rate, Banco de España
+  complaints 2025, CCSF switching review, World Bank branches, EBA Consumer Trends Report) and 2
   behavioural (U: an answer that is not in the corpus, and a request for a surname that must be
   refused). No gold number is typed by hand: dataset values come from `stats.json`, regulatory and
   ECB/Eurostat values are read from the ingested texts with regexes stored in the question file.
@@ -175,7 +177,7 @@ uv run python -m eval.score --examples --example-ids D1,R3   # before/after exam
   with backoff handle rate limits.
 - Scoring is **automatic only** (hit@k, numeric match against the generated gold, citation check,
   abstention and PII-leak checks); there is no manual scoring step, so differences are read as
-  indicative (14 questions, one run).
+  indicative (15 questions, one run).
 - `eval/literature_verification.md` lists the PDF sentences behind the two literature gold answers
   (drafted from abstracts); a human verified them against the PDF on 2026-11-26.
 
@@ -183,25 +185,28 @@ Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one 
 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
-| D dataset (6) | No RAG | 0.00 | | | |
-| D dataset (6) | RAG | 0.83 | 0.83 | 0.50 | |
-| L literature (2) | No RAG | n/a | | | |
+| D dataset (4) | No RAG | 0.00 | | | |
+| D dataset (4) | RAG | 0.75 | 0.75 | 0.75 | |
+| D dataset (4) | RAG avanzado | 1.00 | 1.00 | 0.75 | |
 | L literature (2) | RAG | n/a | 1.00 | 1.00 | |
-| R regulatory/current (4) | No RAG | 0.25 | | | |
-| R regulatory/current (4) | RAG | 0.75 | 1.00 | 0.50 | |
-| U behavioural (2) | No RAG | | | | 1.00 |
-| U behavioural (2) | RAG | | | | 1.00 |
+| L literature (2) | RAG avanzado | n/a | 1.00 | 1.00 | |
+| R regulatory, current, regulators (7) | No RAG | 0.00 | | | |
+| R regulatory, current, regulators (7) | RAG | 0.83 | 1.00 | 0.86 | |
+| R regulatory, current, regulators (7) | RAG avanzado | 0.83 | 1.00 | 0.86 | |
+| U behavioural (2) | No RAG / RAG / RAG avanzado | | | | 1.00 |
 
-How to read it: RAG answers the dataset, literature and current-data questions with exact, cited
-figures; the plain model mostly says "no lo sé" (its prompt allows it, and the behavioural questions do not
-separate the two modes); when it does answer without context it can be wrong, e.g. R3, where it gave an
-out-of-date ECB rate (3.25%, "since 23 October 2024") instead of the current one. Failures are kept on purpose
-as diagnostics for the advanced techniques: **D6** (the plain question "churn rate in Germany":
-the phrase "Kaggle Bank Customer Churn dataset" matches every card, so the Germany card ranks 4th),
-**R1** (the answer sits in the chunk after the one retrieved) and **R4** (the model already knows
-the caps; RAG answered from Wikipedia instead of the regulation). Scores come from a single run per
-question and Gemini 3.5 ignores `temperature`, so small differences (for example a citation) can
-change between runs.
+How to read it: *numeric match* is the share of the gold figures that appear in the answer, *hit@4* whether
+a gold document is among the 4 retrieved chunks, *citation OK* whether the answer cites a document that was
+retrieved, *behaviour OK* whether the model declined the two unanswerable questions. RAG answers the dataset,
+regulator and survey questions with exact, cited figures, while the plain model scores 0.00 on both groups:
+the new-source questions (Banco de España complaints, CCSF "did not dare" share, World Bank branches) are
+facts it cannot know, and on R7 it says it does not know. Failures are kept on purpose as diagnostics:
+**D6** (the plain question "churn rate in Germany": the phrase "Kaggle Bank Customer Churn dataset" matches
+every card; plain RAG misses, hybrid search fixes it) and **R1** (the fixed interchange fee sits in the chunk
+after the one retrieved; both RAG modes still miss it). Scores come from a single run per question and
+Gemini 3.5 ignores `temperature`, so small differences (for example a citation) can change between runs.
+A router bug found while adding the new sources is fixed: the word "study" used to trigger the arXiv-paper
+filter, which hid the Bundesbank study; only "arXiv", "paper", "authors" and "transformer" do now.
 
 ## Run the app
 ```bash
@@ -235,25 +240,25 @@ uv run python -m eval.ablation     # retrieval-only ablation -> eval/ablation.cs
 uv run python -m eval.run_eval     # now also runs rag_advanced (cached answers)
 ```
 
-Retrieval ablation (12 questions with gold sources; hit@4 = what the LLM sees; chunk level):
+Retrieval ablation (13 questions with gold sources; hit@4 = what the LLM sees; chunk level):
 
 | Configuration | hit@1 | hit@4 | MRR |
 |---|---|---|---|
-| vector (baseline) | 0.667 | 0.917 | 0.794 |
-| + hybrid (BM25 + vector) | **0.833** | **1.000** | **0.903** |
-| + rerank (FlashRank TinyBERT) | 0.833 | 1.000 | 0.896 |
-| + filters (router, hybrid) | 0.833 | 1.000 | 0.903 |
-| + filters + rerank (TinyBERT) | 0.833 | 1.000 | 0.896 |
-| rerank MiniLM-L-12 (+filters) | 0.667 | 1.000 | 0.812 |
-| rerank MultiBERT-L-12 (+filters) | 0.417 | 0.500 | 0.454 |
+| vector (baseline) | 0.846 | 0.923 | 0.887 |
+| + hybrid (BM25 + vector) | **1.000** | **1.000** | **1.000** |
+| + rerank (FlashRank TinyBERT) | 0.923 | 1.000 | 0.962 |
+| + filters (router, hybrid) | 1.000 | 1.000 | 1.000 |
+| + filters + rerank (TinyBERT) | 0.923 | 1.000 | 0.962 |
+| rerank MiniLM-L-12 (+filters) | 0.769 | 1.000 | 0.865 |
+| rerank MultiBERT-L-12 (+filters) | 0.462 | 0.692 | 0.545 |
 
-Hybrid search is the technique that pays off: the plain "churn rate in Germany" question (**D6**) goes
-from rank 5 to rank 1 and the answer from wrong to right (numeric match 0 to 1 in `eval/auto_summary.csv`).
-Reranking and filters add nothing measurable on top of hybrid here, and the larger rerankers hurt:
-the cross-encoders are trained on web passages and push the statistic cards down, and the multilingual
-model is far worse. With 12 questions one question is 0.083, so treat small differences as noise.
-Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.00 / 0.83 / 1.00 and R 0.25 /
-0.75 / 0.62 for No RAG / RAG / RAG avanzado; R4 and R1 are still imperfect (R1 needs the neighbour chunk).
+Hybrid search is the technique that pays off: it lifts hit@1 from 0.846 to 1.000, and the plain "churn rate in
+Germany" question (**D6**) goes from a wrong answer to a right one (numeric match 0 to 1 in
+`eval/auto_summary.csv`). Reranking adds nothing on top of hybrid and the larger rerankers hurt: the
+cross-encoders are trained on web passages and push the statistic cards down, and the multilingual model is far
+worse. With 13 questions one question is 0.077, so treat small differences as noise.
+Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.00 / 0.75 / 1.00 and R
+0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; R1 still fails in both RAG modes (it needs the neighbour chunk).
 
 ## Tests and quality
 ```bash

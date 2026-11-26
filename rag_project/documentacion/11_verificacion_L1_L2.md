@@ -34,4 +34,4 @@ Idealmente una segunda persona repite la comprobación de al menos una de las do
 
 - *¿Quién verificó los gold de L1 y L2 y cómo?* Una persona comparó cada afirmación con las frases del PDF (con página) y firmó en `literature_verification.md`.
 - *¿Por qué no hay puntuación manual?* Decisión del equipo por tiempo; la puntuación automática compara cifras generadas desde el dato, comprueba citas contra los trozos recuperados y detecta abstenciones y fugas de datos personales. Limitación: no juzga la calidad global de una respuesta.
-- *¿Qué limitaciones tiene?* 14 preguntas y una ejecución por pregunta; Gemini 3.5 ignora `temperature`, así que otra ejecución daría respuestas algo distintas.
+- *¿Qué limitaciones tiene?* 15 preguntas y una ejecución por pregunta; Gemini 3.5 ignora `temperature`, así que otra ejecución daría respuestas algo distintas.

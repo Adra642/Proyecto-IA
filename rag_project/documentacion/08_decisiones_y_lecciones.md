@@ -23,7 +23,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 | **Chunking según tipo de documento**, 600 / 90 | Un tamaño único; 300 o 1000 | Los atómicos no se parten; 600 equilibra calidad y contexto (ver `03`) |
 | Texto del vector = título + ruta de encabezados (sin H1) + texto | Solo el texto del trozo | El contexto ayuda a recuperar apartados de leyes; el H1 largo repetido ahogaba lo distintivo |
 | **Indexación incremental** con huella (incluye `CHUNKER_VERSION`) | Reconstruir siempre | 1 s sin cambios; un cambio de lógica fuerza la reindexación |
-| **Híbrida BM25 + vectorial** en el modo avanzado | Solo vectorial | Medido: MRR de 0,794 a 0,903 y arregla D6 |
+| **Híbrida BM25 + vectorial** en el modo avanzado | Solo vectorial | Medido: MRR de 0,887 a 1,000 y arregla D6 |
 | **Reranking implementado pero desactivado** | Activarlo | Medido: no mejora y los grandes empeoran |
 | **Router por reglas** | Router con LLM | Gratis, determinista y comprobable |
 
@@ -37,7 +37,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 | **Guarda de privacidad determinista** | Confiar solo en el prompt | No llama al LLM, no puede inventar un apellido |
 | **Verificar las citas** contra los trozos recuperados | Fiarse del modelo | Una cita inventada no cuenta |
 | **Sin caché de respuestas**, una ejecución por pregunta | Caché en disco | Gemini 3.5 ignora `temperature`; las diferencias pequeñas se aceptan |
-| Sustituir las preguntas que la línea base ya sabía; conservar los **diagnósticos** (D6, R1, R4) | Mantenerlas u ocultar los fallos | Lo exige el plan y la honestidad |
+| Sustituir las preguntas que la línea base ya sabía; conservar los **diagnósticos** (D6, R1) | Mantenerlas u ocultar los fallos | Lo exige el plan y la honestidad |
 
 ### Entrega
 | Decisión | Alternativa descartada | Motivo |
@@ -63,10 +63,10 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 
 ## 3. Limitaciones conocidas (reconocerlas puntúa)
 
-- Evaluación pequeña: 14 preguntas (12 de recuperación) y una ejecución por pregunta; Gemini 3.5 ignora `temperature`.
+- Evaluación pequeña: 15 preguntas (13 de recuperación) y una ejecución por pregunta; Gemini 3.5 ignora `temperature`.
 - El experimento de tamaño de chunk discrimina poco; 1000 sale algo mejor en MRR (una pregunta de 12).
 - **Sin puntuación manual** (decisión del equipo): la evaluación es solo automática. Las referencias L1/L2 están verificadas por una persona (26 de noviembre de 2026).
-- R1 necesitaría trozos vecinos; R4 varía entre ejecuciones.
+- R1 necesitaría trozos vecinos.
 - El router solo conoce las palabras clave previstas (EN/ES/FR/DE).
 - Groq no probado con llamadas reales; DeepSeek sí (humo, cadena y alternativa), pero la evaluación se hizo solo con Gemini.
 - Fuente HFCS sin tablas de riqueza por edad; B4 solo ve lo que hay en el feed RSS; falta la página *Consumer Trends* de la EBA.

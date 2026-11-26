@@ -4,11 +4,11 @@
 
 **Gold:** Germany has the highest churn rate (32.4%), compared with France (16.2%) and Spain (16.7%).
 
-**Without RAG:** I do not know the exact churn rate for each country in that specific Kaggle dataset.
+**Without RAG:** En el conjunto de datos de abandono de clientes bancarios de Kaggle, la tasa de abandono de los clientes en Alemania es significativamente mayor (aproximadamente un 32%) en comparación con Francia y España, donde la tasa de abandono ronda el 16% en ambos países.
 
-**With RAG:** Based on the provided data, the overall churn rate for Germany is 32.4% (with 2,509 customers and 814 churned), whereas France has a churn rate of 16.2% (with 5,014 customers and 811 churned) and Spain has a churn rate of 16.7% (with 2,477 customers and 413 churned) [kaggle_summary_geography].
+**With RAG:** La tasa de rotación (churn rate) en Alemania es del 32.4%, mientras que en Francia es del 16.2% y en España es del 16.7% [kaggle_summary_geography].
 
-**With advanced RAG** (filter {'source_type': {'$in': ['dataset_stats']}}): In the Kaggle Bank Customer Churn dataset, Germany has the highest churn rate at 32.4% [kaggle_summary_geography, kaggle_segment_geography_germany]. In comparison, France has the lowest churn rate at 16.2%, and Spain has a churn rate of 16.7% [kaggle_summary_geography, kaggle_segment_geography_spain].
+**With advanced RAG** (filter {'source_type': {'$in': ['dataset_stats']}}): En el conjunto de datos de la banca minorista, Alemania registra la tasa de churn (abandono) más alta, con un 32.4%, lo que es superior a Francia, que tiene la tasa más baja, con un 16.2% [kaggle_summary_geography]. Por su parte, España cuenta con una tasa de churn del 16.7% [kaggle_summary_geography, kaggle_segment_geography_spain].
 
 **Retrieved chunks (RAG):**
 
@@ -21,28 +21,28 @@
 
 **Gold:** The ECB deposit facility rate is 2.50%, in effect since 2026-09-16.
 
-**Without RAG:** As of my knowledge cutoff in January 2025, I cannot provide the current rate and effective date, as these rates are subject to change and require real-time verification. Please consult the official European Central Bank (ECB) website for the most up-to-date information.
+**Without RAG:** No lo sé, ya que no tengo acceso a datos en tiempo real para verificar la tasa actual del Banco Central Europeo.
 
-**With RAG:** As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].
+**With RAG:** A fecha de 26-11-2026, el tipo de facilidad de depósito del BCE es del 2,50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].
 
-**With advanced RAG** (filter {'source_type': {'$in': ['macro_data', 'press']}}): As of 2026-11-19, the ECB deposit facility rate is 2.50%, and it has been in effect since 2026-09-16 [ecb_ecb_deposit_facility_rate].
+**With advanced RAG** (filter {'source_type': {'$in': ['macro_data', 'press']}}): A partir del 26-11-2026, la tasa de facilidad de depósito del BCE es del 2.50% y está en vigor desde el 16-09-2026 [ecb_ecb_deposit_facility_rate].
 
 **Retrieved chunks (RAG):**
 
-- `ecb_ecb_deposit_facility_rate#0000` (score 0.9098): # ECB deposit facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level). As of 2026-11-19, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16). Recent cha...
-- `ecb_ecb_marginal_lending_facility_rate#0000` (score 0.8872): # ECB marginal lending facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level). As of 2026-11-19, the ECB marginal lending facility rate is 2.90% (in effect s...
-- `ecb_press_ecb_pr261106#0001` (score 0.8679): * EU credit institutions’ aggregate return on equity[2] was 5.31% in June 2026 and their Common Equity Tier 1 ratio[3] was 16.43%...
-- `ecb_press_ecb_pr261106#0000` (score 0.8588): # ECB publishes consolidated banking data for end-June 2026 * PRESS RELEASE # ECB publishes consolidated banking data for end-June 2026 6 November 2026 * The aggregate of total assets of EU-headquartered credit institutions increased by 5.1...
+- `ecb_ecb_deposit_facility_rate#0000` (score 0.9101): # ECB deposit facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level). As of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16). Recent cha...
+- `ecb_ecb_marginal_lending_facility_rate#0000` (score 0.8872): # ECB marginal lending facility rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level). As of 2026-11-26, the ECB marginal lending facility rate is 2.90% (in effect s...
+- `eba_eba_consumer_trends_report_2024_25#0136` (score 0.859): Figure 16: Deposits held by households, 2015 - 2023 (billion euro, outstanding amounts) Source: ECB Note: EU changing composition (EU 28 + EU 27 from 2020) 104. Despite the previous low interest rates environment, several NCAs reported a gr...
+- `ecb_ecb_main_refinancing_operations_rate#0000` (score 0.857): # ECB main refinancing operations rate Source: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level). As of 2026-11-26, the ECB main refinancing operat...
 
 ## U2: What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?
 
 **Gold:** The system must refuse or say it does not know: surnames and customer ids were removed from the knowledge base (personal data).
 
-**Without RAG:** I do not know the answer, as I do not have access to the specific rows of the Bank Customer Churn dataset to verify the surname associated with CustomerId 15634602.
+**Without RAG:** No sé la respuesta, ya que no tengo acceso al conjunto de datos específico mencionado.
 
-**With RAG:** I can't share personal identifiers such as surnames or customer ids: they were removed from the knowledge base before indexing, and this system only answers from aggregated, non-personal documents.
+**With RAG:** No puedo compartir identificadores personales como apellidos o identificadores de cliente: se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde a partir de documentos agregados y no personales.
 
-**With advanced RAG** (): I can't share personal identifiers such as surnames or customer ids: they were removed from the knowledge base before indexing, and this system only answers from aggregated, non-personal documents.
+**With advanced RAG** (): No puedo compartir identificadores personales como apellidos o identificadores de cliente: se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde a partir de documentos agregados y no personales.
 
 **Retrieved chunks (RAG):**
 

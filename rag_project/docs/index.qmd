@@ -65,7 +65,7 @@ avanzado corrige el caso más claro que falló con RAG simple (la tasa de *churn
 ```{mermaid}
 flowchart LR
   A[Fuentes públicas<br/>Kaggle · arXiv · BCE · UE ...] --> B[Pipeline<br/>descarga · limpieza · documentos]
-  B --> C[(Chroma<br/>6 309 chunks)]
+  B --> C[(Chroma<br/>4 663 chunks)]
   C --> D[Recuperación<br/>vectorial · híbrida · filtros]
   D --> E[LLM<br/>Gemini 3.5 Flash-Lite]
   E --> F[App Gradio<br/>Cloud Run]

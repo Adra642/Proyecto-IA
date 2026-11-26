@@ -299,3 +299,9 @@ def test_flashrank_reranker_sorts_by_model_score_and_replaces_scores(
     assert [c.score for c in out] == [0.9, 0.1]
     assert (tmp_path / "cache").is_dir()
     assert reranker.rerank("q", []) == []
+
+
+def test_router_does_not_treat_any_study_as_an_arxiv_paper() -> None:
+    """Central-bank and Commission studies are not arXiv papers: no ``paper`` filter."""
+    route = RuleRouter().route("In the Bundesbank study on payment behaviour, what share is cash?")
+    assert "paper" not in str(route.where)
