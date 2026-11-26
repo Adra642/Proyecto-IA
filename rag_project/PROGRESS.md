@@ -229,3 +229,6 @@ Verified: `ruff check`, `ruff format --check`, `mypy` clean; 222 unit tests pass
 ### Stage 7 wrap-up (2026-11-26)
 - L1 and L2 gold answers verified against the PDFs by a team member (ADRA, 2026-11-26); the `DRAFT` prefix was removed from `eval/questions.json`. The two last supporting sentences of L2 changed and both now cite p.20 (the conclusion) in `eval/literature_verification.md` (checked in the downloaded PDF).
 - The Loop URL step was dropped by the team (row removed from `docs/index.qmd`), the defence rehearsal is run by the team, and the backup demo is no longer needed. README, guide and site updated accordingly.
+
+### Hugging Face Spaces references removed (2026-11-26)
+Hugging Face Spaces is no longer part of the project: removed the "why not Spaces" text from the README, site, guide and plans, the `requirements.txt` / `app/README.md` Space entries in the plan, the Hugging Face token from the plan's credential lists and the `export-reqs` poe task (it only existed to feed Spaces). Kept: `HF_HOME` in the Dockerfile and the e5 model, which is downloaded from the Hugging Face Hub, and the 2026-11-22 decision entry above as history.

@@ -31,7 +31,7 @@ Idea fuerza: *"Una app pública, en español, que deja ver de dónde sale cada r
 1. La app en <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>: Chat con selector de modo (*Sin RAG*, *RAG*, *RAG avanzado*), filtros, acordeón **Fuentes** y estado (tiempo y ruta).
 2. Pestaña **Comparar**: la misma pregunta en los tres modos a la vez.
 3. Robustez: pregunta vacía o demasiado larga, límite de la API con reintento y mensaje amable, rechazo de datos personales.
-4. Despliegue: contenedor con el modelo e5 y el índice dentro de la imagen, Cloud Run (2 GiB, 2 CPU), clave en Secret Manager, alerta de presupuesto; por qué no Hugging Face Spaces.
+4. Despliegue: contenedor con el modelo e5 y el índice dentro de la imagen, Cloud Run (2 GiB, 2 CPU), clave en Secret Manager, alerta de presupuesto; por qué Cloud Run (escala a cero, cuota gratuita).
 5. El sitio Quarto: menú **Contenido**, botones Anterior/Siguiente y tablas generadas desde los resultados guardados.
 
 Demo: abrir la app, preguntar «¿Cuál es la tasa de churn en Alemania?» en los tres modos (o en **Comparar**) y abrir *Fuentes*. Antes de la demo: poner 1 instancia mínima en Cloud Run y probar la URL en una ventana privada.
@@ -106,7 +106,7 @@ Cada miembro debe poder responder las de su parte **y las generales**. Antes de 
 38. **¿Cuántas preguntas y por qué sustituisteis algunas?** 14 (12 de recuperación más 2 diagnósticos); R1 y R2 originales las sabía el modelo sin RAG y el plan pide sustituirlas por preguntas más específicas.
 39. **¿Quién puntúa las respuestas?** Se puntúan automáticamente: cifras de referencia generadas desde `stats.json`, verificación de citas contra los trozos recuperados, abstención y fugas de datos personales. No hay puntuación manual; es una limitación que reconocemos (14 preguntas, una ejecución).
 39b. **¿Qué aporta el RAG avanzado?** La búsqueda híbrida sube el MRR de 0,794 a 0,903 y resuelve D6; los filtros no añaden nada medible y el reranking no ayuda, por eso está desactivado.
-39c. **¿Por qué Cloud Run y no Hugging Face?** Spaces exige un plan de pago para Gradio y Docker; Cloud Run escala a cero con cuota gratuita.
+39c. **¿Por qué Cloud Run?** Ejecuta el contenedor con el modelo y el índice incluidos, escala a cero y tiene cuota gratuita.
 
 ### Ingeniería
 40. **¿Qué patrones de diseño usáis?** Strategy, Factory/Registry, Template Method, Adapter, Decorator, Pipeline, Repository e inyección de dependencias (ver `07`).

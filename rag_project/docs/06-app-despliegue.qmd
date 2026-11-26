@@ -27,9 +27,7 @@ Las etiquetas están en español; las respuestas se dan siempre en español, sea
 
 ## Despliegue en Google Cloud Run
 
-La opción inicial era *Hugging Face Spaces*, pero su documentación actual exige un plan de pago para crear Spaces
-de Gradio o Docker (salvo dos de ZeroGPU), así que se decidió desplegar un **contenedor en Cloud Run**, que escala
-a cero y tiene una cuota gratuita mensual.
+La aplicación se despliega como un **contenedor en Cloud Run**, que escala a cero y tiene una cuota gratuita mensual.
 
 1. **Imagen**: un `Dockerfile` instala las dependencias de ejecución, y **hornea el modelo de embeddings y el
    índice de Chroma** en la imagen (el disco de Cloud Run es efímero; construirlos al arrancar repetiría 200 s

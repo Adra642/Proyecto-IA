@@ -108,6 +108,5 @@ test-integration = "pytest -m integration --no-cov"
 lint = ["_ruff-check", "_ruff-format"]
 typecheck = "mypy"
 docs = "quarto render docs"
-export-reqs = "uv export --no-dev --no-hashes -o requirements.txt"
 _ruff-check = "ruff check ."
 _ruff-format = "ruff format --check ."

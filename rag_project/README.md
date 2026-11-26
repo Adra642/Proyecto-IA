@@ -271,8 +271,7 @@ From the repo root: `uv run --project rag_project pre-commit install -c rag_proj
 `uv run poe pipeline | index | eval | app | test | test-integration | lint | typecheck`; `docs` arrives in Stage 6.
 
 ## Deployment (Google Cloud Run)
-Hugging Face Spaces was the original plan, but its docs now require a paid plan for Gradio and
-Docker Spaces, so the app is deployed as a container on **Cloud Run** (decision of 2026-11-22).
+The app is deployed as a container on **Cloud Run**.
 
 ```bash
 podman build -f deploy/Dockerfile -t rag-churn .      # or docker build; run from rag_project/

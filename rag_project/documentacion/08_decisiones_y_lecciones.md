@@ -42,7 +42,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 ### Entrega
 | Decisión | Alternativa descartada | Motivo |
 |---|---|---|
-| **Cloud Run** para la app | Hugging Face Spaces | Spaces exige plan de pago para Gradio y Docker; Cloud Run escala a cero con cuota gratuita |
+| **Cloud Run** para la app | Servidor siempre encendido | Ejecuta el contenedor, escala a cero y tiene cuota gratuita |
 | Índice y modelo **dentro de la imagen** | Construirlos al arrancar | Disco efímero; evita 5 minutos por arranque en frío |
 | **GitHub Pages** para el sitio, con workflow | Cloudflare Pages | Decisión del equipo; Cloudflare Pages es solo estático |
 | Menú desplegable y botones Anterior/Siguiente en Quarto | Barra con ocho enlaces | La barra estaba sobrecargada; la navegación secuencial mejora la lectura |
