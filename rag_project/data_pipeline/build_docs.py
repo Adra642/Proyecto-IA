@@ -116,7 +116,9 @@ def overview(df: pd.DataFrame) -> dict[str, float]:
 
 def segment_stats(df: pd.DataFrame, by: list[str]) -> pd.DataFrame:
     """Per-segment count, share, churn rate and means (only non-empty segments)."""
+    # observed=True skips empty category combinations, so no card is written for a missing segment.
     grouped = df.groupby(by, observed=True)
+    # Every number in the text documents comes from this aggregation, never typed by hand.
     out = grouped.agg(
         customers=(TARGET, "size"),
         churned=(TARGET, "sum"),
@@ -127,7 +129,7 @@ def segment_stats(df: pd.DataFrame, by: list[str]) -> pd.DataFrame:
         mean_age=("Age", "mean"),
         mean_points=("Point Earned", "mean"),
     ).reset_index()
-    out["share"] = out["customers"] / len(df)
+    out["share"] = out["customers"] / len(df)  # fraction of all customers in the segment
     # Labels as text: iterrows() would otherwise upcast an all-numeric row to float ("4.0").
     out[by] = out[by].astype(str)
     return out

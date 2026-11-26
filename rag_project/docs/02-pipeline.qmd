@@ -92,10 +92,3 @@ queja…, resúmenes por segmentación, diccionario de datos, panorama general y
 | Formatos | CSV, JSON, HTML, PDF y generado |
 | Idiomas | inglés, español, francés, alemán |
 | Ejecución en frío | unos 8 min (el *crawl delay* de arXiv); en caché, segundos |
-
-::: {.callout-note}
-## Limitaciones conocidas
-La fuente B5 (encuesta HFCS del BCE) no expone las tablas en una URL estable, así que el corpus contiene la
-página de presentación, un informe de investigación y el estudio SPACE 2024, no las tablas de riqueza por edad. La fuente B4 solo ve
-lo que hay en el RSS del BCE (unas 15 notas recientes). El estudio de la Comisión de 2012 sobre el cambio de cuenta bancaria se descargó de una copia de Internet Archive, porque el servidor de la Comisión bloquea a nuestro rastreador, y es un estudio antiguo.
-:::

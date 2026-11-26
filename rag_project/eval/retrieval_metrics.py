@@ -1,8 +1,11 @@
-"""Retrieval metrics at chunk level: hit@k and reciprocal rank against gold document ids."""
+"""Retrieval metrics: hit@k and reciprocal rank against gold documents and gold facts."""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+
+from eval.numbers import contains_number
+from eval.questions import GoldNumber
 
 
 def first_gold_rank(ranked_doc_ids: Sequence[str], gold: set[str]) -> int | None:
@@ -28,3 +31,24 @@ def reciprocal_rank(ranked_doc_ids: Sequence[str], gold: set[str]) -> float:
 def mean(values: Sequence[float]) -> float:
     """Arithmetic mean (0 for an empty sequence)."""
     return sum(values) / len(values) if values else 0.0
+
+
+def first_true_rank(flags: Sequence[bool]) -> int | None:
+    """1-based position of the first ``True`` flag (``None`` if there is none)."""
+    for rank, flag in enumerate(flags, 1):
+        if flag:
+            return rank
+    return None
+
+
+def chunk_has_fact(
+    chunk_doc_id: str, chunk_text: str, gold_docs: set[str], numbers: Sequence[GoldNumber]
+) -> bool:
+    """True if the chunk belongs to a gold document **and** contains a gold number.
+
+    Stricter than a document-level hit: the right document can be retrieved while the chunk
+    holding the figure is not, which is exactly what a reranker should fix.
+    """
+    return chunk_doc_id in gold_docs and any(
+        contains_number(chunk_text, n.value, n.tolerance, n.percent) for n in numbers
+    )

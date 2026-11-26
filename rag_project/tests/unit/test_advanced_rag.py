@@ -9,12 +9,12 @@ import pytest
 
 from core.models import RetrievedChunk
 from core.settings import RetrievalSettings
-from eval.ablation import Config, evaluate, filtered
-from eval.questions import Question
+from eval.ablation import Config, evaluate, filtered, score_retrieval
+from eval.questions import GoldNumber, Question
 from rag.chain import RagChain
 from rag.lexical import BM25Retriever, matches_where, tokenize
 from rag.prompts import NO_CONTEXT, REFUSAL_PII
-from rag.rerank import rerank_text
+from rag.rerank import BlendedReranker, rerank_text
 from rag.retrievers import HybridRetriever, RerankingRetriever
 from rag.router import Route, RuleRouter, all_of, where_from_filters
 
@@ -123,6 +123,52 @@ def test_reranking_retriever_reorders_a_wider_pool_and_keeps_top_k() -> None:
 def test_rerank_text_includes_title_and_header() -> None:
     c = chunk("x#0", "body", title="Title", header_path="H1 > H2")
     assert rerank_text(c) == "Title > H1 > H2\nbody"
+
+
+class FixedReranker:
+    """Reranks to a fixed order of chunk ids (best first)."""
+
+    def __init__(self, order: list[str]) -> None:
+        self._order = order
+
+    def rerank(self, query: str, chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        by_id = {c.chunk_id: c for c in chunks}
+        return [by_id[i] for i in self._order]
+
+
+def test_rerank_text_can_omit_the_title() -> None:
+    c = chunk("x#0", "body", title="Title", header_path="H1")
+    assert rerank_text(c, with_title=False) == "body"
+
+
+def test_blended_reranker_weight_one_follows_the_cross_encoder() -> None:
+    pool = CORPUS[:3]
+    order = [pool[2].chunk_id, pool[0].chunk_id, pool[1].chunk_id]
+    out = BlendedReranker(FixedReranker(order), weight=1.0).rerank("q", pool)
+    assert [c.chunk_id for c in out] == order
+
+
+def test_blended_reranker_weight_zero_keeps_the_input_order() -> None:
+    pool = CORPUS[:3]
+    order = [pool[2].chunk_id, pool[1].chunk_id, pool[0].chunk_id]
+    out = BlendedReranker(FixedReranker(order), weight=0.0).rerank("q", pool)
+    assert [c.chunk_id for c in out] == [c.chunk_id for c in pool]
+
+
+def test_blended_reranker_weight_decides_who_wins_a_disagreement() -> None:
+    a, b, c = CORPUS[:3]  # input order a, b, c; the cross-encoder prefers b over a
+    cross = FixedReranker([b.chunk_id, a.chunk_id, c.chunk_id])
+    strong = BlendedReranker(cross, 0.8).rerank("q", [a, b, c])
+    weak = BlendedReranker(cross, 0.2).rerank("q", [a, b, c])
+    assert [x.chunk_id for x in strong][:2] == [b.chunk_id, a.chunk_id]
+    assert [x.chunk_id for x in weak][:2] == [a.chunk_id, b.chunk_id]
+    even = BlendedReranker(cross, 0.5).rerank("q", [a, b, c])
+    assert even[0].chunk_id == a.chunk_id  # an exact tie keeps the input order
+
+
+def test_blended_reranker_rejects_a_weight_outside_zero_one() -> None:
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        BlendedReranker(FixedReranker([]), weight=1.5)
 
 
 # --- router ------------------------------------------------------------------------------------
@@ -256,9 +302,25 @@ def test_ablation_scores_each_configuration_and_filtered_falls_back() -> None:
     assert (summary[0]["hit@1"], summary[0]["mrr"]) == (1.0, 1.0)
     assert (summary[1]["hit@1"], summary[1]["hit@4"], summary[1]["mrr"]) == (0.0, 1.0, 0.25)
     assert detail == [
-        {"config": "good", "id": "Q1", "gold_rank": 1},
-        {"config": "bad", "id": "Q1", "gold_rank": 4},
+        {"config": "good", "id": "Q1", "gold_rank": 1, "fact_rank": None},
+        {"config": "bad", "id": "Q1", "gold_rank": 4, "fact_rank": None},
     ]
+    assert summary[0]["fact_questions"] == 0  # no gold number: no fact metric
+    # A gold number only counts when it is in a chunk of the gold document: "2015" is in a#0.
+    q_fact = q.model_copy(
+        update={
+            "gold_source_ids": ["a"],
+            "gold_numbers": {"y": GoldNumber(value=2015, tolerance=0.5, display="2015")},
+        }
+    )
+    row, rows = score_retrieval("fact", lambda text: [CORPUS[1], CORPUS[0]], [q_fact])
+    assert (row["fact_questions"], row["fact@1"], row["fact@4"], row["fact_mrr"]) == (
+        1,
+        0.0,
+        1.0,
+        0.5,
+    )
+    assert rows[0]["fact_rank"] == 2
     only_other = ListRetriever([CORPUS[2]])
     run = filtered(only_other, RuleRouter())
     assert [c.doc_id for c in run("Kaggle dataset churn")] == ["c"]  # filter empty -> unfiltered

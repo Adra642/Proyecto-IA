@@ -22,7 +22,7 @@ from _helpers import show_file
 **Enlace público: <https://rag-churn-6lkxbo5a5a-ew.a.run.app/>** (Gradio, desplegada en Google Cloud Run).
 Las etiquetas están en español; las respuestas se dan siempre en español, sea cual sea el idioma de la pregunta.
 
-![Pestaña *Chat*: selector de modo, filtros, conversación, fuentes y preguntas de ejemplo.](img/app_inicio.png){fig-alt="Interfaz de la aplicación"}
+![Pestaña *Chat* (tema oscuro): selector de modelo, selector de modo, filtros, conversación, fuentes y preguntas de ejemplo.](img/app_inicio.png){fig-alt="Interfaz de la aplicación"}
 
 - **Selector de modelo** (arriba de las pestañas): **Gemini** por defecto, o **Groq** y **DeepSeek**. El mismo modelo
   se usa en todos los modos, así que la comparación sigue siendo justa. Si el servidor no tiene la clave del
@@ -80,7 +80,9 @@ gcloud run services logs read rag-churn --region europe-west1 --limit 30
 Para probar la imagen **en local** antes de subirla (con Podman o Docker):
 
 ```bash
+# Se ejecuta desde la carpeta rag_project/ (el contexto de construcción)
 podman build -f deploy/Dockerfile -t rag-churn .
+# -e pasa la clave como variable de entorno; --rm borra el contenedor al salir
 podman run --rm -p 8080:8080 -e GOOGLE_API_KEY=... rag-churn   # http://localhost:8080
 ```
 
@@ -90,12 +92,14 @@ podman run --rm -p 8080:8080 -e GOOGLE_API_KEY=... rag-churn   # http://localhos
 secretos tienen que existir antes del despliegue**:
 
 ```bash
+# Crear los tres secretos (vacíos); después se les añade una versión con la clave real
 for s in google-api-key groq-api-key deepseek-api-key; do gcloud secrets create $s --replication-policy=automatic; done
 printf '%s' "$GOOGLE_API_KEY"   | gcloud secrets versions add google-api-key   --data-file=-
 printf '%s' "$GROQ_API_KEY"     | gcloud secrets versions add groq-api-key     --data-file=-
 printf '%s' "$DEEPSEEK_API_KEY" | gcloud secrets versions add deepseek-api-key --data-file=-
 
 # La cuenta con la que se ejecuta el servicio debe poder leerlos
+# (SA = cuenta de servicio de Cloud Run)
 SA=$(gcloud run services describe rag-churn --region europe-west1 --format='value(spec.template.spec.serviceAccountName)')
 for s in google-api-key groq-api-key deepseek-api-key; do
   gcloud secrets add-iam-policy-binding $s --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor

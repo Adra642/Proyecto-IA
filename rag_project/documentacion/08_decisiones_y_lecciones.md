@@ -1,4 +1,4 @@
-# 08. Decisiones, lecciones y limitaciones
+# 08. Decisiones y lecciones
 
 Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y describe la situación actual; la historia completa está en `PROGRESS.md`.
 
@@ -24,7 +24,7 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 | Texto del vector = título + ruta de encabezados (sin H1) + texto | Solo el texto del trozo | El contexto ayuda a recuperar apartados de leyes; el H1 largo repetido ahogaba lo distintivo |
 | **Indexación incremental** con huella (incluye `CHUNKER_VERSION`) | Reconstruir siempre | 1 s sin cambios; un cambio de lógica fuerza la reindexación |
 | **Híbrida BM25 + vectorial** en el modo avanzado | Solo vectorial | Medido: MRR de 0,887 a 1,000 y arregla D6 |
-| **Reranking implementado pero desactivado** | Activarlo | Medido: no mejora y los grandes empeoran |
+| **Reranking mixto activado** (FlashRank TinyBERT 0,7 + orden híbrido) | Cross-encoder solo, o sin reranking | Medido por trozo: el cross-encoder solo baja D6 al puesto 2; la mezcla recupera R1 sin perder aciertos; los grandes empeoran |
 | **Router por reglas** | Router con LLM | Gratis, determinista y comprobable |
 
 ### Generación y evaluación
@@ -60,16 +60,4 @@ Consulta rápida para "¿por qué es así hoy?". Está ordenada por área y desc
 8. **Verificar los modelos llamándolos**: `gemini-2.5-flash` estaba retirado aunque la documentación aún lo citaba.
 9. **Guardar resultados tras cada variante** de un experimento largo (el portátil se suspendió una vez).
 10. **Mantener la documentación generada desde los resultados** evita que el sitio contradiga los datos.
-
-## 3. Limitaciones conocidas (reconocerlas puntúa)
-
-- Evaluación pequeña: 15 preguntas (13 de recuperación) y una ejecución por pregunta; Gemini 3.5 ignora `temperature`.
-- El experimento de tamaño de chunk discrimina poco; 1000 sale algo mejor en MRR (una pregunta de 12).
-- **Sin puntuación manual** (decisión del equipo): la evaluación es solo automática. Las referencias L1/L2 están verificadas por una persona (26 de noviembre de 2026).
-- R1 necesitaría trozos vecinos.
-- El router solo conoce las palabras clave previstas (EN/ES/FR/DE).
-- Groq no probado con llamadas reales; DeepSeek sí (humo, cadena y alternativa), pero la evaluación se hizo solo con Gemini.
-- Fuente HFCS sin tablas de riqueza por edad; B4 solo ve lo que hay en el feed RSS; falta la página *Consumer Trends* de la EBA.
-- Licencias: la del dataset de Kaggle y las condiciones de reutilización de páginas de reguladores no están verificadas (constan así en `SOURCES.md`).
-- Sin chunking semántico ni router con LLM (opcionales).
-- Una captura de la app en el sitio; faltan respuestas, *Fuentes* y *Comparar*.
+11. **Medir también a nivel de trozo, no solo de documento**: con `hit@k` por documento la híbrida ya valía 1,000 y el reranking parecía inútil; con una métrica que exige la cifra en el trozo (`fact@k`) apareció el margen real (R1) y se pudo diseñar un reranking mixto.

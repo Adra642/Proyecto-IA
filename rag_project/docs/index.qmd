@@ -7,7 +7,7 @@ subtitle: "Un sistema de recuperación aumentada que supera al mismo LLM sin rec
 #| echo: false
 import sys
 sys.path.insert(0, ".")
-from _helpers import read_csv, md_table, read_json
+from _helpers import read_csv, md_table, read_json, num_es
 ```
 
 ## Resumen
@@ -41,7 +41,7 @@ for cat, label in cats.items():
     row = {"Categoría": label}
     for mode, name in names.items():
         match = [r for r in rows if r["category"] == cat and r["mode"] == mode]
-        row[name] = f'{float(match[0]["numeric_match"]):.2f}' if match and match[0]["numeric_match"] else "—"
+        row[name] = num_es(match[0]["numeric_match"]) if match else "—"
     out.append(row)
 md_table(out)
 ```
