@@ -8,6 +8,8 @@
 # Cloud Build starts with no layer cache, so the previous :latest image is pulled and used as
 # --cache-from (BuildKit inline cache): an unchanged dependency set, or an unchanged corpus and
 # rag/ code, is not rebuilt. A first build, or a change to uv.lock, still takes about 10 minutes.
+# Secrets google-api-key, groq-api-key and deepseek-api-key must exist before the first deploy
+# (create them with `gcloud secrets create`, see docs/06-app-despliegue.qmd).
 # Not exercised end to end by the team yet: check the first two build logs.
 substitutions:
   _REGION: europe-west1
@@ -53,10 +55,7 @@ steps:
       - --min-instances=0
       - --max-instances=2
       - --allow-unauthenticated
-      - --set-secrets=GOOGLE_API_KEY=google-api-key:latest
-      # To enable the Groq / DeepSeek options of the app's model selector, create the secrets
-      # groq-api-key and deepseek-api-key and extend the line above with
-      # ,GROQ_API_KEY=groq-api-key:latest,DEEPSEEK_API_KEY=deepseek-api-key:latest
+      - --set-secrets=GOOGLE_API_KEY=google-api-key:latest,GROQ_API_KEY=groq-api-key:latest,DEEPSEEK_API_KEY=deepseek-api-key:latest
 images:
   - ${_IMAGE}:${SHORT_SHA}
   - ${_IMAGE}:latest

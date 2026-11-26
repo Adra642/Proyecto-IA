@@ -86,10 +86,23 @@ podman run --rm -p 8080:8080 -e GOOGLE_API_KEY=... rag-churn   # http://localhos
 
 ### Habilitar Groq y DeepSeek en producción
 
-El servicio solo monta la clave de Gemini. Para que las opciones **Groq** y **DeepSeek** del selector funcionen en
-Cloud Run hay que crear sus secretos (`groq-api-key`, `deepseek-api-key`) y añadirlos a `--set-secrets` en
-`deploy/cloudbuild.yaml` (`GROQ_API_KEY=groq-api-key:latest,DEEPSEEK_API_KEY=deepseek-api-key:latest`). Hasta
-entonces la aplicación sigue funcionando con Gemini y, al elegir otro proveedor, muestra que falta su clave.
+`cloudbuild.yaml` monta las tres claves (`google-api-key`, `groq-api-key`, `deepseek-api-key`), así que **los
+secretos tienen que existir antes del despliegue**:
+
+```bash
+for s in google-api-key groq-api-key deepseek-api-key; do gcloud secrets create $s --replication-policy=automatic; done
+printf '%s' "$GOOGLE_API_KEY"   | gcloud secrets versions add google-api-key   --data-file=-
+printf '%s' "$GROQ_API_KEY"     | gcloud secrets versions add groq-api-key     --data-file=-
+printf '%s' "$DEEPSEEK_API_KEY" | gcloud secrets versions add deepseek-api-key --data-file=-
+
+# La cuenta con la que se ejecuta el servicio debe poder leerlos
+SA=$(gcloud run services describe rag-churn --region europe-west1 --format='value(spec.template.spec.serviceAccountName)')
+for s in google-api-key groq-api-key deepseek-api-key; do
+  gcloud secrets add-iam-policy-binding $s --member="serviceAccount:$SA" --role=roles/secretmanager.secretAccessor
+done
+```
+
+Si un proveedor no tiene clave, la aplicación sigue funcionando con los demás y muestra que falta esa clave.
 DeepSeek es de pago por uso (sin cuota gratuita).
 
 ### Qué hacer si algo falla
