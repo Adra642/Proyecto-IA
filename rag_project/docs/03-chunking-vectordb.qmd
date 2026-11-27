@@ -64,6 +64,9 @@ Una **Base de Datos Vectorial** no busca palabras exactas, sino que busca por **
 | Qdrant / Milvus | Diseñadas para miles de millones de datos. **Demasiado complejas** para nuestra escala. |
 | Pinecone | Requiere servicios en la nube y costes asociados. |
 
+**Aclaración sobre FAISS.** Aunque es un buscador ultrarrápido, es una *librería en memoria* (un motor de búsqueda), no una base de datos completa. Le faltan la
+persistencia, la gestión de metadatos y las operaciones CRUD (crear, leer, actualizar y borrar) que sí ofrece ChromaDB.
+
 ::: {.callout-important}
 ## Justificación técnica
 *   **Persistencia y Ligereza:** ChromaDB se guarda en un archivo local. Es ideal para nuestro despliegue en **Google Cloud Run** (servidores en la nube que se apagan y encienden).
@@ -89,6 +92,10 @@ repo.add(chunks)  # guarda texto, vector y metadatos de cada chunk
 resultados = repo.query("churn en Alemania", k=4, where={"geography": "DE"})
 ```
 
+El parámetro `k` (*Top-K*) indica cuántos fragmentos se extraen: los `k` **matemáticamente más parecidos a la pregunta**. Esos fragmentos son los que se inyectan al LLM como
+contexto para que redacte la respuesta. La aplicación usa `k=4` (`retrieval.top_k` en `config.yaml`); el experimento de la sección 5 mide además el *Hit@5*, es decir,
+si el documento correcto está entre los cinco primeros.
+
 ---
 
 ## 4. Estrategia de Segmentación (Chunking)
@@ -100,13 +107,19 @@ Para no perder el contexto, controlamos dos parámetros:
 *   **Tamaño:** Equilibrio entre precisión y contexto.
 *   **Solapamiento (Overlap):** Repetimos el final de un trozo al principio del siguiente para no cortar una idea por la mitad (el estándar es un 10-15% del tamaño).
 
+::: {.callout-note}
+## ¿Por qué 90 caracteres de solapamiento?
+Son exactamente el **15 %** de los 600 caracteres del *chunk* (600 × 0,15 = 90). Con esta regla estándar, si una idea queda cortada entre dos fragmentos, el segundo repite
+el final del primero: el modelo recibe contexto sin que se desperdicie memoria.
+:::
+
 ### 4.1. Estrategia de Enrutamiento por Documento
 
 No todos los documentos se cortan igual. Usamos un enrutador para elegir la estrategia:
 
 | Tipo de Documento | Estrategia Aplicada | ¿Por qué? |
 | :--- | :--- | :--- |
-| Tablas y datos | `PassthroughChunker` (No se cortan) | Son documentos atómicos. Si los cortas, separas la cifra de su etiqueta. |
+| Tablas y datos | `PassthroughChunker` (No se cortan) | Son **documentos atómicos** (tablas, filas de CSV). Si los cortas, separas la cifra de su etiqueta (por ejemplo, el 20,4 % de la tasa de *churn*) y el dato queda inservible para la IA. |
 | Leyes y Wikipedia | `MarkdownRecursiveChunker` | Respeta los encabezados (#) y párrafos antes de dividir. |
 | Pruebas | `FixedSizeChunker` | Corta a ciegas por número de letras. Solo usado para comparar. |
 
@@ -134,7 +147,8 @@ def build_chunker(cfg):
 Para no elegir el tamaño "a ojo", ejecutamos un experimento. Medimos el **Hit@1**, que es la proporción de veces que la respuesta correcta aparece como el primer resultado recuperado. Un Hit@1 alto indica que el sistema de recuperación es muy preciso: la respuesta correcta suele ser el primer fragmento que devuelve.
 
 **¿Por qué los valores son `[0.846, 0.846, 0.846]`?**  
-Estos valores provienen de los resultados empíricos del experimento con tres tamaños de chunk, medido sobre el corpus final (176 documentos) y las 13 preguntas de recuperación con documento de referencia (cada pregunta pesa 0,077). Con el corpus y las preguntas finales **los tres tamaños empatan en todas las métricas** (Hit@1 0,846, Hit@5 1,00 y MRR 0,887); con un corpus anterior y más pequeño, 300 caracteres quedaba por detrás:
+Estos valores provienen de los resultados empíricos del experimento con tres tamaños de chunk, medido sobre el corpus final (177 documentos) y las 13 preguntas de recuperación con documento de referencia (cada pregunta pesa 0,077). Con el corpus y las preguntas finales **los tres tamaños empatan en todas las métricas** (Hit@1 0,846, Hit@5 1,00 y MRR 0,887); con un corpus anterior y más pequeño, 300 caracteres quedaba por detrás. En otras palabras, en estas 13 preguntas el sistema ya captura las ideas completas con 300 caracteres,
+así que el tamaño deja de afectar a la precisión de la búsqueda (con otras preguntas el resultado podría ser distinto):
 
 | Tamaño | Chunks | Caracteres medios | Hit@1 | Hit@5 | MRR | Contexto top-5 (caracteres) |
 |---|---|---|---|---|---|---|
@@ -201,6 +215,14 @@ Con chunks de 600, enviamos 2.605 caracteres: un 23% menos (los chunks de 300 en
 Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma información, el volumen total sigue siendo menor. Este ahorro se traduce directamente en menor coste por consulta y menor latencia (el modelo responde más rápido).
 :::
 
+### Los tres costes que baja elegir 600 caracteres
+
+| Coste | Qué pasa con 600 caracteres |
+|---|---|
+| **Consultar al LLM (inferencia)** | Cada consulta envía un 23 % menos de texto (tokens) que con 1000 caracteres: menos latencia y menos factura de API. |
+| **Crear la base (embeddings)** | Con 300 caracteres habría que calcular y guardar 9.743 vectores; con 600, 4.663 (un 52 % menos de vectores). En la medición, el cálculo de embeddings pasó de 195 s a 133 s (un 32 % menos), y también ocupa menos disco y RAM. |
+| **Buscar (recuperación)** | Comparar la pregunta con 4.663 fragmentos es más rápido y consume menos CPU que compararla con casi 10.000. |
+
 ---
 
 ## 6. Conclusión
@@ -210,6 +232,17 @@ Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma infor
 *   **LangChain:** Orquestador flexible para alternar entre modelos (Gemini/Groq) y herramientas.
 *   **ChromaDB:** Base vectorial ligera, persistente y con filtros por metadatos, ideal para la nube.
 *   **Chunking validado:** Corte de 600 caracteres / 90 overlap, respaldado por el experimento empírico (los tres tamaños empatan con un Hit@1 del 84,6%; se elige 600 por el menor contexto y el menor número de chunks).
+:::
+
+::: {.callout-important}
+### Conclusión final y justificación de costes
+La elección de **600 caracteres con 90 de solapamiento no es una victoria en precisión** (los tres tamaños empatan con un Hit@1 del 84,6 % y un Hit@5 del 100 %), sino una
+**victoria en eficiencia técnica y económica**:
+
+*   **Frente a 1000 caracteres:** ahorra un 23 % de contexto por consulta (2.605 frente a 3.369 caracteres). Al enviar menos tokens al LLM bajan la factura de API y la latencia.
+*   **Frente a 300 caracteres:** evita duplicar la base de datos (4.663 chunks frente a 9.743): menos de la mitad de vectores, menos tiempo de embeddings, menos disco y RAM y menos cómputo en cada búsqueda.
+
+En definitiva, 600/90 es el punto de equilibrio: mantiene la misma precisión y optimiza los recursos del sistema.
 :::
 
 Con esta arquitectura preparada, el sistema está listo para la **evaluación comparativa (Sin RAG vs. Con RAG)**.
