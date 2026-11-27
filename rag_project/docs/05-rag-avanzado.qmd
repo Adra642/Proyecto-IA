@@ -24,72 +24,154 @@ flowchart LR
 
 ## 1. Búsqueda híbrida (BM25 + vectorial)
 
-La búsqueda vectorial entiende el significado pero falla con términos exactos ("2015/751", "NumOfProducts"); BM25
-hace lo contrario. Se piden 20 candidatos a cada una y se **fusionan por rango** (*reciprocal rank fusion*, pesos 0,5/0,5):
-se fusionan posiciones y no puntuaciones porque la similitud coseno y BM25 tienen escalas distintas.
+Buscar bien es **encontrar el fragmento que contiene la respuesta**, y hay dos maneras de buscar que se complementan:
+
+| | Búsqueda vectorial | Búsqueda léxica (BM25) |
+|---|---|---|
+| **Qué compara** | El *significado* de la pregunta y de cada fragmento (embeddings) | Las *palabras exactas* que comparten |
+| **Acierta cuando** | La pregunta usa otras palabras: «¿se van los clientes?» encuentra «tasa de abandono» | La pregunta contiene un término raro: «2015/751», «NumOfProducts» |
+| **Falla cuando** | El término exacto importa más que el sentido | Se dice lo mismo con otras palabras |
+
+La **búsqueda híbrida** lanza las dos a la vez y junta sus resultados. Como una da *similitud coseno* y la otra una
+puntuación BM25 (escalas distintas, no se pueden sumar), no se mezclan las puntuaciones sino las **posiciones**
+(*reciprocal rank fusion*, RRF):
+
+> puntos de un fragmento = Σ peso / (60 + posición), sumado sobre cada lista en la que aparece
+
+Con pesos 0,5/0,5, un ejemplo con tres fragmentos:
+
+| Fragmento | Posición vectorial | Posición BM25 | Puntos | Resultado |
+|---|---|---|---|---|
+| A | 1 | 5 | 0,5/61 + 0,5/65 = **0,0159** | 1.º |
+| C | — | 1 | 0,5/61 = 0,0082 | 2.º |
+| B | 2 | — | 0,5/62 = 0,0081 | 3.º |
+
+Un fragmento que aparece **en las dos listas** suma dos veces y sube, aunque no sea el primero en ninguna: dos
+métodos distintos coinciden en que es relevante. De cada método se piden 20 candidatos y de la fusión se quedan los mejores.
+
+El caso real es la pregunta «¿tasa de *churn* en Alemania?» (**D6**): la búsqueda vectorial deja la ficha de Alemania en el puesto 5
+y el modelo no la ve; BM25 encuentra «Alemania» y «churn» al instante y, fusionadas, la ficha pasa al puesto 1.
 
 ```{python}
 #| echo: false
 show_source("rag/retrievers.py", "HybridRetriever.retrieve")
 ```
 
-## 2. Filtros por metadatos
+## 2. Enrutador y filtros por metadatos
 
-Un enrutador **por reglas** (determinista, gratuito, sin llamar a un modelo) decide si hace falta recuperar y qué
-filtro aplicar: una pregunta que menciona "Kaggle" o "dataset" busca solo en `dataset_stats`; una que cita un
-reglamento, en `regulation` y `regulator_guide`; si nombra un único país, se restringe a ese país y a la UE. **El
-filtro es una pista**: si no encuentra nada, se repite la búsqueda sin filtro. Los filtros elegidos en la interfaz
-prevalecen sobre los del enrutador.
+Para optimizar las búsquedas, implementamos un **enrutador basado en reglas deterministas**. Al no depender de un LLM, es instantáneo, gratuito y predecible.
 
-```{python}
-#| echo: false
-show_source("rag/router.py", "RuleRouter.route")
+El enrutador evalúa la pregunta del usuario y toma decisiones basadas en tres capas:
+
+1.  **Detección de *small talk*:** si la pregunta es un saludo corto, se responde directamente sin consultar la base de datos.
+2.  **Reglas por palabras clave:** si la pregunta menciona términos como «Kaggle», se restringe la búsqueda a la fuente `dataset_stats`. Si menciona «reglamento», busca en `regulation` y `regulator_guide`.
+3.  **Filtro geográfico:** si la pregunta menciona un único país, el filtro se restringe a ese país y a la UE (ya que la normativa europea aplica en ambos).
+
+::: {.callout-tip}
+#### El filtro como «pista», no como barrera
+Los filtros generados por el enrutador son sugerencias. Si la búsqueda filtrada no devuelve resultados, el sistema **repite la búsqueda sin filtros** para evitar dejar al usuario sin respuesta. Además, si el usuario ha seleccionado un filtro manualmente en la interfaz, este siempre tiene prioridad sobre el enrutador automático.
+:::
+
+```python
+def route(self, question: str) -> Route:
+    text = question.strip()
+    # 1. Charla trivial: no requiere búsqueda
+    if len(text) <= SMALL_TALK_MAX_CHARS and _SMALL_TALK.search(text):
+        return Route(False, None, "small talk: answered without retrieval")
+
+    # 2. Enrutamiento por palabras clave
+    for source_types, pattern in _SOURCE_RULES:
+        if not pattern.search(text):
+            continue
+        conds: list[dict[str, Any]] = [{"source_type": {"$in": list(source_types)}}]
+
+        # 3. Filtro geográfico (solo si se detecta un país)
+        country = _single_country(text)
+        if country and _GEO_FILTERED.intersection(source_types):
+            conds.append({"geography": {"$in": [country, "EU"]}})
+
+        where = all_of(conds)
+        return Route(True, where, f"filter {where}")
+
+    # 4. Fallback: buscar en todo el corpus si no hay reglas
+    return Route(True, None, "no filter: searching the whole corpus")
 ```
 
-## Ablación
+## Ablación: ¿qué aporta cada pieza?
 
-Recuperación sola (sin LLM, determinista) sobre las 13 preguntas con documento de referencia. *hit@4* es lo que ve el LLM.
+Una **ablación** consiste en cambiar **una sola pieza cada vez** y medir qué pasa, para saber qué aporta cada una. Aquí se mide **solo la búsqueda**
+(sin LLM, así que el resultado es determinista) sobre las **13 preguntas que tienen un documento de referencia**: ¿aparece ese documento entre los resultados?
+
+| Configuración | Qué hace |
+|---|---|
+| **Vectorial** | Punto de partida: solo búsqueda por significado |
+| **+ híbrida** | Añade BM25 y fusiona las dos listas |
+| **+ filtros (híbrida)** | Además, el enrutador restringe la búsqueda por tipo de fuente y país |
+
+**Cómo leer las métricas.** Para cada pregunta se mira en qué puesto aparece el documento de referencia:
+
+- **hit@1:** ¿es el **primer** resultado? Es el porcentaje de preguntas donde sí.
+- **hit@4:** ¿está **entre los 4 primeros**? Importa porque son los 4 fragmentos que se le pasan al LLM: si no está ahí, el modelo no puede usarlo.
+- **MRR:** resume el puesto con una nota de 1/puesto: puesto 1 vale 1, puesto 2 vale 0,5, puesto 5 vale 0,2. El MRR es la media de esas notas.
 
 ```{python}
 #| echo: false
 rows = [r for r in read_csv("eval/ablation.csv") if "rerank" not in r["config"]]
+n = int(rows[0]["questions"])
 md_table([
-    {"Configuración": config_es(r["config"]), "hit@1": num_es(r["hit@1"], 3), "hit@4": num_es(r["hit@4"], 3), "MRR": num_es(r["mrr"], 3)}
+    {
+        "Configuración": config_es(r["config"]),
+        "hit@1": f"{num_es(r['hit@1'], 2)} ({round(float(r['hit@1']) * n)} de {n})",
+        "hit@4": f"{num_es(r['hit@4'], 2)} ({round(float(r['hit@4']) * n)} de {n})",
+        "MRR": num_es(r["mrr"], 2),
+    }
     for r in rows
 ])
 ```
 
+: Ablación de la búsqueda (`eval/ablation.csv`). Entre paréntesis, número de preguntas de las 13.
+
 ```{python}
 #| echo: false
-#| fig-cap: "MRR por configuración de recuperación."
-fig, ax = plt.subplots(figsize=(7, 2.6))
-labels = [config_es(r["config"]) for r in rows]
-ax.barh(labels[::-1], [float(r["mrr"]) for r in rows][::-1], color="#3b6ea5")
-ax.set_xlabel("MRR")
+#| fig-cap: "Qué parte de las 13 preguntas encuentra su documento en el primer puesto (hit@1) y entre los 4 primeros (hit@4)."
+import numpy as np
+fig, ax = plt.subplots(figsize=(7, 3))
+x = np.arange(len(rows))
+ax.bar(x - 0.2, [float(r["hit@1"]) for r in rows], 0.38, color="#3b6ea5", label="hit@1 (primer puesto)")
+ax.bar(x + 0.2, [float(r["hit@4"]) for r in rows], 0.38, color="#e08a3b", label="hit@4 (lo que ve el LLM)")
+for xi, r in zip(x, rows):
+    ax.text(xi - 0.2, float(r["hit@1"]) + 0.01, num_es(r["hit@1"], 2), ha="center", fontsize=8)
+    ax.text(xi + 0.2, float(r["hit@4"]) + 0.01, num_es(r["hit@4"], 2), ha="center", fontsize=8)
+ax.set_xticks(x, [config_es(r["config"]) for r in rows])
+ax.set_ylim(0, 1.15)
+ax.legend(loc="lower right", fontsize=8)
+ax.spines[["top", "right"]].set_visible(False)
 fig.tight_layout()
 plt.show()
 ```
 
-**Qué muestra y qué no.**
+::: {.callout-important}
+## Qué se concluye
+1. **La búsqueda híbrida es la mejora clara:** el documento correcto pasa de estar primero en 11 preguntas de 13 a estar primero en las 13.
+2. **Los filtros no cambian la nota** (la híbrida ya acertaba todas), pero reducen el ruido y permiten filtrar a mano en la interfaz.
+3. **Con 13 preguntas, cada una vale 7,7 puntos:** una diferencia pequeña puede ser ruido; la mejora de la híbrida (2 preguntas) es la única que se ve claramente.
+:::
 
-- **La búsqueda híbrida es lo que rinde**: hit@1 sube de 0,85 a 1,00 y el MRR de 0,89 a 1,00. El caso claro es la
-  pregunta simple "¿tasa de *churn* en Alemania?" (**D6**): con búsqueda vectorial la ficha de Alemania queda en el puesto 5 y
-  el modelo responde que no lo sabe; con la híbrida queda la primera y acierta (32,4 %).
-- **Los filtros no mejoran la recuperación** medida sobre la híbrida (ya acertaba), pero reducen el ruido y permiten filtrar a mano en la interfaz.
-- Con 13 preguntas, una vale 0,077: conviene tomar las diferencias pequeñas como ruido.
+### Un caso concreto: D6, «¿tasa de *churn* en Alemania?»
 
 ```{python}
 #| echo: false
 detail = read_csv("eval/ablation_detail.csv")
 cfgs = ["vector", "+hybrid", "+filters (hybrid)"]
-table = []
-for qid, label in (("D6", "D6 (churn en Alemania)"), ("D1", "D1"), ("R7", "R7")):
-    row = {"Pregunta": label}
-    for c in cfgs:
-        m = [d["gold_rank"] for d in detail if d["id"] == qid and d["config"] == c]
-        row[config_es(c)] = (m[0] or "—") if m else "—"
-    table.append(row)
-md_table(table)
+rank = {c: next(d["gold_rank"] for d in detail if d["id"] == "D6" and d["config"] == c) for c in cfgs}
+md_table([
+    {"Configuración": config_es(c), "Puesto de la ficha de Alemania": rank[c],
+     "¿La ve el LLM? (puesto ≤ 4)": "Sí" if int(rank[c]) <= 4 else "No"}
+    for c in cfgs
+])
 ```
 
-: Posición del primer documento de referencia en el *ranking* (1 es lo mejor) para algunas preguntas.
+: Puesto de la ficha de Alemania en la búsqueda (1 es lo mejor).
+
+Con búsqueda vectorial la ficha correcta queda en el puesto 5, **fuera de los 4 fragmentos que recibe el modelo**, que responde «no lo sé». Con la híbrida queda la primera y el modelo
+acierta (32,4 %). Es el ejemplo más fácil de explicar: la mejora de la tabla se traduce en una respuesta que cambia de incorrecta a correcta.

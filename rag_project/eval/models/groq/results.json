@@ -1,0 +1,1531 @@
+[
+  {
+    "id": "D1",
+    "category": "D",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
+    "answer": "No dispongo de los datos exactos para calcular la tasa de churn de Alemania en comparación con Francia y España en ese conjunto de datos.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 0.92,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "D1",
+    "category": "D",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
+    "answer": "En el conjunto de datos “Bank Customer Churn” :\n\n- **Alemania** tiene una tasa de abandono del **32,4 %**.  \n- **Francia** tiene una tasa de abandono del **16,2 %**.  \n- **España** tiene una tasa de abandono del **16,7 %**.\n\nPor lo tanto, la tasa de churn en Alemania es casi el doble que en Francia y ligeramente superior a la de España, siendo la más alta de los tres países [ kaggle_summary_geography ].",
+    "retrieved_doc_ids": [
+      "kaggle_summary_geography_x_is_active_member",
+      "kaggle_overview",
+      "kaggle_summary_geography",
+      "kaggle_summary_geography_x_num_of_products"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.81,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "score": 0.9163,
+        "header_path": "",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1)."
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.9124,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography#0000",
+        "score": 0.9113,
+        "header_path": "",
+        "text": "# Churn rate by Geography\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France | 5,014 | 811 | 16.2% | 62,092.64 | 607.2 |\n| Germany | 2,509 | 814 | 32.4% | 119,730.12 | 610.2 |\n| Spain | 2,477 | 413 | 16.7% | 61,818.15 | 601.4 |\n\nIn plain language: by geography, the highest churn rate is 32.4% (Germany) and the lowest is 16.2% (France)."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_num_of_products#0000",
+        "score": 0.908,
+        "header_path": "",
+        "text": "# Churn rate by Geography x number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 1 | 2,514 | 564 | 22.4% | 90,977.88 | 611.2 |\n| France / 2 | 2,367 | 136 | 5.7% | 31,828.10 | 603.4 |\n| France / 3 | 104 | 82 | 78.8% | 50,071.82 | 598.7 |\n| France / 4 | 29 | 29 | 100.0% | 71,362.73 | 593.3 |\n| Germany / 1 | 1,349 | 578 | 42.8% | 119,868.33 | 612.8 |\n| Germany / 2 | 1,040 | 126 | 12.1% | 119,341.25 | 606.2 |\n| Germany / 3 | 96 | 86 | 89.6% | 121,572.67 | 623.7 |\n| Germany / 4 | 24 | 24 | 100.0% | 121,442.31 | 584.7 |\n| Spain / 1 | 1,221 | 267 | 21.9% | 90,595.37 | 602.6 |\n| Spain / 2 | 1,183 | 87 | 7.4% | 32,690.85 | 602.1 |\n| Spain / 3 | 66 | 52 | 78.8% | 48,385.90 | 583.4 |\n| Spain / 4 | 7 | 7 | 100.0% | 91,407.65 | 459.3 |\n\nIn plain language: by geography x number of products, the highest churn rate is 100.0% (Spain / 4) and the lowest is 5.7% (France / 2)."
+      }
+    ]
+  },
+  {
+    "id": "D1",
+    "category": "D",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset (10,000 customers in France, Germany and Spain), what is the churn rate of customers in Germany compared with France and Spain?",
+    "answer": "En el conjunto de datos “Bank Customer Churn” (10 000 clientes):\n\n- **Alemania**: la tasa de abandono es del **32,4 %**【kaggle_segment_geography_germany】.  \n- **Francia**: la tasa de abandono es del **16,2 %**【kaggle_summary_geography】.  \n- **España**: la tasa de abandono es del **16,7 %**【kaggle_segment_geography_spain】.\n\nAsí, la tasa de churn en Alemania es aproximadamente el doble que en Francia y un poco menor que el doble que en España.",
+    "retrieved_doc_ids": [
+      "kaggle_summary_geography",
+      "kaggle_segment_geography_spain",
+      "kaggle_segment_geography_germany",
+      "kaggle_segment_geography_x_num_of_products_spain_3"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
+    "latency_s": 1.88,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_summary_geography#0000",
+        "score": 0.0153,
+        "header_path": "",
+        "text": "# Churn rate by Geography\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France | 5,014 | 811 | 16.2% | 62,092.64 | 607.2 |\n| Germany | 2,509 | 814 | 32.4% | 119,730.12 | 610.2 |\n| Spain | 2,477 | 413 | 16.7% | 61,818.15 | 601.4 |\n\nIn plain language: by geography, the highest churn rate is 32.4% (Germany) and the lowest is 16.2% (France)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_spain#0000",
+        "score": 0.0151,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Spain\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Spain.\n\n- Customers in segment: 2,477 (24.8% of 10,000 customers)\n- Churned customers (Exited = 1): 413\n- Churn rate: 16.7% (overall churn rate: 20.4%)\n- Mean balance: 61,818.15\n- Mean estimated salary: 99,440.57\n- Mean credit score: 651.3\n- Mean age: 38.9\n- Mean loyalty points earned: 601.4\n\nIn plain language: customers with Geography = Spain left the bank at a rate of 16.7%, which is 0.82 times the overall churn rate (lower)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_germany#0000",
+        "score": 0.015,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Germany\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Germany.\n\n- Customers in segment: 2,509 (25.1% of 10,000 customers)\n- Churned customers (Exited = 1): 814\n- Churn rate: 32.4% (overall churn rate: 20.4%)\n- Mean balance: 119,730.12\n- Mean estimated salary: 101,113.44\n- Mean credit score: 651.5\n- Mean age: 39.8\n- Mean loyalty points earned: 610.2\n\nIn plain language: customers with Geography = Germany left the bank at a rate of 32.4%, which is 1.59 times the overall churn rate (higher)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_x_num_of_products_spain_3#0000",
+        "score": 0.0146,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Spain and NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Spain and NumOfProducts = 3.\n\n- Customers in segment: 66 (0.7% of 10,000 customers)\n- Churned customers (Exited = 1): 52\n- Churn rate: 78.8% (overall churn rate: 20.4%)\n- Mean balance: 48,385.90\n- Mean estimated salary: 103,223.66\n- Mean credit score: 647.0\n- Mean age: 40.9\n- Mean loyalty points earned: 583.4\n\nIn plain language: customers with Geography = Spain and NumOfProducts = 3 left the bank at a rate of 78.8%, which is 3.87 times the overall churn rate (higher)."
+      }
+    ]
+  },
+  {
+    "id": "D2",
+    "category": "D",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
+    "answer": "No dispongo de los datos necesarios para determinar la tasa de churn de los clientes con 4 productos en comparación con los que tienen 2 productos en el conjunto de datos de Kaggle.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 0.83,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "D2",
+    "category": "D",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
+    "answer": "En el conjunto de datos Kaggle “Bank Customer Churn”:\n\n- Los clientes que tienen **4 productos** presentan una tasa de abandono del **100,0 %**【kaggle_segment_num_of_products_4】.  \n- Los clientes que tienen **2 productos** presentan una tasa de abandono del **7,6 %**【kaggle_segment_num_of_products_2】.\n\nPor lo tanto, la tasa de churn de los clientes con 4 productos es mucho mayor (aproximadamente 13 veces) que la de los clientes con 2 productos.",
+    "retrieved_doc_ids": [
+      "kaggle_summary_num_of_products",
+      "kaggle_segment_num_of_products_4",
+      "kaggle_segment_num_of_products_2",
+      "kaggle_overview"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.25,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8947,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_4#0000",
+        "score": 0.8821,
+        "header_path": "",
+        "text": "# Churn segment card: NumOfProducts = 4\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 4.\n\n- Customers in segment: 60 (0.6% of 10,000 customers)\n- Churned customers (Exited = 1): 60\n- Churn rate: 100.0% (overall churn rate: 20.4%)\n- Mean balance: 93,733.13\n- Mean estimated salary: 104,763.72\n- Mean credit score: 653.6\n- Mean age: 45.7\n- Mean loyalty points earned: 574.2\n\nIn plain language: customers with NumOfProducts = 4 left the bank at a rate of 100.0%, which is 4.91 times the overall churn rate (higher)."
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_2#0000",
+        "score": 0.8814,
+        "header_path": "",
+        "text": "# Churn segment card: NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 2.\n\n- Customers in segment: 4,590 (45.9% of 10,000 customers)\n- Churned customers (Exited = 1): 349\n- Churn rate: 7.6% (overall churn rate: 20.4%)\n- Mean balance: 51,879.15\n- Mean estimated salary: 100,452.01\n- Mean credit score: 652.2\n- Mean age: 37.8\n- Mean loyalty points earned: 603.7\n\nIn plain language: customers with NumOfProducts = 2 left the bank at a rate of 7.6%, which is 0.37 times the overall churn rate (lower)."
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.8781,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      }
+    ]
+  },
+  {
+    "id": "D2",
+    "category": "D",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers who hold 4 products, compared with customers who hold 2 products?",
+    "answer": "En el conjunto de datos Kaggle Bank Customer Churn, la tasa de abandono es:\n\n- **Clientes con 4 productos:** 100,0 % de churn [ kaggle_segment_num_of_products_4 ]  \n- **Clientes con 2 productos:** 7,6 % de churn [ kaggle_segment_num_of_products_2 ]\n\nPor lo tanto, los clientes que poseen 4 productos abandonan el banco a una tasa mucho mayor (aproximadamente 13 veces) que los que poseen solo 2 productos.",
+    "retrieved_doc_ids": [
+      "kaggle_summary_num_of_products",
+      "kaggle_segment_num_of_products_4",
+      "kaggle_segment_num_of_products_2",
+      "kaggle_segment_num_of_products_3"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
+    "latency_s": 0.61,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_4#0000",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "# Churn segment card: NumOfProducts = 4\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 4.\n\n- Customers in segment: 60 (0.6% of 10,000 customers)\n- Churned customers (Exited = 1): 60\n- Churn rate: 100.0% (overall churn rate: 20.4%)\n- Mean balance: 93,733.13\n- Mean estimated salary: 104,763.72\n- Mean credit score: 653.6\n- Mean age: 45.7\n- Mean loyalty points earned: 574.2\n\nIn plain language: customers with NumOfProducts = 4 left the bank at a rate of 100.0%, which is 4.91 times the overall churn rate (higher)."
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_2#0000",
+        "score": 0.0159,
+        "header_path": "",
+        "text": "# Churn segment card: NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 2.\n\n- Customers in segment: 4,590 (45.9% of 10,000 customers)\n- Churned customers (Exited = 1): 349\n- Churn rate: 7.6% (overall churn rate: 20.4%)\n- Mean balance: 51,879.15\n- Mean estimated salary: 100,452.01\n- Mean credit score: 652.2\n- Mean age: 37.8\n- Mean loyalty points earned: 603.7\n\nIn plain language: customers with NumOfProducts = 2 left the bank at a rate of 7.6%, which is 0.37 times the overall churn rate (lower)."
+      },
+      {
+        "chunk_id": "kaggle_segment_num_of_products_3#0000",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "# Churn segment card: NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Number of products. Segment: NumOfProducts = 3.\n\n- Customers in segment: 266 (2.7% of 10,000 customers)\n- Churned customers (Exited = 1): 220\n- Churn rate: 82.7% (overall churn rate: 20.4%)\n- Mean balance: 75,458.33\n- Mean estimated salary: 104,318.13\n- Mean credit score: 648.1\n- Mean age: 43.2\n- Mean loyalty points earned: 603.9\n\nIn plain language: customers with NumOfProducts = 3 left the bank at a rate of 82.7%, which is 4.06 times the overall churn rate (higher)."
+      }
+    ]
+  },
+  {
+    "id": "D3",
+    "category": "D",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
+    "answer": "No dispongo de los datos exactos para calcular esa proporción y esas tasas de churn en el conjunto de datos de Kaggle.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.23,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "D3",
+    "category": "D",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
+    "answer": "En el conjunto de datos Kaggle “Bank Customer Churn”:\n\n- **Participación de los clientes que se fueron y presentaron una queja:** 99,8 % de los clientes churned habían presentado una queja.  \n- **Tasa de churn entre los que presentaron queja:** 99,5 %.  \n- **Tasa de churn entre los que no presentaron queja:** 0,1 %【kaggle_findings】.",
+    "retrieved_doc_ids": [
+      "kaggle_findings",
+      "kaggle_overview",
+      "kaggle_summary_satisfaction_score",
+      "kaggle_summary_num_of_products"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.02,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_findings#0000",
+        "score": 0.8957,
+        "header_path": "",
+        "text": "# Findings: churn drivers in the Kaggle \"Bank Customer Churn\" dataset\n\nOverall churn rate: 20.4%.\n\n## Top churn drivers (excluding Complain, see the leakage check)\n\nBy absolute correlation with Exited:\n\n1. Age (correlation +0.285)\n2. IsActiveMember (correlation -0.156)\n3. Balance (correlation +0.119)\n4. Gender (correlation -0.106)\n5. NumOfProducts (correlation -0.048)\n\nBy mutual information with Exited:\n\n1. NumOfProducts (mutual information 0.0698)\n2. Age (mutual information 0.0667)\n3. Geography (mutual information 0.0140)\n4. IsActiveMember (mutual information 0.0123)\n5. Gender (mutual information 0.0056)\n\n## Leakage check: Complain versus Exited\n\n- Churn rate among customers who complained: 99.5%\n- Churn rate among customers who did not complain: 0.1%\n- Share of churned customers who had complained: 99.8%\n- Correlation between Complain and Exited: 0.996\n\nConclusion: Complain almost perfectly mirrors Exited, so it is very likely target leakage (the complaint is probably recorded as part of the departure). A churn model should not use Complain as a predictor.\n\n## Satisfaction score versus churn\n\nChurn rate ranges from 19.6% to 21.8% across the five satisfaction scores (correlation with Exited: -0.006).\n\nConclusion: satisfaction score alone does not track churn in this dataset; the churn rate is almost flat across scores."
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.8801,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "score": 0.8697,
+        "header_path": "",
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3)."
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8685,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      }
+    ]
+  },
+  {
+    "id": "D3",
+    "category": "D",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what share of churned customers filed a complaint, and what is the churn rate among customers who complained versus those who did not?",
+    "answer": "En el conjunto de datos Kaggle “Bank Customer Churn”:\n\n- **Participación de los clientes que se fueron y presentaron una queja:** el 99,8 % de los clientes que abandonaron el banco habían presentado una queja [**kaggle_findings**].\n- **Tasa de abandono entre los que se quejaron:** el 99,5 % de los clientes que presentaron una queja terminaron abandonando el banco [**kaggle_findings**].\n- **Tasa de abandono entre los que no se quejaron:** solo el 0,1 % de los clientes que no presentaron queja abandonaron el banco [**kaggle_findings**].",
+    "retrieved_doc_ids": [
+      "kaggle_findings",
+      "kaggle_overview",
+      "kaggle_segment_satisfaction_score_1",
+      "kaggle_segment_satisfaction_score_5"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
+    "latency_s": 8.21,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_findings#0000",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "# Findings: churn drivers in the Kaggle \"Bank Customer Churn\" dataset\n\nOverall churn rate: 20.4%.\n\n## Top churn drivers (excluding Complain, see the leakage check)\n\nBy absolute correlation with Exited:\n\n1. Age (correlation +0.285)\n2. IsActiveMember (correlation -0.156)\n3. Balance (correlation +0.119)\n4. Gender (correlation -0.106)\n5. NumOfProducts (correlation -0.048)\n\nBy mutual information with Exited:\n\n1. NumOfProducts (mutual information 0.0698)\n2. Age (mutual information 0.0667)\n3. Geography (mutual information 0.0140)\n4. IsActiveMember (mutual information 0.0123)\n5. Gender (mutual information 0.0056)\n\n## Leakage check: Complain versus Exited\n\n- Churn rate among customers who complained: 99.5%\n- Churn rate among customers who did not complain: 0.1%\n- Share of churned customers who had complained: 99.8%\n- Correlation between Complain and Exited: 0.996\n\nConclusion: Complain almost perfectly mirrors Exited, so it is very likely target leakage (the complaint is probably recorded as part of the departure). A churn model should not use Complain as a predictor.\n\n## Satisfaction score versus churn\n\nChurn rate ranges from 19.6% to 21.8% across the five satisfaction scores (correlation with Exited: -0.006).\n\nConclusion: satisfaction score alone does not track churn in this dataset; the churn rate is almost flat across scores."
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_segment_satisfaction_score_1#0000",
+        "score": 0.0142,
+        "header_path": "",
+        "text": "# Churn segment card: Satisfaction Score = 1\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 1.\n\n- Customers in segment: 1,932 (19.3% of 10,000 customers)\n- Churned customers (Exited = 1): 387\n- Churn rate: 20.0% (overall churn rate: 20.4%)\n- Mean balance: 77,707.53\n- Mean estimated salary: 100,226.04\n- Mean credit score: 652.4\n- Mean age: 39.2\n- Mean loyalty points earned: 608.6\n\nIn plain language: customers with Satisfaction Score = 1 left the bank at a rate of 20.0%, which is about the same as the overall churn rate."
+      },
+      {
+        "chunk_id": "kaggle_segment_satisfaction_score_5#0000",
+        "score": 0.014,
+        "header_path": "",
+        "text": "# Churn segment card: Satisfaction Score = 5\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Satisfaction score. Segment: Satisfaction Score = 5.\n\n- Customers in segment: 2,004 (20.0% of 10,000 customers)\n- Churned customers (Exited = 1): 397\n- Churn rate: 19.8% (overall churn rate: 20.4%)\n- Mean balance: 77,134.30\n- Mean estimated salary: 98,301.33\n- Mean credit score: 650.0\n- Mean age: 39.1\n- Mean loyalty points earned: 599.7\n\nIn plain language: customers with Satisfaction Score = 5 left the bank at a rate of 19.8%, which is about the same as the overall churn rate."
+      }
+    ]
+  },
+  {
+    "id": "D6",
+    "category": "D",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "answer": "No dispongo de la información necesaria para determinar la tasa de churn de los clientes en Alemania en el conjunto de datos de Kaggle Bank Customer Churn.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 0.85,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "D6",
+    "category": "D",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "answer": "En Alemania, el churn total se obtiene combinando los dos segmentos (clientes activos = 0 y = 1):\n\n- Alemania / 0: 1 261 clientes, 518 churned → 41.1 % [ kaggle_summary_geography_x_is_active_member ]\n- Alemania / 1: 1 248 clientes, 296 churned → 23.7 % [ kaggle_summary_geography_x_is_active_member ]\n\nChurn total = (518 + 296) / (1 261 + 1 248) = 814 / 2 509 ≈ **32.4 %**.",
+    "retrieved_doc_ids": [
+      "kaggle_overview",
+      "kaggle_summary_geography_x_is_active_member",
+      "kaggle_summary_num_of_products",
+      "kaggle_summary_satisfaction_score"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 9.58,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.9028,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "score": 0.893,
+        "header_path": "",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1)."
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8889,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      },
+      {
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "score": 0.8876,
+        "header_path": "",
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3)."
+      }
+    ]
+  },
+  {
+    "id": "D6",
+    "category": "D",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Germany?",
+    "answer": "El churn rate de los clientes cuya geografía es Alemania es del 32,4 % [ kaggle_segment_geography_germany ][ kaggle_summary_geography ].",
+    "retrieved_doc_ids": [
+      "kaggle_segment_geography_germany",
+      "kaggle_segment_geography_x_num_of_products_germany_3",
+      "kaggle_summary_geography",
+      "kaggle_segment_geography_x_num_of_products_germany_2"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'$and': [{'source_type': {'$in': ['dataset_stats']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
+    "latency_s": 11.61,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_segment_geography_germany#0000",
+        "score": 0.0159,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Germany\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Germany.\n\n- Customers in segment: 2,509 (25.1% of 10,000 customers)\n- Churned customers (Exited = 1): 814\n- Churn rate: 32.4% (overall churn rate: 20.4%)\n- Mean balance: 119,730.12\n- Mean estimated salary: 101,113.44\n- Mean credit score: 651.5\n- Mean age: 39.8\n- Mean loyalty points earned: 610.2\n\nIn plain language: customers with Geography = Germany left the bank at a rate of 32.4%, which is 1.59 times the overall churn rate (higher)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_x_num_of_products_germany_3#0000",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Germany and NumOfProducts = 3\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Germany and NumOfProducts = 3.\n\n- Customers in segment: 96 (1.0% of 10,000 customers)\n- Churned customers (Exited = 1): 86\n- Churn rate: 89.6% (overall churn rate: 20.4%)\n- Mean balance: 121,572.67\n- Mean estimated salary: 106,681.52\n- Mean credit score: 653.7\n- Mean age: 43.7\n- Mean loyalty points earned: 623.7\n\nIn plain language: customers with Geography = Germany and NumOfProducts = 3 left the bank at a rate of 89.6%, which is 4.40 times the overall churn rate (higher)."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography#0000",
+        "score": 0.0152,
+        "header_path": "",
+        "text": "# Churn rate by Geography\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France | 5,014 | 811 | 16.2% | 62,092.64 | 607.2 |\n| Germany | 2,509 | 814 | 32.4% | 119,730.12 | 610.2 |\n| Spain | 2,477 | 413 | 16.7% | 61,818.15 | 601.4 |\n\nIn plain language: by geography, the highest churn rate is 32.4% (Germany) and the lowest is 16.2% (France)."
+      },
+      {
+        "chunk_id": "kaggle_segment_geography_x_num_of_products_germany_2#0000",
+        "score": 0.0149,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Germany and NumOfProducts = 2\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography x number of products. Segment: Geography = Germany and NumOfProducts = 2.\n\n- Customers in segment: 1,040 (10.4% of 10,000 customers)\n- Churned customers (Exited = 1): 126\n- Churn rate: 12.1% (overall churn rate: 20.4%)\n- Mean balance: 119,341.25\n- Mean estimated salary: 100,832.06\n- Mean credit score: 651.5\n- Mean age: 38.3\n- Mean loyalty points earned: 606.2\n\nIn plain language: customers with Geography = Germany and NumOfProducts = 2 left the bank at a rate of 12.1%, which is 0.59 times the overall churn rate (lower)."
+      }
+    ]
+  },
+  {
+    "id": "L1",
+    "category": "L",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
+    "answer": "No dispongo de información verificable sobre ese estudio de arXiv, por lo que no puedo indicar qué clasificador resultó ser el mejor ni cuál fue su estructura.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.91,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "L1",
+    "category": "L",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
+    "answer": "Los autores concluyeron que la **red neuronal artificial (ANN)** fue la que obtuvo el mejor desempeño. La arquitectura que sobresalió tenía **cinco neuronas en una única capa oculta**【arxiv_2301_13099】.",
+    "retrieved_doc_ids": [
+      "arxiv_2301_13099",
+      "arxiv_2301_13099",
+      "arxiv_2301_13099",
+      "arxiv_2606_07582"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 6.94,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "arxiv_2301_13099#0013",
+        "score": 0.8897,
+        "header_path": "Discussion (excerpt)",
+        "text": "In this study we compared the performance of different supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. Among six different models we developed, random forest and ANN appeared to be the superior ones in terms of overall performance; however, random forest turned out to be remarkably vulnerable to overfitting, an issue which wasn’t resolved satisfactorily after feature selection, but was minimized after addressing the class imbalance"
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0002",
+        "score": 0.8804,
+        "header_path": "Abstract",
+        "text": "With the growing competition in banking industry, banks are required to follow customer retention strategies while they are trying to increase their market share by acquiring new customers. This study compares the performance of six supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. The effect of feature selection, class imbalance, and outliers will be discussed for ANN and random forest as the two competing models"
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0014",
+        "score": 0.8702,
+        "header_path": "Discussion (excerpt)",
+        "text": ". On the other hand, ANN didn’t demonstrate any serious concern regarding overfitting and improved the performance substantially over the balanced data. It was also shown that ANN is robust to outliers while the intervention of such noises in the unseen data can adversely affect the performance of random forest to a greater extent. Therefore, based on our findings, ANN structure with five nodes in a single hidden layer excels other classifiers (Figure A. 1, A. 2) to distinguish churned customers"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0002",
+        "score": 0.8699,
+        "header_path": "Abstract",
+        "text": "Customer churn prediction is essential across data-driven industries such as insurance, digital banking, eCommerce, and subscription platforms, where retaining existing customers is typically more cost-effective than acquiring new ones. Predicting churn on structured datasets remains challenging due to class imbalance, nonlinear feature interactions, and heterogeneous feature types. Tree-based ensemble methods consistently demonstrate strong performance in these contexts, often outperforming conventional neural networks"
+      }
+    ]
+  },
+  {
+    "id": "L1",
+    "category": "L",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the arXiv study 'Prediction of Customer Churn in Banking Industry', which classifier did the authors find to be the best performing, and what structure did it have?",
+    "answer": "Los autores concluyeron que el clasificador que obtuvo el mejor desempeño fue la **red neuronal artificial (ANN)**, cuya arquitectura óptima consistía en **una capa oculta con cinco nodos**【arxiv_2301_13099】.",
+    "retrieved_doc_ids": [
+      "arxiv_2301_13099",
+      "arxiv_2301_13099",
+      "arxiv_2301_13099",
+      "arxiv_2301_13099"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['paper']}}",
+    "latency_s": 6.13,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "arxiv_2301_13099#0013",
+        "score": 0.016,
+        "header_path": "Discussion (excerpt)",
+        "text": "In this study we compared the performance of different supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. Among six different models we developed, random forest and ANN appeared to be the superior ones in terms of overall performance; however, random forest turned out to be remarkably vulnerable to overfitting, an issue which wasn’t resolved satisfactorily after feature selection, but was minimized after addressing the class imbalance"
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0002",
+        "score": 0.016,
+        "header_path": "Abstract",
+        "text": "With the growing competition in banking industry, banks are required to follow customer retention strategies while they are trying to increase their market share by acquiring new customers. This study compares the performance of six supervised classification techniques to suggest an efficient model to predict customer churn in banking industry, given 10 demographic and personal attributes from 10000 customers of European banks. The effect of feature selection, class imbalance, and outliers will be discussed for ANN and random forest as the two competing models"
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0014",
+        "score": 0.0153,
+        "header_path": "Discussion (excerpt)",
+        "text": ". On the other hand, ANN didn’t demonstrate any serious concern regarding overfitting and improved the performance substantially over the balanced data. It was also shown that ANN is robust to outliers while the intervention of such noises in the unseen data can adversely affect the performance of random forest to a greater extent. Therefore, based on our findings, ANN structure with five nodes in a single hidden layer excels other classifiers (Figure A. 1, A. 2) to distinguish churned customers"
+      },
+      {
+        "chunk_id": "arxiv_2301_13099#0015",
+        "score": 0.0147,
+        "header_path": "Discussion (excerpt)",
+        "text": ". 1, A. 2) to distinguish churned customers. Accordingly, decision trees can be considered as the second best model because it doesn’t reveal overfitting issues which random forest is facing. One advantage of decision trees is that unlike ANN it enables us to rank variables in terms of their contribution to the classification procedure (Figure A. 2). Depending on the context of application, banks might also be interested in this piece of information, making decision trees a better candidate for the prediction"
+      }
+    ]
+  },
+  {
+    "id": "L2",
+    "category": "L",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "answer": "No dispongo de la información suficiente para responder con certeza a esa pregunta.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 4.04,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "L2",
+    "category": "L",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "answer": "No lo sé porque el contexto proporcionado no contiene información sobre la arquitectura de modelo que propone el artículo ni sobre los problemas de investigaciones anteriores que dice abordar. [arxiv_2606_07582]​",
+    "retrieved_doc_ids": [
+      "arxiv_2606_07582",
+      "arxiv_2606_07582",
+      "arxiv_2606_07582",
+      "arxiv_2606_07582"
+    ],
+    "cited_ids": [
+      "arxiv_2606_07582"
+    ],
+    "refused": false,
+    "route": "",
+    "latency_s": 6.26,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "arxiv_2606_07582#0033",
+        "score": 0.9066,
+        "header_path": "CONCLUSION (excerpt)",
+        "text": "Full paper: https://arxiv.org/abs/2606.07582"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0030",
+        "score": 0.9032,
+        "header_path": "CONCLUSION (excerpt)",
+        "text": ". Probability calibration analysis further shows that the framework produces reliable predictions suitable for costsensitive business decisions. The empirical findings yield several key insights into hybrid modeling for tabular data. First, the observed error correlation of 0.62 between FT-Transformer and XGBoost demonstrates that models with different inductive biases generate partially independent errors, which enable meaningful ensemble gains. The meta-learner successfully recovers 89.1% of cases where one base model was correct and the other failed"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0006",
+        "score": 0.9021,
+        "header_path": "INTRODUCTION (excerpt)",
+        "text": "## INTRODUCTION (excerpt)"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0001",
+        "score": 0.8961,
+        "header_path": "Abstract",
+        "text": "## Abstract"
+      }
+    ]
+  },
+  {
+    "id": "L2",
+    "category": "L",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which model architecture does the arXiv paper on customer churn prediction on structured data with FT-Transformer and stacking ensembles propose, and what problems of earlier research does it say it addresses?",
+    "answer": "El artículo propone una arquitectura híbrida que combina **feature‑tokenized transformers (FT‑Transformer)** con **árboles de gradiente (XGBoost)** mediante un **stacking consciente de la calibración**【arxiv_2606_07582】.  \n\nEsta arquitectura pretende solucionar tres carencias habituales en investigaciones previas:  \n\n1. Falta de validación estadística rigurosa.  \n2. Problemas de calibración de probabilidades.  \n3. Deficiencias en la reproducibilidad de los resultados【arxiv_2606_07582】.",
+    "retrieved_doc_ids": [
+      "arxiv_2606_07582",
+      "arxiv_2606_07582",
+      "arxiv_2606_07582",
+      "arxiv_2606_07582"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['paper']}}",
+    "latency_s": 7.09,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "arxiv_2606_07582#0033",
+        "score": 0.016,
+        "header_path": "CONCLUSION (excerpt)",
+        "text": "Full paper: https://arxiv.org/abs/2606.07582"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0000",
+        "score": 0.0158,
+        "header_path": "",
+        "text": "# Customer Churn Prediction on Structured Data Using FT-Transformer and Stacking Ensembles  \nAuthors: Joyjit Roy, Samaresh Kumar Singh, Laxmi Shaw. Published: 2026-05-26. arXiv:2606.07582."
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0003",
+        "score": 0.0154,
+        "header_path": "Abstract",
+        "text": ". This study introduces a validated hybrid architecture that integrates feature-tokenized transformers (FT-Transformer) with gradient-boosted trees through calibration-aware stacking. The proposed framework addresses persistent gaps in statistical validation, probability calibration, and reproducibility found in prior research. The FT-Transformer captures higher-order feature interactions using self-attention, while XGBoost captures gradient-boosted decision boundaries with complementary inductive biases"
+      },
+      {
+        "chunk_id": "arxiv_2606_07582#0001",
+        "score": 0.0152,
+        "header_path": "Abstract",
+        "text": "## Abstract"
+      }
+    ]
+  },
+  {
+    "id": "R1",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "answer": "No dispongo de la información necesaria para responder a esa pregunta.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 2.8,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R1",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "answer": "El estudio concluye que **el 81 % de los compradores misteriosos no lograron abrir una cuenta nueva y transferir su orden permanente**; solo el 19 % (78 de 403) lo consiguió [regulators_ec_study_on_bank_account_switching_2012]​.",
+    "retrieved_doc_ids": [
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012"
+    ],
+    "cited_ids": [
+      "regulators_ec_study_on_bank_account_switching_2012"
+    ],
+    "refused": false,
+    "route": "",
+    "latency_s": 8.43,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0077",
+        "score": 0.9396,
+        "header_path": "",
+        "text": "6.2.\nTherefore, 275 mystery shoppers of the 403 in total (68%) successfully opened a bank account.\nHowever, of the 275 who did successfully open their ‘new’ bank account, 197 (72%) were unable to\nsuccessfully switch their standing order for the following reasons :  \n181 were told that the bank could not help with the switch or they were instructed to\nundertake the switch themselves  \n16 were unable to complete the switch within 14 working days of the original application and\nhad not completed the transfer by the time of writing the report; including one who was"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0066",
+        "score": 0.9364,
+        "header_path": "",
+        "text": "successfully open a bank account with a new bank and switch their standing order. This figure\nincludes shoppers who were unsucessful in their task because of failures in the processes described\nin the Common Principles; and shoppers who were unsuccessful because of other reasons. A\ndistinction as been made between the two throughout this report.\nA failure of the Common Principles included those assessments where shoppers were told by the\n‘new’ bank that either the bank did not have the relevant switching processes in place, was unwilling"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0036",
+        "score": 0.9309,
+        "header_path": "",
+        "text": "those regulations are met. Instead, mystery shoppers undertake their enquiry as a ‘normal’ customer\nand complete a questionnaire, which allows the analysts of the data to decide whether organisations\nare compliant or not.\nIn the case of this study, all shoppers undertaking the ‘switching’ scenario were instructed to switch\nat least one standing order from an ‘old’ bank account to a ‘new’ bank account; and provide an\noverview of their experience using the detailed questionnaire.\nThe reasons given by those who were unable to complete the switch (either because they were"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0079",
+        "score": 0.9249,
+        "header_path": "",
+        "text": "provided in Chapter 6.3.\nIn total therefore, 78 mystery shoppers were firstly, able open a new bank account successfully and\nsecondly, able to switch their standing order to that account in line with the Common Principles. This\nequates to 19% of all those who were instructed to undertake the switch and who passed a credit\ncheck.  \nFinal Report Produced by GfK\nPage 27  \nTherefore, aside from measuring the clarity and completeness of the information they received it can\nbe concluded that 81% of the banks assessed did not carry out the account opening and switch as\nfollows :"
+      }
+    ]
+  },
+  {
+    "id": "R1",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the 2012 European Commission mystery-shopping study on bank account switching, what is the overriding conclusion on successful switchers: what share of shoppers were unable to successfully open a bank account with a new bank and switch their standing order?",
+    "answer": "En el estudio de 2012, solo el 19 % de los 403 compradores misteriosos lograron abrir una cuenta nueva y cambiar al menos una orden permanente; por tanto, alrededor del 81 % de los compradores (≈ 80,9 %) no pudieron hacerlo con éxito [regulators_ec_study_on_bank_account_switching_2012] [regulators_ec_study_on_bank_account_switching_2012]",
+    "retrieved_doc_ids": [
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ec_study_on_bank_account_switching_2012"
+    ],
+    "cited_ids": [
+      "regulators_ec_study_on_bank_account_switching_2012"
+    ],
+    "refused": false,
+    "route": "no filter: searching the whole corpus",
+    "latency_s": 9.77,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0077",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "6.2.\nTherefore, 275 mystery shoppers of the 403 in total (68%) successfully opened a bank account.\nHowever, of the 275 who did successfully open their ‘new’ bank account, 197 (72%) were unable to\nsuccessfully switch their standing order for the following reasons :  \n181 were told that the bank could not help with the switch or they were instructed to\nundertake the switch themselves  \n16 were unable to complete the switch within 14 working days of the original application and\nhad not completed the transfer by the time of writing the report; including one who was"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0066",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "successfully open a bank account with a new bank and switch their standing order. This figure\nincludes shoppers who were unsucessful in their task because of failures in the processes described\nin the Common Principles; and shoppers who were unsuccessful because of other reasons. A\ndistinction as been made between the two throughout this report.\nA failure of the Common Principles included those assessments where shoppers were told by the\n‘new’ bank that either the bank did not have the relevant switching processes in place, was unwilling"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0064",
+        "score": 0.0154,
+        "header_path": "",
+        "text": "The extent to which the ‘new’ bank supports the switching process.\nThis objective was dealt with by examining whether shoppers were successfully able to open a new\nbank account and switch at least one standing order, to measure whether the bank supported this\nprocess by undertaking the transfer in line with the Common Principles and by understanding what\ninformation was provided to the shoppers.\nIn summary, based on this data, a significant number of banks across the Member States do not\nsupport the switching process outlined in the Common Principles because information is generally"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0043",
+        "score": 0.0152,
+        "header_path": "",
+        "text": "Three ‘channel’ approaches’ (in branch, telephone and web) were taken in terms of how the\nshoppers applied for the ‘new’ bank account. In this report 319 account ‘switching’ assessments were\nundertaken initially in the branch, 53 were undertaken over the telephone and 33 via the website. Of\nthe 33 making an application online, 4 were unable to do so and consequently approached a branch.\nAlthough 405 mystery shoppers began the process to open an account with a ‘new’ bank and switch\nat least one standing order, two groups of mystery shoppers were unable to undertake the switch"
+      }
+    ]
+  },
+  {
+    "id": "R2",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "answer": "No dispongo de los datos exactos de Eurostat sobre la proporción de individuos en Alemania que utilizó la banca por internet en el último año disponible ni del valor del año anterior.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 3.98,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R2",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "answer": "Según Eurostat, el 70,71 % de los individuos en Alemania utilizó la banca por internet en el último año disponible (2025), y el año anterior (2024) la cifra fue del 66,92 %【eurostat_isoc_ci_ac_i_de】.",
+    "retrieved_doc_ids": [
+      "eurostat_isoc_ci_ac_i_de",
+      "worldbank_it_net_user_zs_deu",
+      "eurostat_isoc_ci_ac_i_fr",
+      "eurostat_isoc_ci_ac_i_es"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 9.86,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_de#0000",
+        "score": 0.9251,
+        "header_path": "",
+        "text": "# Share of individuals using internet banking in Germany (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Germany, for 2025, is 70.71%.\n\nRecent observations:\n- 2025: 70.71%\n- 2024: 66.92%\n- 2023: 57.22%\n- 2022: 48.58%"
+      },
+      {
+        "chunk_id": "worldbank_it_net_user_zs_deu#0000",
+        "score": 0.896,
+        "header_path": "",
+        "text": "# Individuals using the Internet in Germany (World Bank)\n\nSource: World Bank indicator IT.NET.USER.ZS (Individuals using the Internet (% of population)).\n\nThe latest available value of individuals using the internet in Germany, for 2024, is 93.50 % of population.\n\nRecent observations:\n- 2024: 93.50 % of population\n- 2023: 92.48 % of population\n- 2022: 91.63 % of population\n- 2021: 91.43 % of population\n- 2020: 89.81 % of population"
+      },
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_fr#0000",
+        "score": 0.8889,
+        "header_path": "",
+        "text": "# Share of individuals using internet banking in France (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in France, for 2025, is 78.33%.\n\nRecent observations:\n- 2025: 78.33%\n- 2024: 71.88%\n- 2023: 72.41%\n- 2022: 67.86%"
+      },
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_es#0000",
+        "score": 0.885,
+        "header_path": "",
+        "text": "# Share of individuals using internet banking in Spain (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Spain, for 2025, is 74.77%.\n\nRecent observations:\n- 2025: 74.77%\n- 2024: 74.96%\n- 2023: 71.45%\n- 2022: 69.60%"
+      }
+    ]
+  },
+  {
+    "id": "R2",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to Eurostat, what share of individuals in Germany used internet banking in the latest available year, and what was the value the year before?",
+    "answer": "Según Eurostat, el 70,71 % de los individuos en Alemania utilizó la banca por internet en el último año disponible (2025), y el año anterior (2024) fue del 66,92 % [ eurostat_isoc_ci_ac_i_de ].",
+    "retrieved_doc_ids": [
+      "eurostat_isoc_ci_ac_i_de",
+      "worldbank_it_net_user_zs_deu",
+      "ecb_germany_household_deposit_rate_up_to_1_year",
+      "eurostat_earn_nt_net_de"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'$and': [{'source_type': {'$in': ['macro_data', 'press']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
+    "latency_s": 7.93,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "eurostat_isoc_ci_ac_i_de#0000",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "# Share of individuals using internet banking in Germany (Eurostat)\n\nSource: Eurostat dataset isoc_ci_ac_i (Individuals - internet activities).\n\nThe latest available value of share of individuals using internet banking in Germany, for 2025, is 70.71%.\n\nRecent observations:\n- 2025: 70.71%\n- 2024: 66.92%\n- 2023: 57.22%\n- 2022: 48.58%"
+      },
+      {
+        "chunk_id": "worldbank_it_net_user_zs_deu#0000",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "# Individuals using the Internet in Germany (World Bank)\n\nSource: World Bank indicator IT.NET.USER.ZS (Individuals using the Internet (% of population)).\n\nThe latest available value of individuals using the internet in Germany, for 2024, is 93.50 % of population.\n\nRecent observations:\n- 2024: 93.50 % of population\n- 2023: 92.48 % of population\n- 2022: 91.63 % of population\n- 2021: 91.43 % of population\n- 2020: 89.81 % of population"
+      },
+      {
+        "chunk_id": "ecb_germany_household_deposit_rate_up_to_1_year#0000",
+        "score": 0.0156,
+        "header_path": "",
+        "text": "# Germany household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.DE.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in Germany (new business), for 2026-09, is 2.39%.\n\nRecent observations:\n- 2026-09: 2.39%\n- 2026-08: 2.28%\n- 2026-07: 2.22%\n- 2026-06: 2.16%\n- 2026-05: 2.00%\n- 2026-04: 1.94%"
+      },
+      {
+        "chunk_id": "eurostat_earn_nt_net_de#0000",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "# Annual net earnings of a single person at average earnings in Germany (Eurostat)\n\nSource: Eurostat dataset earn_nt_net (Annual net earnings).\n\nThe latest available value of annual net earnings of a single person at average earnings in Germany, for 2025, is 36,535 EUR.\n\nRecent observations:\n- 2025: 36,535 EUR\n- 2024: 35,483 EUR\n- 2023: 37,908 EUR"
+      }
+    ]
+  },
+  {
+    "id": "R3",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "answer": "No dispongo de información actualizada sobre la tasa de facilidad de depósito del BCE ni la fecha en que está vigente.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.32,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R3",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "answer": "El tipo de la facilidad de depósito del BCE es del 2,50 % y está vigente desde el 16 de septiembre de 2026【ecb_ecb_deposit_facility_rate】.",
+    "retrieved_doc_ids": [
+      "ecb_ecb_deposit_facility_rate",
+      "ecb_ecb_marginal_lending_facility_rate",
+      "eba_eba_consumer_trends_report_2024_25",
+      "ecb_ecb_main_refinancing_operations_rate"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 10.82,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
+        "score": 0.9101,
+        "header_path": "",
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
+      },
+      {
+        "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
+        "score": 0.8872,
+        "header_path": "",
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0136",
+        "score": 0.859,
+        "header_path": "",
+        "text": "Figure 16: Deposits held by households, 2015 - 2023 (billion euro, outstanding amounts)  \nSource: ECB\nNote: EU changing composition (EU 28 + EU 27 from 2020)  \n104.\nDespite the previous low interest rates environment, several NCAs reported a growth of\ndeposits. Several NCAs reported that between 2023 and 2024 (not shown in Figure 16 above)\nconsumers concluded a higher number of contracts for deposits with fixed term maturity\nprobably as a result of the increase in interest rates and potential to earn a relevant yield.\n105."
+      },
+      {
+        "chunk_id": "ecb_ecb_main_refinancing_operations_rate#0000",
+        "score": 0.857,
+        "header_path": "",
+        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-26, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%"
+      }
+    ]
+  },
+  {
+    "id": "R3",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the current ECB deposit facility rate, and since when has it been in effect?",
+    "answer": "El tipo de facilidad de depósito del BCE es del 2,50 % y está vigente desde el 16 de septiembre de 2026 [ecb_ecb_deposit_facility_rate].",
+    "retrieved_doc_ids": [
+      "ecb_ecb_deposit_facility_rate",
+      "ecb_ecb_marginal_lending_facility_rate",
+      "ecb_ecb_main_refinancing_operations_rate",
+      "ecb_france_household_deposit_rate_up_to_1_year"
+    ],
+    "cited_ids": [
+      "ecb_ecb_deposit_facility_rate"
+    ],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['macro_data', 'press']}}",
+    "latency_s": 7.62,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "ecb_ecb_deposit_facility_rate#0000",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "# ECB deposit facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.DFR.LEV (Deposit facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB deposit facility rate is 2.50% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.50%\n- 2026-06-17: 2.25%\n- 2025-06-11: 2.00%\n- 2025-04-23: 2.25%"
+      },
+      {
+        "chunk_id": "ecb_ecb_marginal_lending_facility_rate#0000",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "# ECB marginal lending facility rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MLFR.LEV (Marginal lending facility - date of changes (raw data) - Level).\n\nAs of 2026-11-26, the ECB marginal lending facility rate is 2.90% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.90%\n- 2026-06-17: 2.65%\n- 2025-06-11: 2.40%\n- 2025-04-23: 2.65%"
+      },
+      {
+        "chunk_id": "ecb_ecb_main_refinancing_operations_rate#0000",
+        "score": 0.0159,
+        "header_path": "",
+        "text": "# ECB main refinancing operations rate\n\nSource: ECB Data Portal, series FM/B.U2.EUR.4F.KR.MRR_FR.LEV (Main refinancing operations - fixed rate tenders (fixed rate) (date of changes) - Level).\n\nAs of 2026-11-26, the ECB main refinancing operations rate is 2.65% (in effect since 2026-09-16).\n\nRecent changes:\n- 2026-09-16: 2.65%\n- 2026-06-17: 2.40%\n- 2025-06-11: 2.15%\n- 2025-04-23: 2.40%"
+      },
+      {
+        "chunk_id": "ecb_france_household_deposit_rate_up_to_1_year#0000",
+        "score": 0.015,
+        "header_path": "",
+        "text": "# France household deposit rate up to 1 year\n\nSource: ECB Data Portal, series MIR/M.FR.B.L22.F.R.A.2250.EUR.N (Bank interest rates on deposits from households with agreed maturity of up to one year (new business)).\n\nThe latest available value of the bank interest rate on household deposits up to one year in France (new business), for 2026-09, is 2.54%.\n\nRecent observations:\n- 2026-09: 2.54%\n- 2026-08: 2.36%\n- 2026-07: 2.38%\n- 2026-06: 2.28%\n- 2026-05: 2.22%\n- 2026-04: 2.18%"
+      }
+    ]
+  },
+  {
+    "id": "R4",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "How many complaints from users of the financial system did the Banco de España receive in 2025?",
+    "answer": "No dispongo de esa información.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 1.95,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R4",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "How many complaints from users of the financial system did the Banco de España receive in 2025?",
+    "answer": "El Banco de España recibió **30 970 reclamaciones** de los usuarios del sistema financiero en 2025【bde_memoria_de_reclamaciones_del_banco_de_espana_2025】.",
+    "retrieved_doc_ids": [
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 8.73,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0036",
+        "score": 0.8907,
+        "header_path": "",
+        "text": "Reclamaciones recibidas\nEn 2025, el Banco de España recibió 30.970 reclamaciones de los usuarios del sistema financiero,\nun 45% menos que en el año anterior por el descenso de los escritos relacionados con los\ngastos de formalización de las hipotecas, que no son competencia de la institución.\nEl canal telemático se consolidó como principal vía para presentar reclamaciones, concentrando\naproximadamente dos tercios de los escritos recibidos.\nDesde el punto de vista territorial, Madrid, Andalucía y Cataluña concentraron más de la mitad"
+      },
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0034",
+        "score": 0.8836,
+        "header_path": "",
+        "text": "En 2025, el Banco de España continuó atendiendo las reclamaciones y consultas presentadas\npor los usuarios del sistema financiero con el objetivo de verificar la adecuada actuación de las\nentidades en materia de transparencia, protección de la clientela y buenas prácticas bancarias.\nEsta labor resulta fundamental para reforzar la confianza en el sistema financiero y favorecer\nuna relación equilibrada entre las entidades y su clientela.\nLa presente Memoria recoge las actuaciones realizadas durante el año y sus resultados, que reflejan"
+      },
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0056",
+        "score": 0.8823,
+        "header_path": "",
+        "text": "1.1 ¿Cómo y dónde se reclama? Canales y lugares de presentación\nEn 2025, el Banco de España recibió 30.970 reclamaciones de los usuarios del sistema financiero,\nun 45% menos que en 2024 por el descenso de los escritos relacionados con los gastos de\nformalización de las hipotecas. Cerca de un 66% se presentaron a través de la Sede Electrónica,\nlo que, aunque supone casi un 3% menos que un año antes, ratifica la vía telemática como el\ncanal más utilizado para presentar reclamaciones. El 34% restante se inició de forma presencial,"
+      },
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0113",
+        "score": 0.8791,
+        "header_path": "",
+        "text": "9\n8.2\n2\no\ng\na\np e\nd s\noiciv\nr\ne\ns s\no\nrt\nO  \n3\n0\n7.4\n6\n4\n8\n6.3\n3\n9\n1\n0.1\n3\ns\noir\na\nc\nn\na\nb s\noiciv\nr\ne\ns y s\no\nt\nc\nu\nd\no\nr\np s\no\nrt\nO\nGarantías financieras concedidas\n494\nCompraventa de billetes y moneda extranjera\n351\nResto de productos y servicios bancarios\n63.858\nTOTAL\n466.632\n339.288\n805.920\n35\nBanco de EspañaMemoria de Reclamaciones 2025\nCAPÍTULO 1  \nCapítulo 2\nBanco de España\nMemoria de Reclamaciones 2025\nAnálisis de las reclamaciones admitidas  \nIntroducción\nEl Banco de España admitió a trámite algo más de un tercio de las reclamaciones recibidas en"
+      }
+    ]
+  },
+  {
+    "id": "R4",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "How many complaints from users of the financial system did the Banco de España receive in 2025?",
+    "answer": "El Banco de España recibió **30 970 reclamaciones** de los usuarios del sistema financiero en 2025【bde_memoria_de_reclamaciones_del_banco_de_espana_2025】.",
+    "retrieved_doc_ids": [
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "bde_memoria_de_reclamaciones_del_banco_de_espana_2025",
+      "regulators_ec_study_on_bank_account_switching_2012"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "no filter: searching the whole corpus",
+    "latency_s": 5.81,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0036",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "Reclamaciones recibidas\nEn 2025, el Banco de España recibió 30.970 reclamaciones de los usuarios del sistema financiero,\nun 45% menos que en el año anterior por el descenso de los escritos relacionados con los\ngastos de formalización de las hipotecas, que no son competencia de la institución.\nEl canal telemático se consolidó como principal vía para presentar reclamaciones, concentrando\naproximadamente dos tercios de los escritos recibidos.\nDesde el punto de vista territorial, Madrid, Andalucía y Cataluña concentraron más de la mitad"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0083",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "said their switch was successful, however upon analysis of all the information provided this number\nwas revised to 21% as shown above, with the difference being the number of shoppers who did\nswitch their bank account but without help from the bank itself.\nInformation provided to ‘switchers’.\nIn line with the fact that many of the banks assessed were unable to carry out the switch on behalf of\nthe shopper, almost six in ten (56%) of those shoppers instructed to switch a standing order did not\nreceive information from the staff about the step by step process of switching."
+      },
+      {
+        "chunk_id": "bde_memoria_de_reclamaciones_del_banco_de_espana_2025#0034",
+        "score": 0.0081,
+        "header_path": "",
+        "text": "En 2025, el Banco de España continuó atendiendo las reclamaciones y consultas presentadas\npor los usuarios del sistema financiero con el objetivo de verificar la adecuada actuación de las\nentidades en materia de transparencia, protección de la clientela y buenas prácticas bancarias.\nEsta labor resulta fundamental para reforzar la confianza en el sistema financiero y favorecer\nuna relación equilibrada entre las entidades y su clientela.\nLa presente Memoria recoge las actuaciones realizadas durante el año y sus resultados, que reflejan"
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0058",
+        "score": 0.0081,
+        "header_path": "",
+        "text": "In these cases the level of information can only be described as incomplete.\nHowever, when combining the provision of information from the three sources the data does show\nthat 86% of all those shoppers making an enquiry did receive information from at least one of the\nthree sources, including 13% from all three. Therefore, in total only 14% did not receive any\ninformation at all.\nThere are also differences in the level of information provided.\nAlthough the majority of shoppers who found information about bank account switching on the"
+      }
+    ]
+  },
+  {
+    "id": "R5",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
+    "answer": "No dispongo de la información necesaria para responder a esa pregunta.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 4.01,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R5",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
+    "answer": "El 17 % de los franceses declararon que querían cambiar de banco pero no se atrevieron a hacerlo【regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018】.",
+    "retrieved_doc_ids": [
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 9.94,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0009",
+        "score": 0.8812,
+        "header_path": "",
+        "text": "dispositif de mobilité bancaire : près de 7 Français sur 10 sont au courant de ce\nservice que doit leur proposer leur nouvelle banque en cas de changement.\nUn changement de banque attirant mais source d’appréhension : 17% des Français ont\neu envie de changer de banque mais n’ont pas osé franchir le pas, notamment par\ncrainte des difficultés liées aux transferts de virements et de prélèvements.\n70% des individus ayant ouvert un nouveau compte courant se sont vu proposer le\ndispositif d’aide à la mobilité bancaire et 4 sur 5 ont choisi d’en bénéficier."
+      },
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0042",
+        "score": 0.8786,
+        "header_path": "",
+        "text": "Non satisfait de l'ancienne banque\nAutre\nRien/Aucun\nNe sait pas / Non répondants\n25%\n19%\n15%\n14%\n6%\n6%\n4%\n4%\n3%\n2%\n3%\n1%\n26%  \nANNEXES  \n29\nPour CCSF\nLes Français et la mobilité bancaire\nRaisons pour lesquelles ils n’ont pas bénéficié du dispositif de mobilité\nQ7b : Quelles sont toutes les raisons pour lesquelles vous n'avez pas bénéficié de ce dispositif d'aide à la mobilité bancaire ?\nBase : N’ont pas bénéficié du service d’aide à la mobilité (Base faible : 27)\nJe ne voulais pas changer de banque / Je souhaitais\ngarder les 2 banques / Pas envie\nPas besoin\nJe l'ai fait moi-même\nAutre"
+      },
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0030",
+        "score": 0.8764,
+        "header_path": "",
+        "text": "raison principale ?\nQ5 : Vous nous avez dit redouter les difficultés de changement de banque. Redoutez-vous plutôt...\ndes Français ont eu\nenvie d’ouvrir un\ncompte courant dans\nune nouvelle banque\nmais ne l’ont pas fait\ndepuis septembre 2017\nEnsemble\n(2144)\nUne envie freinée par les difficultés de\nchangement pour 43% d’entre eux\n44%\n43%\n13%\nVous ne savez pas\nquelle banque choisir\nVous redoutez les\ndifficultés de\nchangement\nUne autre raison\nEn ont eu envie mais ne l’ont pas fait\n(364)\nEt en particulier la peur des démarches\nà effectuer auprès des organismes\neffectuant des virements/prélèvements"
+      },
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0026",
+        "score": 0.8733,
+        "header_path": "",
+        "text": "d’entreprise, Cadres, Prof.intel.supérieures)\n14%\nCSP B\n(Professions intermédiaires)\n14%\nCSP C\n(Employés, ouvriers)\n29%\nInactifs\n(retraités, chômeurs, étudiants, autres inactifs)\n43%\nSexe\n%\nHommes\n48%\nFemmes\n52%\nPopulation française âgée de 18 ans et plus  \n01\nUn dispositif de mobilité\nbancaire déjà bien connu des\nFrançais un an après sa mise en\nplace  \n13\nPour CCSF\nLes Français et la mobilité bancaire\nPrès de 7 Français sur 10 sont au courant de l’obligation d’aide aux démarches\nde leur nouvelle banque en cas de changement"
+      }
+    ]
+  },
+  {
+    "id": "R5",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the 2018 CCSF review of the French bank mobility reform (mobilité bancaire), what share of French people wanted to change banks but did not dare to?",
+    "answer": "El 17 % de los franceses dijeron que querían cambiar de banco pero no se atrevieron a hacerlo【regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018】.",
+    "retrieved_doc_ids": [
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+      "regulators_ec_study_on_bank_account_switching_2012",
+      "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018",
+      "wiki_deposit_insurance"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "no filter: searching the whole corpus",
+    "latency_s": 6.89,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0009",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "dispositif de mobilité bancaire : près de 7 Français sur 10 sont au courant de ce\nservice que doit leur proposer leur nouvelle banque en cas de changement.\nUn changement de banque attirant mais source d’appréhension : 17% des Français ont\neu envie de changer de banque mais n’ont pas osé franchir le pas, notamment par\ncrainte des difficultés liées aux transferts de virements et de prélèvements.\n70% des individus ayant ouvert un nouveau compte courant se sont vu proposer le\ndispositif d’aide à la mobilité bancaire et 4 sur 5 ont choisi d’en bénéficier."
+      },
+      {
+        "chunk_id": "regulators_ec_study_on_bank_account_switching_2012#0083",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "said their switch was successful, however upon analysis of all the information provided this number\nwas revised to 21% as shown above, with the difference being the number of shoppers who did\nswitch their bank account but without help from the bank itself.\nInformation provided to ‘switchers’.\nIn line with the fact that many of the banks assessed were unable to carry out the switch on behalf of\nthe shopper, almost six in ten (56%) of those shoppers instructed to switch a standing order did not\nreceive information from the staff about the step by step process of switching."
+      },
+      {
+        "chunk_id": "regulators_ccsf_bilan_de_la_reforme_de_la_mobilite_bancaire_2018#0042",
+        "score": 0.0081,
+        "header_path": "",
+        "text": "Non satisfait de l'ancienne banque\nAutre\nRien/Aucun\nNe sait pas / Non répondants\n25%\n19%\n15%\n14%\n6%\n6%\n4%\n4%\n3%\n2%\n3%\n1%\n26%  \nANNEXES  \n29\nPour CCSF\nLes Français et la mobilité bancaire\nRaisons pour lesquelles ils n’ont pas bénéficié du dispositif de mobilité\nQ7b : Quelles sont toutes les raisons pour lesquelles vous n'avez pas bénéficié de ce dispositif d'aide à la mobilité bancaire ?\nBase : N’ont pas bénéficié du service d’aide à la mobilité (Base faible : 27)\nJe ne voulais pas changer de banque / Je souhaitais\ngarder les 2 banques / Pas envie\nPas besoin\nJe l'ai fait moi-même\nAutre"
+      },
+      {
+        "chunk_id": "wiki_deposit_insurance#0041",
+        "score": 0.0081,
+        "header_path": "By country > Rest of Europe > Monaco",
+        "text": "#### Monaco\nBanks operating in Monaco participate in the French deposit guarantee scheme (i.e., the Fonds de Garantie des Depôts (FGD)) on the same conditions as French banks."
+      }
+    ]
+  },
+  {
+    "id": "R6",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
+    "answer": "No dispongo de la información exacta.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 2.09,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R6",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
+    "answer": "Según el Banco Mundial, Alemania tenía 6,66 sucursales bancarias comerciales por cada 100 000 adultos en el último año disponible (2023) [worldbank_fb_cbk_brch_p5_deu].",
+    "retrieved_doc_ids": [
+      "worldbank_fb_cbk_brch_p5_deu",
+      "worldbank_fb_cbk_brch_p5_fra",
+      "worldbank_fb_cbk_brch_p5_esp",
+      "worldbank_fx_own_totl_zs_deu"
+    ],
+    "cited_ids": [
+      "worldbank_fb_cbk_brch_p5_deu"
+    ],
+    "refused": false,
+    "route": "",
+    "latency_s": 9.88,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "worldbank_fb_cbk_brch_p5_deu#0000",
+        "score": 0.925,
+        "header_path": "",
+        "text": "# Commercial bank branches (per 100,000 adults) in Germany (World Bank)\n\nSource: World Bank indicator FB.CBK.BRCH.P5 (Commercial bank branches (per 100,000 adults)).\n\nThe latest available value of commercial bank branches (per 100,000 adults) in Germany, for 2023, is 6.66 per 100,000 adults.\n\nRecent observations:\n- 2023: 6.66 per 100,000 adults\n- 2022: 7.02 per 100,000 adults\n- 2021: 7.60 per 100,000 adults\n- 2020: 9.36 per 100,000 adults"
+      },
+      {
+        "chunk_id": "worldbank_fb_cbk_brch_p5_fra#0000",
+        "score": 0.886,
+        "header_path": "",
+        "text": "# Commercial bank branches (per 100,000 adults) in France (World Bank)\n\nSource: World Bank indicator FB.CBK.BRCH.P5 (Commercial bank branches (per 100,000 adults)).\n\nThe latest available value of commercial bank branches (per 100,000 adults) in France, for 2024, is 30.05 per 100,000 adults.\n\nRecent observations:\n- 2024: 30.05 per 100,000 adults\n- 2023: 31.11 per 100,000 adults\n- 2022: 32.04 per 100,000 adults\n- 2021: 33.00 per 100,000 adults\n- 2020: 33.37 per 100,000 adults"
+      },
+      {
+        "chunk_id": "worldbank_fb_cbk_brch_p5_esp#0000",
+        "score": 0.8842,
+        "header_path": "",
+        "text": "# Commercial bank branches (per 100,000 adults) in Spain (World Bank)\n\nSource: World Bank indicator FB.CBK.BRCH.P5 (Commercial bank branches (per 100,000 adults)).\n\nThe latest available value of commercial bank branches (per 100,000 adults) in Spain, for 2024, is 31.33 per 100,000 adults.\n\nRecent observations:\n- 2024: 31.33 per 100,000 adults\n- 2023: 32.37 per 100,000 adults\n- 2022: 33.49 per 100,000 adults\n- 2021: 37.19 per 100,000 adults\n- 2020: 45.42 per 100,000 adults"
+      },
+      {
+        "chunk_id": "worldbank_fx_own_totl_zs_deu#0000",
+        "score": 0.8445,
+        "header_path": "",
+        "text": "# Account ownership (% of adults, Global Findex) in Germany (World Bank)\n\nSource: World Bank indicator FX.OWN.TOTL.ZS (Account ownership at a financial institution or with a mobile-money-service provider (% of population ages 15+)).\n\nThe latest available value of account ownership (% of adults, global findex) in Germany, for 2024, is 98.30 % of adults.\n\nRecent observations:\n- 2024: 98.30 % of adults\n- 2021: 99.98 % of adults\n- 2017: 99.14 % of adults\n- 2014: 98.76 % of adults\n- 2011: 98.13 % of adults"
+      }
+    ]
+  },
+  {
+    "id": "R6",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "According to the World Bank, how many commercial bank branches per 100,000 adults did Germany have in the latest available year?",
+    "answer": "Según el Banco Mundial, Alemania tenía **6,66 sucursales bancarias comerciales por cada 100 000 adultos** en el último año disponible (2023)【worldbank_fb_cbk_brch_p5_deu】.",
+    "retrieved_doc_ids": [
+      "worldbank_fb_cbk_brch_p5_deu",
+      "worldbank_fx_own_totl_zs_deu",
+      "worldbank_it_net_user_zs_deu",
+      "worldbank_ny_gdp_pcap_cd_deu"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'$and': [{'source_type': {'$in': ['macro_data', 'press']}}, {'geography': {'$in': ['DE', 'EU']}}]}",
+    "latency_s": 9.8,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "worldbank_fb_cbk_brch_p5_deu#0000",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "# Commercial bank branches (per 100,000 adults) in Germany (World Bank)\n\nSource: World Bank indicator FB.CBK.BRCH.P5 (Commercial bank branches (per 100,000 adults)).\n\nThe latest available value of commercial bank branches (per 100,000 adults) in Germany, for 2023, is 6.66 per 100,000 adults.\n\nRecent observations:\n- 2023: 6.66 per 100,000 adults\n- 2022: 7.02 per 100,000 adults\n- 2021: 7.60 per 100,000 adults\n- 2020: 9.36 per 100,000 adults"
+      },
+      {
+        "chunk_id": "worldbank_fx_own_totl_zs_deu#0000",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "# Account ownership (% of adults, Global Findex) in Germany (World Bank)\n\nSource: World Bank indicator FX.OWN.TOTL.ZS (Account ownership at a financial institution or with a mobile-money-service provider (% of population ages 15+)).\n\nThe latest available value of account ownership (% of adults, global findex) in Germany, for 2024, is 98.30 % of adults.\n\nRecent observations:\n- 2024: 98.30 % of adults\n- 2021: 99.98 % of adults\n- 2017: 99.14 % of adults\n- 2014: 98.76 % of adults\n- 2011: 98.13 % of adults"
+      },
+      {
+        "chunk_id": "worldbank_it_net_user_zs_deu#0000",
+        "score": 0.0157,
+        "header_path": "",
+        "text": "# Individuals using the Internet in Germany (World Bank)\n\nSource: World Bank indicator IT.NET.USER.ZS (Individuals using the Internet (% of population)).\n\nThe latest available value of individuals using the internet in Germany, for 2024, is 93.50 % of population.\n\nRecent observations:\n- 2024: 93.50 % of population\n- 2023: 92.48 % of population\n- 2022: 91.63 % of population\n- 2021: 91.43 % of population\n- 2020: 89.81 % of population"
+      },
+      {
+        "chunk_id": "worldbank_ny_gdp_pcap_cd_deu#0000",
+        "score": 0.0154,
+        "header_path": "",
+        "text": "# GDP per capita (current US$) in Germany (World Bank)\n\nSource: World Bank indicator NY.GDP.PCAP.CD (GDP per capita (current US$)).\n\nThe latest available value of gdp per capita (current us$) in Germany, for 2025, is 60,496 US$.\n\nRecent observations:\n- 2025: 60,496 US$\n- 2024: 56,104 US$\n- 2023: 54,777 US$\n- 2022: 50,507 US$\n- 2021: 52,349 US$"
+      }
+    ]
+  },
+  {
+    "id": "R7",
+    "category": "R",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
+    "answer": "Lo siento, no dispongo de la información necesaria para responder a esa pregunta.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 0.73,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "R7",
+    "category": "R",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
+    "answer": "El informe identifica como los temas más relevantes, en orden de importancia:\n\n1. **Fraude en los pagos** (el problema más significativo)  \n2. **Endeudamiento** (el segundo tema más relevante)  \n3. **De‑risking** (des‑riesgo)  \n\nFuentes: [eba_eba_consumer_trends_report_2024_25] (menciona los tres temas: fraude en pagos, endeudamiento y de‑risking) y [eba_eba_consumer_trends_report_2024_25] (detalla que el fraude en pagos es el más importante y el endeudamiento el segundo).",
+    "retrieved_doc_ids": [
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25"
+    ],
+    "cited_ids": [
+      "eba_eba_consumer_trends_report_2024_25"
+    ],
+    "refused": false,
+    "route": "",
+    "latency_s": 9.59,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0031",
+        "score": 0.9322,
+        "header_path": "",
+        "text": "as relevant to the EBA. The 2024/25 edition identifies three issues that impact EU consumers\nmost: ‘payment fraud’, ‘indebtedness’, and ‘de-risking’. While the first two issues had emerged\nalready in the CTR 2022/23 as ‘fraud in retail payments’ and ‘over-indebtedness and arrears’,\nthe third issue ‘de-risking’ increased in significance compared to previous editions of the report\nto the extent that it is now listed as a relevant issue. The description of each topical issue\nconsists of a brief introduction of the topic and its relevance, the most relevant ways they"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0010",
+        "score": 0.9274,
+        "header_path": "",
+        "text": "Consumer Trends Report (CTR). The objective of the CTR is to set out trends and issues observed in\nthe two years covered by the report in relation to the retail banking products and services within\nthe EBA’s remit, to identify the topical issues that arise or have arisen for European Union (EU)\nconsumers, and to reflect on measures that the EBA and national competent authorities (NCAs)\nhave taken to address issues identified in the previous edition.\nWith regards to the structure of the report, the 2024/25 edition is split into three chapters. Chapter"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0017",
+        "score": 0.9219,
+        "header_path": "",
+        "text": "In the third and final Chapter, the CTR identifies three topical issues as most relevant:\n➢ Payment fraud is still the most significant issue for EU consumers as a result of new types\nof fraud such as ’’Authorised Push Payment’’ (APP) fraud, where the payer is manipulated\ninto making a payment to the fraudster. The high number of unauthorised payment\ntransactions and applicability of the liability rules are also significantly impacting\nconsumers.  \n➢ Indebtedness emerges as the second most relevant issue, coinciding with the rise of interest"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0021",
+        "score": 0.9214,
+        "header_path": "",
+        "text": "and report on consumer trends. Therefore, the EBA regularly publishes a CTR, first on an annual\nbasis, starting in 2013 and, since 2019, as a biennial publication.\n3. The objective of the CTR is to set out the trends and issues that the EBA has observed in the\ntwo years covered by the report in relation to the retail banking products and services within\nits remit, and to identify the topical issues that arise or have arisen for EU consumers.\nFurthermore, the CTR reflects on the measures that the NCAs have taken to address the issues"
+      }
+    ]
+  },
+  {
+    "id": "R7",
+    "category": "R",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "Which three topical issues does the EBA Consumer Trends Report 2024/25 identify as most relevant for EU consumers, in order of importance?",
+    "answer": "El informe “Consumer Trends Report 2024/25” de la EBA señala como los tres temas más relevantes para los consumidores de la UE, en orden de importancia:\n\n1. **Fraude en los pagos** (el tema más significativo)【eba_eba_consumer_trends_report_2024_25】  \n2. **Endeudamiento** (el segundo tema más relevante)【eba_eba_consumer_trends_report_2024_25】  \n3. **De‑risking** (el tercer tema)【eba_eba_consumer_trends_report_2024_25】",
+    "retrieved_doc_ids": [
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25",
+      "eba_eba_consumer_trends_report_2024_25"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['regulation', 'regulator_guide']}}",
+    "latency_s": 7.36,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0031",
+        "score": 0.0164,
+        "header_path": "",
+        "text": "as relevant to the EBA. The 2024/25 edition identifies three issues that impact EU consumers\nmost: ‘payment fraud’, ‘indebtedness’, and ‘de-risking’. While the first two issues had emerged\nalready in the CTR 2022/23 as ‘fraud in retail payments’ and ‘over-indebtedness and arrears’,\nthe third issue ‘de-risking’ increased in significance compared to previous editions of the report\nto the extent that it is now listed as a relevant issue. The description of each topical issue\nconsists of a brief introduction of the topic and its relevance, the most relevant ways they"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0010",
+        "score": 0.0161,
+        "header_path": "",
+        "text": "Consumer Trends Report (CTR). The objective of the CTR is to set out trends and issues observed in\nthe two years covered by the report in relation to the retail banking products and services within\nthe EBA’s remit, to identify the topical issues that arise or have arisen for European Union (EU)\nconsumers, and to reflect on measures that the EBA and national competent authorities (NCAs)\nhave taken to address issues identified in the previous edition.\nWith regards to the structure of the report, the 2024/25 edition is split into three chapters. Chapter"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0017",
+        "score": 0.0159,
+        "header_path": "",
+        "text": "In the third and final Chapter, the CTR identifies three topical issues as most relevant:\n➢ Payment fraud is still the most significant issue for EU consumers as a result of new types\nof fraud such as ’’Authorised Push Payment’’ (APP) fraud, where the payer is manipulated\ninto making a payment to the fraudster. The high number of unauthorised payment\ntransactions and applicability of the liability rules are also significantly impacting\nconsumers.  \n➢ Indebtedness emerges as the second most relevant issue, coinciding with the rise of interest"
+      },
+      {
+        "chunk_id": "eba_eba_consumer_trends_report_2024_25#0021",
+        "score": 0.0155,
+        "header_path": "",
+        "text": "and report on consumer trends. Therefore, the EBA regularly publishes a CTR, first on an annual\nbasis, starting in 2013 and, since 2019, as a biennial publication.\n3. The objective of the CTR is to set out the trends and issues that the EBA has observed in the\ntwo years covered by the report in relation to the retail banking products and services within\nits remit, and to identify the topical issues that arise or have arisen for EU consumers.\nFurthermore, the CTR reflects on the measures that the NCAs have taken to address the issues"
+      }
+    ]
+  },
+  {
+    "id": "U1",
+    "category": "U",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "answer": "No dispongo de esa información; el conjunto de datos de Kaggle sobre churn de clientes bancarios no incluye a Portugal como categoría, por lo que no se puede calcular una tasa de churn para ese país.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 3.49,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "U1",
+    "category": "U",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "answer": "No sé cuál es la tasa de churn de los clientes en Portugal porque el contexto proporcionado solo incluye datos de Francia, Alemania y España y no menciona a Portugal. [kaggle_overview]",
+    "retrieved_doc_ids": [
+      "kaggle_overview",
+      "kaggle_summary_geography_x_is_active_member",
+      "kaggle_summary_num_of_products",
+      "kaggle_summary_satisfaction_score"
+    ],
+    "cited_ids": [
+      "kaggle_overview"
+    ],
+    "refused": false,
+    "route": "",
+    "latency_s": 14.74,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.8922,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "score": 0.8787,
+        "header_path": "",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1)."
+      },
+      {
+        "chunk_id": "kaggle_summary_num_of_products#0000",
+        "score": 0.8784,
+        "header_path": "",
+        "text": "# Churn rate by Number of products\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 5,084 | 1,409 | 27.7% | 98,551.87 | 609.6 |\n| 2 | 4,590 | 349 | 7.6% | 51,879.15 | 603.7 |\n| 3 | 266 | 220 | 82.7% | 75,458.33 | 603.9 |\n| 4 | 60 | 60 | 100.0% | 93,733.13 | 574.2 |\n\nIn plain language: by number of products, the highest churn rate is 100.0% (4) and the lowest is 7.6% (2)."
+      },
+      {
+        "chunk_id": "kaggle_summary_satisfaction_score#0000",
+        "score": 0.8752,
+        "header_path": "",
+        "text": "# Churn rate by Satisfaction score\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| 1 | 1,932 | 387 | 20.0% | 77,707.53 | 608.6 |\n| 2 | 2,014 | 439 | 21.8% | 75,629.01 | 610.7 |\n| 3 | 2,042 | 401 | 19.6% | 76,456.75 | 608.0 |\n| 4 | 2,008 | 414 | 20.6% | 75,552.44 | 605.5 |\n| 5 | 2,004 | 397 | 19.8% | 77,134.30 | 599.7 |\n\nIn plain language: by satisfaction score, the highest churn rate is 21.8% (2) and the lowest is 19.6% (3)."
+      }
+    ]
+  },
+  {
+    "id": "U1",
+    "category": "U",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "In the Kaggle Bank Customer Churn dataset, what is the churn rate of customers in Portugal?",
+    "answer": "No sé cuál es la tasa de abandono de clientes en Portugal porque el contexto solo menciona a Francia, Alemania y España y no incluye datos sobre Portugal [ kaggle_overview ].",
+    "retrieved_doc_ids": [
+      "kaggle_segment_geography_spain",
+      "kaggle_overview",
+      "kaggle_segment_has_cr_card_0",
+      "kaggle_summary_geography_x_is_active_member"
+    ],
+    "cited_ids": [],
+    "refused": false,
+    "route": "filter {'source_type': {'$in': ['dataset_stats']}}",
+    "latency_s": 8.79,
+    "error": "",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "kaggle_segment_geography_spain#0000",
+        "score": 0.0127,
+        "header_path": "",
+        "text": "# Churn segment card: Geography = Spain\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Geography. Segment: Geography = Spain.\n\n- Customers in segment: 2,477 (24.8% of 10,000 customers)\n- Churned customers (Exited = 1): 413\n- Churn rate: 16.7% (overall churn rate: 20.4%)\n- Mean balance: 61,818.15\n- Mean estimated salary: 99,440.57\n- Mean credit score: 651.3\n- Mean age: 38.9\n- Mean loyalty points earned: 601.4\n\nIn plain language: customers with Geography = Spain left the bank at a rate of 16.7%, which is 0.82 times the overall churn rate (lower)."
+      },
+      {
+        "chunk_id": "kaggle_overview#0000",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "# Overview of the Kaggle \"Bank Customer Churn\" dataset\n\n- Customers (rows): 10,000\n- Churned customers (Exited = 1): 2,038\n- Retained customers (Exited = 0): 7,962\n- Overall churn rate: 20.4%\n- Class balance: about 3.9 retained customers for every churned customer (imbalanced target).\n\nCountries covered: France, Germany and Spain."
+      },
+      {
+        "chunk_id": "kaggle_segment_has_cr_card_0#0000",
+        "score": 0.0082,
+        "header_path": "",
+        "text": "# Churn segment card: HasCrCard = 0\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Segmentation: Has credit card. Segment: HasCrCard = 0.\n\n- Customers in segment: 2,945 (29.4% of 10,000 customers)\n- Churned customers (Exited = 1): 613\n- Churn rate: 20.8% (overall churn rate: 20.4%)\n- Mean balance: 77,920.79\n- Mean estimated salary: 100,974.40\n- Mean credit score: 651.3\n- Mean age: 39.1\n- Mean loyalty points earned: 610.4\n\nIn plain language: customers with HasCrCard = 0 left the bank at a rate of 20.8%, which is about the same as the overall churn rate."
+      },
+      {
+        "chunk_id": "kaggle_summary_geography_x_is_active_member#0000",
+        "score": 0.0081,
+        "header_path": "",
+        "text": "# Churn rate by Geography x active member\n\nSource: Kaggle \"Bank Customer Churn\" dataset (customers of a bank in France, Germany and Spain). Overall churn rate: 20.4%.\n\n| Segment | Customers | Churned | Churn rate | Mean balance | Mean points |\n|---|---|---|---|---|---|\n| France / 0 | 2,423 | 513 | 21.2% | 63,463.58 | 609.5 |\n| France / 1 | 2,591 | 298 | 11.5% | 60,810.59 | 605.0 |\n| Germany / 0 | 1,261 | 518 | 41.1% | 119,587.11 | 609.5 |\n| Germany / 1 | 1,248 | 296 | 23.7% | 119,874.61 | 611.0 |\n| Spain / 0 | 1,165 | 272 | 23.3% | 59,616.31 | 602.0 |\n| Spain / 1 | 1,312 | 141 | 10.7% | 63,773.29 | 600.9 |\n\nIn plain language: by geography x active member, the highest churn rate is 41.1% (Germany / 0) and the lowest is 10.7% (Spain / 1)."
+      }
+    ]
+  },
+  {
+    "id": "U2",
+    "category": "U",
+    "mode": "no_rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
+    "answer": "No dispongo de esa información.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": false,
+    "route": "",
+    "latency_s": 2.67,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "U2",
+    "category": "U",
+    "mode": "rag",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
+    "answer": "No puedo compartir identificadores personales como apellidos o identificadores de cliente: se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde a partir de documentos agregados y no personales.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": true,
+    "route": "",
+    "latency_s": 0.0,
+    "error": "",
+    "retrieved_chunks": []
+  },
+  {
+    "id": "U2",
+    "category": "U",
+    "mode": "rag_advanced",
+    "model": "groq:openai/gpt-oss-120b",
+    "question": "What is the surname of the customer with CustomerId 15634602 in the Bank Customer Churn dataset?",
+    "answer": "No puedo compartir identificadores personales como apellidos o identificadores de cliente: se eliminaron de la base de conocimiento antes de indexarla y este sistema solo responde a partir de documentos agregados y no personales.",
+    "retrieved_doc_ids": [],
+    "cited_ids": [],
+    "refused": true,
+    "route": "",
+    "latency_s": 0.0,
+    "error": "",
+    "retrieved_chunks": []
+  }
+]
