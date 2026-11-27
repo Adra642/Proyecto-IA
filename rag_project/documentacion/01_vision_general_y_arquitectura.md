@@ -140,7 +140,7 @@ El proyecto 1 (modelo de predicción de churn en `bank-churn-prediction/`) **no 
 | Base vectorial | **ChromaDB** persistente | Filtros por metadatos, sin servidor, el índice cabe dentro de la imagen del contenedor |
 | Embeddings | `intfloat/multilingual-e5-small` | Multilingüe (EN/ES/FR/DE) y pequeño: corre en CPU gratuita |
 | LLM | Gemini (`gemini-3.5-flash-lite`), con Groq y DeepSeek como alternativas | Gemini tiene capa gratuita; selector en configuración |
-| Reranking | FlashRank TinyBERT, mezclado con el orden híbrido (peso 0,7) | Local, sin clave |
+| Reranking | FlashRank (implementado, desactivado por defecto) | Local, sin clave |
 | Búsqueda léxica | `rank_bm25` | Búsqueda híbrida con la vectorial |
 | Interfaz | Gradio (Blocks), en español | Python puro, corre en un solo contenedor |
 | Despliegue | Docker/Podman + Google Cloud Run | Escala a cero con cuota gratuita |

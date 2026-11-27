@@ -147,7 +147,7 @@ generar sin claves de API ni descargas.
 | Pipeline | Descarga, limpieza y documentos derivados, con extractos de código |
 | Chunking y vector DB | Por qué LangChain y ChromaDB, el tamaño de *chunk* y su experimento |
 | Evaluación | Sin RAG frente a con RAG, métricas automáticas y ejemplos |
-| RAG avanzado | Búsqueda híbrida, enrutador, filtros y reranking, con la ablación |
+| RAG avanzado | Búsqueda híbrida y filtros por metadatos, con la ablación |
 | App y despliegue | Esta página |
 | Equipo | Autores y referencias |
 

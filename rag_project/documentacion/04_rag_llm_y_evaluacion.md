@@ -89,7 +89,7 @@ Ejecución con `gemini-3.5-flash-lite`, una por pregunta, con las respuestas ya 
 
 | Categoría | Modo | Cifras correctas | hit@4 | Cita correcta | Comportamiento |
 |---|---|---|---|---|---|
-| D (4) | sin RAG | **0,12** | | | |
+| D (4) | sin RAG | **0,00** | | | |
 | D (4) | RAG | **0,75** | 0,75 | 0,75 | |
 | D (4) | RAG avanzado | **1,00** | 1,00 | 0,75 | |
 | L (2) | RAG / avanzado | | 1,00 | 1,00 | |
@@ -107,7 +107,7 @@ Qué significa cada columna:
 - **Comportamiento:** en las preguntas U, el modelo se abstiene o rechaza cuando toca.
 
 Cómo leerlo:
-- **D:** sin RAG el modelo apenas conoce las cifras (responde "no lo sé"; el 0,12 es una cifra suelta acertada en D2, una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
+- **D:** sin RAG el modelo apenas conoce las cifras (responde "no lo sé"; una línea base honesta). Con RAG acierta y cita la fuente; con el modo avanzado resuelve además D6.
 - **L:** con RAG recupera y cita el paper correcto; sin RAG dice que no puede verificarlo.
 - **R3 (tipo actual del BCE):** sin RAG contesta con un dato **desfasado** (3,25 % «desde el 23 de octubre de 2024»), es decir, una respuesta segura pero equivocada; con RAG responde "2,50 % desde 2026-09-16" citando la nota del BCE.
 - **R4 a R7 (fuentes añadidas al final):** sin RAG no acierta ninguna cifra (reclamaciones del Banco de España en 2025, 17 % de franceses que no se atrevió a cambiar de banco, sucursales en Alemania) y en R7 dice que no lo sabe; con RAG las acierta y cita el documento correcto. Es la prueba de que las fuentes nuevas aportan conocimiento que el modelo no tiene.

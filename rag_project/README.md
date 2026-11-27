@@ -185,7 +185,7 @@ Automatic results (`eval/auto_summary.csv`, Gemini `gemini-3.5-flash-lite`, one 
 
 | Category | Mode | Numeric match | hit@4 | Citation OK | Behaviour OK |
 |---|---|---|---|---|---|
-| D dataset (4) | No RAG | 0.12 | | | |
+| D dataset (4) | No RAG | 0.00 | | | |
 | D dataset (4) | RAG | 0.75 | 0.75 | 0.75 | |
 | D dataset (4) | RAG avanzado | 1.00 | 1.00 | 0.75 | |
 | L literature (2) | RAG | n/a | 1.00 | 1.00 | |
@@ -234,48 +234,33 @@ Mode *RAG avanzado* (`RagChain.answer_advanced`) = **router** -> **hybrid retrie
 - `rag/router.py`: deterministic rules decide *retrieve or answer directly* (small talk) and a filter
   (`source_type`, plus `geography in [country, EU]` when the question names one country). The filter is a
   hint: when it finds nothing the search is repeated without it. Filters picked in the UI override the router.
-- Reranking is **on** (`retrieval.rerank_enabled: true`) and **blended**: `BlendedReranker` mixes the order of
-  the FlashRank cross-encoder (TinyBERT, weight 0.7) with the hybrid order using reciprocal ranks. The
-  cross-encoder alone hurt a hybrid ranking that was already strong (see the table); the blend keeps its gains
-  and avoids its losses. `rerank_weight` and `rerank_with_title` are in `config.yaml`; the Docker image
-  downloads the FlashRank model at build time.
+- Reranking is **implemented but off by default** (`retrieval.rerank_enabled: false`): it did not help on
+  our questions (see the table).
 
 ```bash
 uv run python -m eval.ablation     # retrieval-only ablation -> eval/ablation.csv, ablation_detail.csv
-uv run python -m eval.rerank_sweep # pool size x blend weight x title -> eval/rerank_sweep.csv
 uv run python -m eval.run_eval     # now also runs rag_advanced (cached answers)
 ```
 
-Retrieval ablation (13 questions with gold sources; hit@k and MRR are per document, hit@4 = what the LLM sees;
-fact@k and fact MRR are per chunk, over the 10 questions with a gold figure: a chunk counts only if it belongs
-to a gold document **and** contains the figure):
+Retrieval ablation (13 questions with gold sources; hit@4 = what the LLM sees; chunk level):
 
-| Configuration | hit@1 | hit@4 | MRR | fact@1 | fact@4 | fact MRR |
-|---|---|---|---|---|---|---|
-| vector (baseline) | 0.846 | 0.923 | 0.887 | 0.70 | 0.90 | 0.778 |
-| + hybrid (BM25 + vector) | **1.000** | 1.000 | **1.000** | 0.90 | 0.90 | 0.900 |
-| + rerank (TinyBERT, alone) | 0.923 | 1.000 | 0.962 | 0.80 | 1.00 | 0.883 |
-| + rerank blend (TinyBERT, 0.7) | **1.000** | 1.000 | **1.000** | 0.90 | **1.00** | **0.933** |
-| + filters (router, hybrid) | 1.000 | 1.000 | 1.000 | 0.90 | 0.90 | 0.900 |
-| + filters + rerank (TinyBERT, alone) | 0.923 | 1.000 | 0.962 | 0.80 | 1.00 | 0.883 |
-| + filters + rerank blend (TinyBERT, 0.7) | 1.000 | 1.000 | 1.000 | 0.90 | 1.00 | 0.933 |
-| rerank MiniLM-L-12 (+filters) | 0.769 | 1.000 | 0.865 | 0.60 | 1.00 | 0.775 |
-| rerank MultiBERT-L-12 (+filters) | 0.462 | 0.692 | 0.545 | 0.20 | 0.50 | 0.308 |
+| Configuration | hit@1 | hit@4 | MRR |
+|---|---|---|---|
+| vector (baseline) | 0.846 | 0.923 | 0.887 |
+| + hybrid (BM25 + vector) | **1.000** | **1.000** | **1.000** |
+| + rerank (FlashRank TinyBERT) | 0.923 | 1.000 | 0.962 |
+| + filters (router, hybrid) | 1.000 | 1.000 | 1.000 |
+| + filters + rerank (TinyBERT) | 0.923 | 1.000 | 0.962 |
+| rerank MiniLM-L-12 (+filters) | 0.769 | 1.000 | 0.865 |
+| rerank MultiBERT-L-12 (+filters) | 0.462 | 0.692 | 0.545 |
 
 Hybrid search is the technique that pays off: it lifts hit@1 from 0.846 to 1.000, and the plain "churn rate in
 Germany" question (**D6**) goes from a wrong answer to a right one (numeric match 0 to 1 in
-`eval/auto_summary.csv`). At document level hybrid is already perfect, so a reranker has nothing to gain; at chunk
-level it does: hybrid misses the chunk with the figure for **R1** (fact@4 0.90) and any reranker brings it to
-rank 3. The cross-encoder alone costs precision (D6 drops from rank 1 to 2, hit@1 0.923) and the larger rerankers
-hurt more (web-passage training; the multilingual one is far worse). The **blend** keeps the R1 gain and the
-rank-1 results. `eval/rerank_sweep.csv` (27 variants: pool 10/20/30, weight 1.0/0.7/0.5/0.3, title shown or
-not) shows weights 0.5 to 0.7 with the title give the same result at every pool size, so 0.7 with 20 candidates
-is not a knife-edge choice; without the title or with weight 0.3 the gain is less stable. Caveats: 13 questions
-(10 with a figure), one question is 0.077 to 0.1, and the blend was chosen on the same questions.
-Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.12 / 0.75 / 1.00 and R
-0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado. R1 still fails in both RAG modes: its figure now reaches the
-model (rank 3), but the sentence is about banks that did not complete the account opening, and the model
-answers "no lo sé".
+`eval/auto_summary.csv`). Reranking adds nothing on top of hybrid and the larger rerankers hurt: the
+cross-encoders are trained on web passages and push the statistic cards down, and the multilingual model is far
+worse. With 13 questions one question is 0.077, so treat small differences as noise.
+Answer level (`eval/auto_summary.csv`, one run per question): numeric match D 0.00 / 0.75 / 1.00 and R
+0.00 / 0.83 / 0.83 for No RAG / RAG / RAG avanzado; R1 still fails in both RAG modes (right document, wrong chunk).
 
 ## Tests and quality
 ```bash

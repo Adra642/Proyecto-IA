@@ -52,7 +52,7 @@ Publicado en <https://adra642.github.io/Proyecto-IA/>, en español.
 | 02 Pipeline | Arquitectura de la ingesta, patrones y fragmentos de código explicados |
 | 03 Chunking y vector DB | Estrategia, experimento de tamaño, justificación de ChromaDB |
 | 04 Evaluación | Preguntas, tablas sin RAG frente a con RAG, ejemplos antes/después |
-| 05 RAG avanzado | Híbrido, filtros, reranking y ablación |
+| 05 RAG avanzado | Híbrido, filtros y ablación |
 | 06 App y despliegue | La app, el contenedor y el despliegue |
 | 07 Equipo y referencias | Equipo (por rellenar), tecnologías y enlaces |
 

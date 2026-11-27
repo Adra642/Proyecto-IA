@@ -1,118 +1,92 @@
-config,id,gold_rank,fact_rank
-vector,D1,3,3
-vector,D2,1,1
-vector,D3,1,1
-vector,D6,5,5
-vector,L1,1,
-vector,L2,1,
-vector,R1,1,4
-vector,R2,1,1
-vector,R3,1,1
-vector,R4,1,1
-vector,R5,1,1
-vector,R6,1,1
-vector,R7,1,
-+hybrid,D1,1,1
-+hybrid,D2,1,1
-+hybrid,D3,1,1
-+hybrid,D6,1,1
-+hybrid,L1,1,
-+hybrid,L2,1,
-+hybrid,R1,1,
-+hybrid,R2,1,1
-+hybrid,R3,1,1
-+hybrid,R4,1,1
-+hybrid,R5,1,1
-+hybrid,R6,1,1
-+hybrid,R7,1,
-+rerank (TinyBERT),D1,1,1
-+rerank (TinyBERT),D2,1,1
-+rerank (TinyBERT),D3,1,1
-+rerank (TinyBERT),D6,2,2
-+rerank (TinyBERT),L1,1,
-+rerank (TinyBERT),L2,1,
-+rerank (TinyBERT),R1,1,3
-+rerank (TinyBERT),R2,1,1
-+rerank (TinyBERT),R3,1,1
-+rerank (TinyBERT),R4,1,1
-+rerank (TinyBERT),R5,1,1
-+rerank (TinyBERT),R6,1,1
-+rerank (TinyBERT),R7,1,
-+filters (hybrid),D1,1,1
-+filters (hybrid),D2,1,1
-+filters (hybrid),D3,1,1
-+filters (hybrid),D6,1,1
-+filters (hybrid),L1,1,
-+filters (hybrid),L2,1,
-+filters (hybrid),R1,1,
-+filters (hybrid),R2,1,1
-+filters (hybrid),R3,1,1
-+filters (hybrid),R4,1,1
-+filters (hybrid),R5,1,1
-+filters (hybrid),R6,1,1
-+filters (hybrid),R7,1,
-+filters+rerank (TinyBERT),D1,1,1
-+filters+rerank (TinyBERT),D2,1,1
-+filters+rerank (TinyBERT),D3,1,1
-+filters+rerank (TinyBERT),D6,2,2
-+filters+rerank (TinyBERT),L1,1,
-+filters+rerank (TinyBERT),L2,1,
-+filters+rerank (TinyBERT),R1,1,3
-+filters+rerank (TinyBERT),R2,1,1
-+filters+rerank (TinyBERT),R3,1,1
-+filters+rerank (TinyBERT),R4,1,1
-+filters+rerank (TinyBERT),R5,1,1
-+filters+rerank (TinyBERT),R6,1,1
-+filters+rerank (TinyBERT),R7,1,
-+rerank blend (TinyBERT),D1,1,1
-+rerank blend (TinyBERT),D2,1,1
-+rerank blend (TinyBERT),D3,1,1
-+rerank blend (TinyBERT),D6,1,1
-+rerank blend (TinyBERT),L1,1,
-+rerank blend (TinyBERT),L2,1,
-+rerank blend (TinyBERT),R1,1,3
-+rerank blend (TinyBERT),R2,1,1
-+rerank blend (TinyBERT),R3,1,1
-+rerank blend (TinyBERT),R4,1,1
-+rerank blend (TinyBERT),R5,1,1
-+rerank blend (TinyBERT),R6,1,1
-+rerank blend (TinyBERT),R7,1,
-+filters+rerank blend (TinyBERT),D1,1,1
-+filters+rerank blend (TinyBERT),D2,1,1
-+filters+rerank blend (TinyBERT),D3,1,1
-+filters+rerank blend (TinyBERT),D6,1,1
-+filters+rerank blend (TinyBERT),L1,1,
-+filters+rerank blend (TinyBERT),L2,1,
-+filters+rerank blend (TinyBERT),R1,1,3
-+filters+rerank blend (TinyBERT),R2,1,1
-+filters+rerank blend (TinyBERT),R3,1,1
-+filters+rerank blend (TinyBERT),R4,1,1
-+filters+rerank blend (TinyBERT),R5,1,1
-+filters+rerank blend (TinyBERT),R6,1,1
-+filters+rerank blend (TinyBERT),R7,1,
-rerank MiniLM-L-12,D1,2,2
-rerank MiniLM-L-12,D2,2,2
-rerank MiniLM-L-12,D3,1,1
-rerank MiniLM-L-12,D6,4,4
-rerank MiniLM-L-12,L1,1,
-rerank MiniLM-L-12,L2,1,
-rerank MiniLM-L-12,R1,1,2
-rerank MiniLM-L-12,R2,1,1
-rerank MiniLM-L-12,R3,1,1
-rerank MiniLM-L-12,R4,1,1
-rerank MiniLM-L-12,R5,1,1
-rerank MiniLM-L-12,R6,1,1
-rerank MiniLM-L-12,R7,1,
-rerank MultiBERT-L-12,D1,,
-rerank MultiBERT-L-12,D2,4,4
-rerank MultiBERT-L-12,D3,,
-rerank MultiBERT-L-12,D6,3,3
-rerank MultiBERT-L-12,L1,1,
-rerank MultiBERT-L-12,L2,1,
-rerank MultiBERT-L-12,R1,1,
-rerank MultiBERT-L-12,R2,2,2
-rerank MultiBERT-L-12,R3,,
-rerank MultiBERT-L-12,R4,,
-rerank MultiBERT-L-12,R5,1,1
-rerank MultiBERT-L-12,R6,1,1
-rerank MultiBERT-L-12,R7,1,
+config,id,gold_rank
+vector,D1,3
+vector,D2,1
+vector,D3,1
+vector,D6,5
+vector,L1,1
+vector,L2,1
+vector,R1,1
+vector,R2,1
+vector,R3,1
+vector,R4,1
+vector,R5,1
+vector,R6,1
+vector,R7,1
++hybrid,D1,1
++hybrid,D2,1
++hybrid,D3,1
++hybrid,D6,1
++hybrid,L1,1
++hybrid,L2,1
++hybrid,R1,1
++hybrid,R2,1
++hybrid,R3,1
++hybrid,R4,1
++hybrid,R5,1
++hybrid,R6,1
++hybrid,R7,1
++rerank (TinyBERT),D1,1
++rerank (TinyBERT),D2,1
++rerank (TinyBERT),D3,1
++rerank (TinyBERT),D6,2
++rerank (TinyBERT),L1,1
++rerank (TinyBERT),L2,1
++rerank (TinyBERT),R1,1
++rerank (TinyBERT),R2,1
++rerank (TinyBERT),R3,1
++rerank (TinyBERT),R4,1
++rerank (TinyBERT),R5,1
++rerank (TinyBERT),R6,1
++rerank (TinyBERT),R7,1
++filters (hybrid),D1,1
++filters (hybrid),D2,1
++filters (hybrid),D3,1
++filters (hybrid),D6,1
++filters (hybrid),L1,1
++filters (hybrid),L2,1
++filters (hybrid),R1,1
++filters (hybrid),R2,1
++filters (hybrid),R3,1
++filters (hybrid),R4,1
++filters (hybrid),R5,1
++filters (hybrid),R6,1
++filters (hybrid),R7,1
++filters+rerank (TinyBERT),D1,1
++filters+rerank (TinyBERT),D2,1
++filters+rerank (TinyBERT),D3,1
++filters+rerank (TinyBERT),D6,2
++filters+rerank (TinyBERT),L1,1
++filters+rerank (TinyBERT),L2,1
++filters+rerank (TinyBERT),R1,1
++filters+rerank (TinyBERT),R2,1
++filters+rerank (TinyBERT),R3,1
++filters+rerank (TinyBERT),R4,1
++filters+rerank (TinyBERT),R5,1
++filters+rerank (TinyBERT),R6,1
++filters+rerank (TinyBERT),R7,1
+rerank MiniLM-L-12,D1,2
+rerank MiniLM-L-12,D2,2
+rerank MiniLM-L-12,D3,1
+rerank MiniLM-L-12,D6,4
+rerank MiniLM-L-12,L1,1
+rerank MiniLM-L-12,L2,1
+rerank MiniLM-L-12,R1,1
+rerank MiniLM-L-12,R2,1
+rerank MiniLM-L-12,R3,1
+rerank MiniLM-L-12,R4,1
+rerank MiniLM-L-12,R5,1
+rerank MiniLM-L-12,R6,1
+rerank MiniLM-L-12,R7,1
+rerank MultiBERT-L-12,D1,
+rerank MultiBERT-L-12,D2,4
+rerank MultiBERT-L-12,D3,
+rerank MultiBERT-L-12,D6,3
+rerank MultiBERT-L-12,L1,1
+rerank MultiBERT-L-12,L2,1
+rerank MultiBERT-L-12,R1,1
+rerank MultiBERT-L-12,R2,2
+rerank MultiBERT-L-12,R3,
+rerank MultiBERT-L-12,R4,
+rerank MultiBERT-L-12,R5,1
+rerank MultiBERT-L-12,R6,1
+rerank MultiBERT-L-12,R7,1
