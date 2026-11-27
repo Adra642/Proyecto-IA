@@ -156,17 +156,17 @@ así que el tamaño deja de afectar a la precisión de la búsqueda (con otras p
 | **600 (90 de overlap)** | 4.663 | 453 | 0,846 | 1,00 | 0,887 | 2.605 |
 | 1000 (150 de overlap) | 2.942 | 725 | 0,846 | 1,00 | 0,887 | 3.369 |
 
-**¿Qué significa cada columna?**
+### ¿Qué significa cada columna?
 
-| Columna | Definición |
-|---|---|
-| **Tamaño (overlap)** | Máximo de caracteres de cada *chunk* y caracteres que se repiten entre un *chunk* y el siguiente para no cortar una idea. |
-| **Chunks** | Número de fragmentos en que queda dividido todo el corpus; es lo que hay que convertir en vectores y guardar. |
-| **Caracteres medios** | Longitud media real de un *chunk* (suele quedar por debajo del máximo porque se corta en párrafos y frases). |
-| **Hit@1** | Proporción de preguntas cuyo **primer** fragmento recuperado pertenece a un documento de referencia. |
-| **Hit@5** | Igual, pero basta con que un documento de referencia aparezca entre los **cinco** primeros fragmentos. |
-| **MRR** | Media del inverso de la posición del primer fragmento correcto (1 si siempre es el primero, 0,5 si es el segundo...). Resume en un número cómo de arriba queda la respuesta. |
-| **Contexto top-5** | Caracteres medios que los cinco mejores fragmentos envían al modelo en cada consulta: indica el coste y la latencia. |
+| Columna | Definición Técnica |
+| :--- | :--- |
+| *Tamaño (overlap)* | Límite máximo de caracteres por fragmento y el margen de texto (ej. 90 car.) que se repite entre fragmentos consecutivos para evitar cortar una idea a la mitad. |
+| *Chunks* | Total de fragmentos generados. A mayor número, mayor coste de almacenamiento y tiempo de cómputo para calcular y guardar los vectores (embeddings). |
+| *Caracteres medios* | Longitud real promedio de los fragmentos. Suele ser menor al máximo configurado porque el algoritmo respeta los límites de párrafos o frases antes de cortar a ciegas. |
+| *Hit@1* | Porcentaje de preguntas en las que el **primer** fragmento recuperado pertenece a un documento de referencia (el que contiene la respuesta). Mide la precisión máxima. |
+| *Hit@5* | Porcentaje de preguntas en las que algún documento de referencia aparece entre los **5 primeros** fragmentos recuperados. Un 100% indica que, en este conjunto de preguntas, la información siempre llega al modelo. |
+| *MRR* (Mean Reciprocal Rank) | Media del inverso de la posición del primer fragmento correcto: 1,0 si siempre es el primero, 0,5 si suele ser el segundo, etc. Resume en un número "cómo de arriba" queda la respuesta. |
+| *Contexto top-5* | Cantidad media de caracteres enviados al LLM en cada consulta (la suma de los 5 fragmentos recuperados). Es el *indicador directo del coste de API (tokens) y la latencia* de respuesta. |
 
 *   **300 caracteres (con 45 de overlap):** Obtiene el mismo **Hit@1 del 84,6%**, pero genera más del doble de chunks (9.743 frente a 4.663): hay que calcular y guardar el doble de vectores sin ninguna mejora de precisión.
 *   **600 caracteres (con 90 de overlap):** Alcanza también un **Hit@1 del 84,6%**. Este tamaño ofrece un equilibrio razonable: los chunks son lo suficientemente grandes para contener la idea completa sin fragmentarla, pero lo bastante pequeños para ser precisos. El solapamiento del 15% evita cortes bruscos.
@@ -215,13 +215,15 @@ Con chunks de 600, enviamos 2.605 caracteres: un 23% menos (los chunks de 300 en
 Aunque a veces necesitemos recuperar 6 o 7 fragmentos para cubrir la misma información, el volumen total sigue siendo menor. Este ahorro se traduce directamente en menor coste por consulta y menor latencia (el modelo responde más rápido).
 :::
 
-### Los tres costes que baja elegir 600 caracteres
+### Los tres costes: qué ahorra 600 caracteres y frente a qué
 
-| Coste | Qué pasa con 600 caracteres |
-|---|---|
-| **Consultar al LLM (inferencia)** | Cada consulta envía un 23 % menos de texto (tokens) que con 1000 caracteres: menos latencia y menos factura de API. |
-| **Crear la base (embeddings)** | Con 300 caracteres habría que calcular y guardar 9.743 vectores; con 600, 4.663 (un 52 % menos de vectores). En la medición, el cálculo de embeddings pasó de 195 s a 133 s (un 32 % menos), y también ocupa menos disco y RAM. |
-| **Buscar (recuperación)** | Comparar la pregunta con 4.663 fragmentos es más rápido y consume menos CPU que compararla con casi 10.000. |
+Cada coste se mide frente al tamaño que más lo penaliza, y 600 queda en un punto intermedio:
+
+| Coste | Frente a | Qué pasa con 600 caracteres |
+|---|---|---|
+| **Consultar al LLM (inferencia)** | 1000 caracteres | Cada consulta envía un 23 % menos de texto (2.605 frente a 3.369 caracteres): menos tokens, latencia y factura de API. Frente a 300 envía más (1.933), pero con la misma precisión en este experimento. |
+| **Crear la base (embeddings)** | 300 caracteres | Hay que calcular y guardar 4.663 vectores en lugar de 9.743 (un 52 % menos). El cálculo de embeddings pasó de 195 s a 133 s (un 32 % menos) y se usa menos disco y RAM. Frente a 1000 (2.942 chunks) cuesta más. |
+| **Buscar (recuperación)** | 300 caracteres | Comparar la pregunta con 4.663 fragmentos es más rápido y consume menos CPU que compararla con casi 10.000. |
 
 ---
 
