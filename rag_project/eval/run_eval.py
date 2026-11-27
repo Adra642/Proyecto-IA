@@ -5,7 +5,9 @@ Every run calls the LLM again (no answer cache).
 
 Usage::
 
-    uv run python -m eval.run_eval [--modes no_rag,rag,rag_advanced] [--ids D1,R3]
+    uv run python -m eval.run_eval [--modes no_rag,rag,rag_advanced] [--ids D1,R3] [--out-dir DIR]
+
+Select the model with ``LLM_PROVIDER=groq`` (or ``deepseek``); the default is the configured one.
 """
 
 from __future__ import annotations
@@ -138,6 +140,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the No-RAG vs RAG evaluation.")
     parser.add_argument("--modes", default=",".join(MODES))
     parser.add_argument("--ids", help="comma-separated question ids (default: all)")
+    parser.add_argument(
+        "--out-dir", type=Path, default=OUT_DIR, help="where results.json/csv are written"
+    )
     args = parser.parse_args(argv)
     settings = load_settings()
     setup_logging(settings.resolve(settings.paths.logs_dir))
@@ -153,7 +158,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         questions,
         args.modes.split(","),
     )
-    write_results(rows)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    write_results(rows, args.out_dir)
     failed = [r for r in rows if r.error]
     log.info("Done: %d answers, %d failed. See eval/results.csv", len(rows), len(failed))
     return 1 if failed else 0

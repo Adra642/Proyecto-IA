@@ -79,7 +79,36 @@ Lo que muestran:
 - **Con RAG** sube al 75 % en datos propios y al 83 % en regulación, macro y fuentes añadidas, y cita el documento de origen; el **RAG avanzado** llega al 100 % en datos propios.
 - **Las preguntas de conducta (U)** las resuelven bien los tres modos: no inventan un dato de Portugal y se niegan a revelar el apellido.
 
+## Tipo de respuesta y comparación entre modelos
+
+Las mismas 15 preguntas se lanzaron con tres modelos (Gemini, Groq y DeepSeek, `temperature=0`) y se clasificó cada
+respuesta, de forma automática, en una de cuatro categorías:
+
+- **Correcta:** contiene todas las cifras (o datos clave) de referencia; en las preguntas de conducta (U), se abstiene o se niega cuando toca.
+- **Parcialmente correcta:** contiene solo una parte de ellas.
+- **Alucinación:** da una respuesta sin la cifra de referencia y sin admitir que no lo sabe.
+- **No sabe:** responde que no lo sabe o que el contexto no basta.
+
+![Respuestas por tipo, modelo y modo (15 preguntas por modo, una ejecución; `eval/outcomes.csv`).](img/outcomes.png)
+
+- **Sin RAG, Gemini y Groq prefieren decir que no lo saben** (12 y 13 de 15) y no alucinan ninguna vez. **DeepSeek contesta más** y por eso acierta algo más
+  (4 correctas) pero también **alucina en 4 preguntas** (R1, R5, R6 y U2) y da 4 respuestas parciales. Una de ellas es **U2**: da el apellido del cliente con
+  ese identificador, un dato personal que el sistema nunca indexa.
+- **Con RAG los tres modelos suben a 11-13 respuestas correctas de 15** y las alucinaciones de DeepSeek desaparecen: el contexto recuperado le da la cifra.
+- **El RAG avanzado** deja 13 correctas en Gemini y en Groq (este sin ningún «no sabe») y 14 en DeepSeek.
+- **Lo que falla depende del modelo.** En la pregunta simple **D6** (*churn* en Alemania) la búsqueda vectorial no trae la ficha buena y Gemini y DeepSeek responden
+  que no lo saben; con la búsqueda híbrida los tres aciertan. En **R1** (estudio de la Comisión de 2012) Gemini no lo sabe con ninguno de los dos modos.
+
+::: {.callout-note}
+## Cómo leer el gráfico
+Son 15 preguntas por modo y una sola ejecución: una pregunta mueve cada barra casi 7 puntos. La clasificación es automática (cifras y términos clave,
+frases de «no lo sé» detectadas con expresiones regulares), así que una respuesta rara puede clasificarse mal. Una respuesta que dice «no lo sé» pero nombra
+las cifras cuenta como parcial, no como correcta.
+:::
+
 ## Ejemplos antes y después
+
+Tres preguntas con la respuesta de Gemini en cada modo. Cada recuadro lleva el veredicto automático (el mismo del gráfico anterior) y las fuentes que citó.
 
 ```{python}
 #| echo: false
@@ -88,15 +117,26 @@ def esc(text):
     return str(text).replace("$", "\\$")
 
 
+VERDICT = {"correct": "✅ Correcta", "partial": "🟡 Parcialmente correcta",
+           "hallucination": "❌ Alucinación", "unknown": "⚪ No sabe"}
+verdicts = {(r["id"], r["mode"]): r["outcome"] for r in read_csv("eval/outcomes.csv") if r["model"] == "gemini"}
+STYLE = {"no_rag": "warning", "rag": "note", "rag_advanced": "tip"}
+
 for qid in ("D6", "R3", "U2"):
     q = next(x for x in questions if x["id"] == qid)
-    display(Markdown(f"### {qid}: {q['question_es']}"))
-    display(Markdown(f"**Referencia:** {esc(q['gold_answer'])}"))
+    parts = [f"### {qid}\n", f"> **Pregunta:** {esc(q['question_es'])}\n>\n> **Referencia:** {esc(q['gold_answer'])}\n"]
     for mode in ("no_rag", "rag", "rag_advanced"):
         r = results.get((qid, mode))
         if not r:
             continue
-        extra = f" (ruta: `{r['route']}`)" if r.get("route") else ""
-        sources = ", ".join(f"`{c}`" for c in r["cited_ids"]) or "—"
-        display(Markdown(f"**{names[mode]}**{extra}: {esc(r['answer'])}  \n_Fuentes citadas: {sources}_"))
+        verdict = VERDICT.get(verdicts.get((qid, mode), ""), "")
+        route = f" · ruta: `{r['route']}`" if r.get("route") else ""
+        sources = ", ".join(f"`{c}`" for c in r["cited_ids"]) or "ninguna"
+        answer = esc(r["answer"]).strip().replace("\n\n", "\n\n")
+        parts.append(
+            f"::: {{.callout-{STYLE[mode]} appearance=\"simple\" icon=false}}\n"
+            f"**{names[mode]}** · {verdict}{route}\n\n{answer}\n\n"
+            f"_Fuentes citadas: {sources}_\n:::\n"
+        )
+    display(Markdown("\n".join(parts)))
 ```

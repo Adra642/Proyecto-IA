@@ -273,3 +273,9 @@ Hugging Face Spaces is no longer part of the project: removed the "why not Space
 
 ### Groq model fixed (2026-11-27)
 - Groq returned 404 because `llama-3.3-70b-versatile` is no longer served for our key. Listing `GET /openai/v1/models` showed `openai/gpt-oss-120b`, `openai/gpt-oss-20b` and `qwen/qwen3.8-27b` as chat models; all three answered through `Container.llm("groq")`. The default is now `openai/gpt-oss-120b` (the earlier docs-only check of the old name was wrong). For a deployed service the model can be changed without a rebuild with `LLM__MODELS__GROQ`.
+
+### Evaluation outcomes by model and didactic Quarto pages (2026-11-27)
+- `eval/outcomes.py` classifies every answer as correct / partial / hallucination / unknown (figures or key terms, "I don't know" regex) and plots it per model: `eval/outcomes.csv`, `eval/outcomes.png`.
+- The 15 questions were also run with Groq and DeepSeek (`LLM_PROVIDER=groq|deepseek uv run python -m eval.run_eval --out-dir eval/models/<provider>`, new `--out-dir` option), 45 answers each, 0 failed. DeepSeek without RAG hallucinates in 4 questions and leaks the surname in U2.
+- `eval/score.py`: "doesn't know" regex no longer matches "no se atrevió" and also catches "no existe", "no hay clientes", "no proporciona".
+- Quarto: evaluation page has the model comparison chart and cards for the before/after examples; advanced RAG page has a didactic hybrid section, the router text, and a simpler ablation (hit@1, hit@4, MRR with counts, D6 case).
