@@ -74,7 +74,7 @@ md_table([
 
 Lo que muestran:
 
-- **Sin RAG** apenas acierta cifras del dataset (0,12: una cifra suelta de D2, de 4 preguntas) y ninguna de regulación, macro y fuentes añadidas al final (0,00): las preguntas R4 a R6 (reclamaciones del Banco de España, franceses que no se atrevieron a cambiar de banco, sucursales en Alemania) son datos que el modelo no puede conocer.
+- **Sin RAG** apenas acierta cifras del dataset (0,00) y tampoco de regulación, macro y fuentes añadidas al final (0,00): las preguntas R4 a R6 (reclamaciones del Banco de España, franceses que no se atrevieron a cambiar de banco, sucursales en Alemania) son datos que el modelo no puede conocer.
   Es un modelo honesto: ante lo que no sabe, **lo dice** en lugar de inventar.
 - **Con RAG** sube al 75 % en datos propios y al 83 % en regulación, macro y fuentes añadidas, y cita el documento de origen; el **RAG avanzado** llega al 100 % en datos propios.
 - **Las preguntas de conducta (U)** las resuelven bien los tres modos: no inventan un dato de Portugal y se niegan a revelar el apellido.

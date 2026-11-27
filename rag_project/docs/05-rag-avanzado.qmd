@@ -10,7 +10,7 @@ from _helpers import read_csv, md_table, show_source, num_es, config_es
 import matplotlib.pyplot as plt
 ```
 
-El modo **RAG avanzado** añade tres piezas al RAG simple y se evaluó cada una por separado.
+El modo **RAG avanzado** añade dos piezas al RAG simple y se evaluó cada una por separado: la búsqueda híbrida y los filtros por metadatos.
 
 ```{mermaid}
 flowchart LR
@@ -18,8 +18,7 @@ flowchart LR
   R -->|charla| L[LLM directo]
   R -->|consulta| F[Filtro por metadatos<br/>tipo de fuente · país]
   F --> H[Búsqueda híbrida<br/>BM25 + vectorial<br/>fusión RRF]
-  H --> K[Reranking mixto<br/>FlashRank + orden híbrido]
-  K --> P[Prompt con contexto]
+  H --> P[Prompt con contexto]
   P --> L2[LLM]
 ```
 
@@ -34,7 +33,7 @@ se fusionan posiciones y no puntuaciones porque la similitud coseno y BM25 tiene
 show_source("rag/retrievers.py", "HybridRetriever.retrieve")
 ```
 
-## 2. Enrutador y filtros por metadatos
+## 2. Filtros por metadatos
 
 Un enrutador **por reglas** (determinista, gratuito, sin llamar a un modelo) decide si hace falta recuperar y qué
 filtro aplicar: una pregunta que menciona "Kaggle" o "dataset" busca solo en `dataset_stats`; una que cita un
@@ -47,117 +46,50 @@ prevalecen sobre los del enrutador.
 show_source("rag/router.py", "RuleRouter.route")
 ```
 
-## 3. Reranking mixto (FlashRank)
-
-Se recuperan 20 candidatos y un *cross-encoder* local (FlashRank, sin API) los reordena. Usado **solo**, el
-*cross-encoder* empeoraba una búsqueda híbrida que ya era muy buena: está entrenado con pasajes web en inglés y
-desplaza a veces la ficha correcta. Por eso el reranking es **mixto**: se combina el orden del *cross-encoder*
-con el orden de la búsqueda híbrida mediante rangos recíprocos (`0,7 / (60 + rango del cross-encoder) + 0,3 / (60 + rango híbrido)`),
-así que ninguno de los dos manda por completo y no hay que comparar escalas de puntuación.
-
-```{python}
-#| echo: false
-show_source("rag/rerank.py", "BlendedReranker.rerank")
-```
-
 ## Ablación
 
-Recuperación sola (sin LLM, determinista) sobre las 13 preguntas con documento de referencia. Hay dos formas de medirla:
-
-- **hit@k, MRR (por documento):** algún *chunk* de los *k* primeros pertenece a un documento de referencia. *hit@4* es lo que ve el LLM.
-- **fact@k, fact MRR (por *chunk*):** más estricta. Un *chunk* cuenta solo si es de un documento de referencia **y contiene la cifra de la respuesta**. Se calcula sobre las 10 preguntas que tienen una cifra de referencia. Detecta el caso en que se recupera el documento correcto pero no el fragmento que contiene el dato.
+Recuperación sola (sin LLM, determinista) sobre las 13 preguntas con documento de referencia. *hit@4* es lo que ve el LLM.
 
 ```{python}
 #| echo: false
-rows = read_csv("eval/ablation.csv")
+rows = [r for r in read_csv("eval/ablation.csv") if "rerank" not in r["config"]]
 md_table([
-    {
-        "Configuración": config_es(r["config"]),
-        "hit@1": num_es(r["hit@1"], 3), "hit@4": num_es(r["hit@4"], 3), "MRR": num_es(r["mrr"], 3),
-        "fact@1": num_es(r["fact@1"], 2), "fact@4": num_es(r["fact@4"], 2), "fact MRR": num_es(r["fact_mrr"], 3),
-    }
+    {"Configuración": config_es(r["config"]), "hit@1": num_es(r["hit@1"], 3), "hit@4": num_es(r["hit@4"], 3), "MRR": num_es(r["mrr"], 3)}
     for r in rows
 ])
 ```
 
-: Ablación de recuperación (`eval/ablation.csv`). Los reranking «mixtos» usan el *cross-encoder* TinyBERT con un peso de 0,7.
-
 ```{python}
 #| echo: false
-#| fig-cap: "MRR por documento y MRR por chunk (fact MRR) de cada configuración."
-import numpy as np
-fig, ax = plt.subplots(figsize=(8, 3.8))
-labels = [config_es(r["config"]) for r in rows][::-1]
-y = np.arange(len(rows))
-ax.barh(y + 0.2, [float(r["mrr"]) for r in rows][::-1], height=0.38, color="#3b6ea5", label="MRR (documento)")
-ax.barh(y - 0.2, [float(r["fact_mrr"]) for r in rows][::-1], height=0.38, color="#e08a3b", label="fact MRR (chunk con la cifra)")
-ax.set_yticks(y, labels)
+#| fig-cap: "MRR por configuración de recuperación."
+fig, ax = plt.subplots(figsize=(7, 2.6))
+labels = [config_es(r["config"]) for r in rows]
+ax.barh(labels[::-1], [float(r["mrr"]) for r in rows][::-1], color="#3b6ea5")
 ax.set_xlabel("MRR")
-ax.legend(loc="lower right", fontsize=8)
 fig.tight_layout()
 plt.show()
 ```
 
 **Qué muestra y qué no.**
 
-- **La búsqueda híbrida es lo que más rinde**: hit@1 sube de 0,85 a 1,00 y el MRR de 0,89 a 1,00. El caso claro es la
+- **La búsqueda híbrida es lo que rinde**: hit@1 sube de 0,85 a 1,00 y el MRR de 0,89 a 1,00. El caso claro es la
   pregunta simple "¿tasa de *churn* en Alemania?" (**D6**): con búsqueda vectorial la ficha de Alemania queda en el puesto 5 y
   el modelo responde que no lo sabe; con la híbrida queda la primera y acierta (32,4 %).
-- **A nivel de documento no se ve margen de mejora para el reranking** (la híbrida ya tiene 1,00), pero a nivel de *chunk* sí:
-  la híbrida deja **sin el fragmento con la cifra** (fact@4 = 0,90) la pregunta **R1** (estudio de la Comisión de 2012): el documento es el
-  correcto, pero el fragmento con el 81 % queda fuera de los cuatro primeros. El reranking lo sube al puesto 3 (fact@4 = 1,00).
-- **El *cross-encoder* solo tiene un coste:** reordena mal las fichas estadísticas (D6 pasa del puesto 1 al 2, hit@1 = 0,92 y fact@1 = 0,80).
-  Con la **mezcla** se queda lo bueno y se evita lo malo: hit@1 y MRR 1,00, fact@4 1,00 y fact MRR 0,933, el mejor valor de la tabla.
-- **Los *cross-encoders* mayores empeoran** (MiniLM) y el multilingüe disponible en FlashRank es mucho peor (hit@4 de 0,69): se entrenaron con pasajes web
-  y desplazan las fichas estadísticas.
 - **Los filtros no mejoran la recuperación** medida sobre la híbrida (ya acertaba), pero reducen el ruido y permiten filtrar a mano en la interfaz.
-- **Cuidado con la lectura:** son 13 preguntas (10 con cifra), una vale 0,077 (0,1), y la mezcla se eligió con estas mismas preguntas; conviene verla
-  como evidencia a favor y no como una garantía. A nivel de respuesta del modelo **la puntuación no cambia** (R1 sigue sin acertarse): el fragmento con el
-  81 % llega al modelo, pero esa frase habla de los bancos que no completaron la apertura de cuenta, y el modelo prefiere decir «no lo sé».
-
-### Cómo se eligió el peso, el tamaño del grupo y el título
-
-`eval/rerank_sweep.py` prueba 3 tamaños de grupo de candidatos (10, 20, 30), 4 pesos del *cross-encoder* en la mezcla (1,0 es el *cross-encoder* solo) y si se le muestra el
-título del documento (con la ruta de encabezados) o solo el texto. La tabla recoge los casos más representativos con 20 candidatos:
-
-```{python}
-#| echo: false
-sweep = read_csv("eval/rerank_sweep.csv")
-def pick(pool, weight, title):
-    for r in sweep:
-        if r["pool"] == str(pool) and r["weight"] == weight and r["title"] == title:
-            return r
-def hybrid_row(pool):
-    return next(r for r in sweep if r["config"] == f"hybrid pool={pool}")
-show = [("Solo híbrida (sin reranking)", hybrid_row(20))]
-for weight, label in (("1.0", "Reranking solo"), ("0.7", "Mezcla 0,7"), ("0.5", "Mezcla 0,5"), ("0.3", "Mezcla 0,3")):
-    for title, tl in (("si", "con título"), ("no", "sin título")):
-        show.append((f"{label}, {tl}", pick(20, weight, title)))
-md_table([
-    {"Variante (20 candidatos)": name, "hit@1": num_es(r["hit@1"], 3), "MRR": num_es(r["mrr"], 3),
-     "fact@1": num_es(r["fact@1"], 2), "fact@4": num_es(r["fact@4"], 2), "fact MRR": num_es(r["fact_mrr"], 3)}
-    for name, r in show
-])
-```
-
-: Barrido de reranking (`eval/rerank_sweep.csv`, 27 variantes en total).
-
-- **Mostrar el título al *cross-encoder* ayuda casi siempre:** sin él, las fichas estadísticas pierden el contexto («Alemania», «tasa de churn»). Solo una variante sin título (20 candidatos, peso 0,5) iguala el resultado; las demás empeoran el hit@1 o el fact@1.
-- **Una mezcla de 0,5 a 0,7 es estable:** con 10, 20 o 30 candidatos da los mismos resultados (hit@1 = 1,00, fact@4 = 1,00), así que no depende de un valor afinado al milímetro. Se eligió **0,7 con 20 candidatos**.
-- **Con un peso bajo (0,3) la mejora no es estable:** con 10 candidatos desaparece (fact@4 vuelve a 0,90) porque el orden híbrido pesa demasiado.
+- Con 13 preguntas, una vale 0,077: conviene tomar las diferencias pequeñas como ruido.
 
 ```{python}
 #| echo: false
 detail = read_csv("eval/ablation_detail.csv")
-cfgs = ["+hybrid", "+rerank (TinyBERT)", "+rerank blend (TinyBERT)"]
+cfgs = ["vector", "+hybrid", "+filters (hybrid)"]
 table = []
-for qid, label in (("D6", "D6 (churn en Alemania)"), ("R1", "R1 (estudio de la Comisión, 2012)")):
+for qid, label in (("D6", "D6 (churn en Alemania)"), ("D1", "D1"), ("R7", "R7")):
     row = {"Pregunta": label}
     for c in cfgs:
-        m = [d["fact_rank"] for d in detail if d["id"] == qid and d["config"] == c]
-        row[config_es(c)] = (m[0] or "no aparece") if m else "—"
+        m = [d["gold_rank"] for d in detail if d["id"] == qid and d["config"] == c]
+        row[config_es(c)] = (m[0] or "—") if m else "—"
     table.append(row)
 md_table(table)
 ```
 
-: Posición del primer *chunk* con la cifra de referencia (1 es lo mejor) en dos preguntas clave.
+: Posición del primer documento de referencia en el *ranking* (1 es lo mejor) para algunas preguntas.

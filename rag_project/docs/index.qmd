@@ -58,7 +58,7 @@ avanzado corrige el caso más claro que falló con RAG simple (la tasa de *churn
 2. [Pipeline](02-pipeline.qmd): descarga, limpieza y generación de documentos, todo automatizado.
 3. [Chunking y base vectorial](03-chunking-vectordb.qmd): decisiones técnicas justificadas con un experimento.
 4. [Evaluación](04-evaluacion.qmd): sin RAG frente a con RAG, con ejemplos.
-5. [RAG avanzado](05-rag-avanzado.qmd): búsqueda híbrida, filtros, enrutador y reranking, con ablación.
+5. [RAG avanzado](05-rag-avanzado.qmd): búsqueda híbrida y filtros por metadatos, con ablación.
 6. [App y despliegue](06-app-despliegue.qmd): la interfaz y cómo se publica.
 7. [Equipo y referencias](07-equipo-referencias.qmd).
 

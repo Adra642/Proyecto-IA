@@ -47,7 +47,7 @@ Jerarquía bajo `RagProjectError`: `ConfigError`, `FetchError`, `IndexingError`,
 
 | Tipo | Dónde | Características |
 |---|---|---|
-| **Unitarios** | `tests/unit/` | Sin red ni claves; rápidos y deterministas; **230 tests**; cobertura de aproximadamente 95 % en `core`, `rag` y `data_pipeline` (objetivo del plan: 80 %) |
+| **Unitarios** | `tests/unit/` | Sin red ni claves; rápidos y deterministas; **223 tests**; cobertura de aproximadamente 95 % en `core`, `rag` y `data_pipeline` (objetivo del plan: 80 %) |
 | **Integración** | `tests/integration/` | Marcados `@pytest.mark.integration`; excluidos por defecto; usan red, modelo de embeddings y LLM reales (por ejemplo: cada fuente devuelve documentos, el índice acierta consultas en ES y DE, Gemini responde) |
 
 Cómo se prueba sin red ni claves:

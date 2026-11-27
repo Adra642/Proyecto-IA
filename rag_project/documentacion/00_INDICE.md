@@ -39,9 +39,9 @@ Los archivos son independientes, pero conviene leerlos en orden la primera vez.
 | B. RAG, base vectorial y chunking | LangChain + ChromaDB + e5; chunking por tipo de documento; experimento de tamaño | Hecho |
 | C. Sin RAG frente a con RAG | 15 preguntas, tres modos, puntuación automática | Hecho (puntuación automática; sin puntuación manual) |
 | D. App web pública | Gradio en Cloud Run, interfaz en español, respuestas siempre en español | Hecho y desplegada |
-| E. Extras | Híbrido BM25 + vector, filtros por metadatos, router, reranking mixto (medido por trozo y activado) | Hecho |
+| E. Extras | Híbrido BM25 + vector, filtros por metadatos, router (reranking implementado y desactivado) | Hecho |
 | Documentación | Sitio Quarto en español, publicado en GitHub Pages, con menú desplegable y navegación Anterior/Siguiente | Hecho |
-| Calidad | 230 tests unitarios, cobertura 95 %, ruff y mypy estrictos limpios | Hecho |
+| Calidad | 223 tests unitarios, cobertura 95 %, ruff y mypy estrictos limpios | Hecho |
 
 ### Pendiente
 Nada de código. El equipo ensaya la defensa por su cuenta (guion y preguntas en [09](09_guion_y_preguntas_defensa.md)). Opcional: capturas de una respuesta, de *Fuentes* y de *Comparar* para la página de la app.
@@ -52,7 +52,7 @@ Nada de código. El equipo ensaya la defensa por su cuenta (guion y preguntas en
 - **Corpus:** 13 fuentes, **177 documentos**, unas 325.000 palabras, 4 idiomas (inglés, español, francés y alemán), 5 formatos.
 - **Índice:** **4.663 trozos** de 600 caracteres con 90 de solapamiento; 384 dimensiones; construcción en frío unos 5 minutos en CPU, 1 segundo sin cambios.
 - **Modelos:** embeddings `intfloat/multilingual-e5-small`; LLM `gemini-3.5-flash-lite` (el mismo en todos los modos).
-- **Resultados (cifras correctas):** datos D **0,12 → 0,75 → 1,00** y regulatorio/actual R **0,00 → 0,83 → 0,83** (sin RAG → RAG → RAG avanzado).
+- **Resultados (cifras correctas):** datos D **0,00 → 0,75 → 1,00** y regulatorio/actual R **0,00 → 0,83 → 0,83** (sin RAG → RAG → RAG avanzado).
 - **Recuperación (13 preguntas):** vectorial MRR 0,887; **híbrida 1,000** (hit@1 de 0,846 a 1,000).
 - **Calidad:** 220 tests, 96 % de cobertura.
 
@@ -65,7 +65,7 @@ uv run python -m rag.index --query "churn rate in Germany"   # indexa (increment
 uv run python -m app.app                                     # app en http://localhost:8080 (necesita GOOGLE_API_KEY)
 uv run python -m eval.run_eval                               # sin RAG, RAG y RAG avanzado (gasta llamadas al LLM)
 uv run python -m eval.score                                  # puntuación automática
-uv run pytest                                                # 230 tests sin red
+uv run pytest                                                # 223 tests sin red
 uv run quarto render docs                                    # sitio Quarto en docs/_site
 ```
 

@@ -25,8 +25,6 @@ COPY core ./core
 COPY rag ./rag
 COPY data/processed ./data/processed
 RUN python -m rag.index
-# The FlashRank cross-encoder (a few MB) is fetched on first use: do it now, not on a cold start.
-RUN python -c "from core.settings import load_settings; from factory import Container; Container(load_settings()).retriever('advanced').retrieve('warm-up', 1)"
 
 # 3. The app and the example questions (UI edits do not invalidate the index layer).
 COPY app ./app
